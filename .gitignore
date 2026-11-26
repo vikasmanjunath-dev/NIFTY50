@@ -1,0 +1,10 @@
+.DS_Store
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+.env
+catboost_info/
+data/raw/*
+data/processed/*
+!data/**/.gitkeep
