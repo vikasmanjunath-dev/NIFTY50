@@ -469,3 +469,8 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 1. Downloaded (approved) Yahoo daily bars for 57 pool stocks plus India VIX; no pre-2021 data for ETERNAL and JIOFIN.
 2. Passed the pre-set rule: AUC 0.671→0.684 (5d), 0.702→0.739 (20d) on identical rows; 20-day R² 0.143→0.325. Live forecaster now trains with it; ranges recalibrated.
 3. Open: older rows are survivorship-biased (training only); inverse-volatility portfolio still does not beat equal weight; first `v3-history` ledger entry awaits a new data date.
+
+### 2026-11-27 — Volatility: second AUC search with history
+1. 20-day extra features passed the holdout rule (0.7632→0.7761, gain CI +0.007..+0.029) and are live; 5-day winner did not pass. Ledger tag `v4-history-extra`.
+2. Direction with history and extra features: AUC 0.49-0.52, no edge.
+3. Bug: the Chronos step segfaulted when LightGBM was imported in the same process; moved to `scripts/build_chronos_history.py`. `run_vol_auc.py`'s one-time Chronos step has the same weakness on a clean cache.

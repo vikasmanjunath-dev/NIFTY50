@@ -12,7 +12,7 @@ real bug found and fixed, every honestly-reported result) and **[TRACKER.xlsx](T
 (the same tracker as a structured, filterable spreadsheet).
 
 > **Current state (2026-11-24):** the repository was found reduced to a partial snapshot and has been **rebuilt and
-> re-verified on real data** (see [TRACKER.md](TRACKER.md), Session 7). Present and tested (**341 tests passing**): the base
+> re-verified on real data** (see [TRACKER.md](TRACKER.md), Session 7). Present and tested (**343 tests passing**): the base
 > layer, all Phase 2 layers (macro, regime, cross-sectional, delivery %, fundamentals incl. insurance PDFs, FII/DII,
 > calibration, selective prediction, ensemble, costs, drift), Phase 3 (RAG + LLM + guardrails) and the new point-in-time
 > universe. Phase 4 is built (below). Bug/test counts and the *historical* Phase 1/2
@@ -100,7 +100,7 @@ Part 6's phase plan). Four phases, each with a distinct goal:
 | 3 | RAG + LLM intelligence layer over NSE announcements | ✅ 9/9 items complete |
 | 4 | Operations: `/v3/analyse` API, monitoring dashboard, hash-chained audit log + replay, kill switch | ✅ 4/4 built and verified (`nifty_analyser/ops/`) |
 
-**341/341 tests passing**. See [TRACKER.md](TRACKER.md) for the full
+**343/343 tests passing**. See [TRACKER.md](TRACKER.md) for the full
 itemised checklist, every known simplification, every real bug found and fixed (27 documented
 so far), and the complete, dated work log.
 
@@ -627,7 +627,7 @@ nifty_analyser/
     extraction.py, llm.py, guardrails.py, eval.py
 
 scripts/                  end-to-end pipeline runners & backfill jobs (one per phase)
-tests/                    pytest suite — one file per area, 341 tests, one file per module
+tests/                    pytest suite — one file per area, 343 tests, one file per module
 data/{raw,processed}/     parquet cache (gitignored except .gitkeep)
 reports/                  locked metrics output from each phase's pipeline run (.md + .json)
 *.pdf                     blueprint & reference documents driving the roadmap
@@ -660,7 +660,7 @@ The Phase 1/2 pipelines have no such dependency and run with only the packages i
 ## Running things
 
 ```bash
-# Run the full test suite (341 tests)
+# Run the full test suite (343 tests)
 pytest
 
 # End-to-end phase pipelines (produce reports/ output)
@@ -907,6 +907,18 @@ One pre-set variant, adoption rule fixed first (`scripts/run_vol_history.py`, `r
 The ranges now beat both EWMA and trailing-volatility ranges on pinball loss at both horizons. The tables above this one describe the earlier model without history.
 Caveats: the older rows carry survivorship bias (today's pool, training only), have no announcement features, and this history has been examined repeatedly — the forward
 ledger (entries tagged `v3-history` from the next data date) is the clean test. Run order: `run_vol_forecast_v2.py`, `run_vol_history.py`, `run_vol_ranges.py`.
+
+### Second AUC search, with history — 20-day extra features adopted
+`scripts/build_chronos_history.py` then `scripts/run_vol_auc2.py` (`reports/vol_auc_search2.json`); same develop-then-holdout protocol against the history model.
+
+| | winner | holdout AUC live → winner | 95% interval of gain | decision |
+|---|---|---|---|---|
+| 5-day | larger trees | 0.7054 → 0.7077 | -0.002 to +0.008 | not adopted |
+| 20-day | extra features | 0.7632 → 0.7761 | +0.007 to +0.029 | **adopted** |
+
+Over all out-of-sample dates the 20-day AUC goes 0.739 → **0.752** (that figure includes the selection dates; candidate used 12 refits, and refitting alone added nothing).
+The live 20-day classifier now uses `features/volatility_extra.py` (without index features); the 5-day model, the volatility-level regression and the ranges are unchanged.
+**Direction** with the same data stays at chance: AUC 0.517 / 0.494 (up, 5/20-day) and about 0.51 for beating the median stock.
 
 ## Keeping these docs current
 
