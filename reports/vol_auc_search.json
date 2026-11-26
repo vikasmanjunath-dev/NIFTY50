@@ -1,0 +1,48 @@
+{
+ "5": {
+  "dev_auc": {
+   "current": 0.6564,
+   "refit_often": 0.6581,
+   "more_features": 0.65,
+   "plus_chronos": 0.6589,
+   "all_features": 0.6507,
+   "chronos_ensemble4": 0.6619,
+   "all_ensemble4": 0.6516
+  },
+  "winner": "chronos_ensemble4",
+  "n_holdout": 22698,
+  "holdout_from": "2025-01-14",
+  "holdout_current": 0.6973,
+  "holdout_winner": 0.7011,
+  "gain_ci95": [
+   -0.0002,
+   0.0084
+  ],
+  "full_oos_winner": 0.6772,
+  "full_oos_current": 0.6712,
+  "adopt": false
+ },
+ "20": {
+  "dev_auc": {
+   "current": 0.7095,
+   "refit_often": 0.71,
+   "more_features": 0.6699,
+   "plus_chronos": 0.7104,
+   "all_features": 0.6672,
+   "chronos_ensemble4": 0.7076,
+   "all_ensemble4": 0.6714
+  },
+  "winner": "plus_chronos",
+  "n_holdout": 22198,
+  "holdout_from": "2025-01-07",
+  "holdout_current": 0.7288,
+  "holdout_winner": 0.7355,
+  "gain_ci95": [
+   -0.0053,
+   0.021
+  ],
+  "full_oos_winner": 0.7146,
+  "full_oos_current": 0.7017,
+  "adopt": false
+ }
+}
