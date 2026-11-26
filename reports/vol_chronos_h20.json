@@ -1,0 +1,17 @@
+{
+ "horizon_days": 20,
+ "n_test": 1900,
+ "n_test_dates": 38,
+ "chronos_zero_shot": {
+  "auc": 0.6756,
+  "r2": 0.1148
+ },
+ "our_blend": {
+  "auc": 0.6726,
+  "r2": 0.1188
+ },
+ "average_of_both_regression": {
+  "auc": 0.6917,
+  "r2": 0.1882
+ }
+}
