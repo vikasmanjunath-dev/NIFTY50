@@ -443,3 +443,10 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 
 ### 2026-11-26 — Session 7 (continued): stock-level pre-open v2
 1. Betas/sector/calendar features move stock gap AUC only 0.691 → 0.696 (saturated near 0.70); tradable direction AUC 0.50–0.52.
+
+### 2026-11-27 — Volatility forecasting v2
+1. Built range-based HAR features, a linear + shallow-tree blend, purged walk-forward with block-bootstrap intervals, a live forecaster with forward ledger and `GET /v3/volatility`; 335 tests pass.
+2. 5-day AUC 0.671 vs persistence 0.598 (CI of gain +0.056..+0.089). 20-day AUC 0.702 vs 0.669 (CI spans zero; threshold accuracy slightly below persistence). Replaces the earlier 20-day result where the model lost to the naive rule (rows and features differ, so not a paired comparison).
+3. Chronos-Bolt zero-shot is competitive (0.638 / 0.676) on non-overlapping dates; averaging is a candidate to test forward only.
+4. `daily_refresh.py` now refreshes macro/VIX too (not yet run); open: forward ledger needs months before it says anything.
+

@@ -12,10 +12,10 @@ real bug found and fixed, every honestly-reported result) and **[TRACKER.xlsx](T
 (the same tracker as a structured, filterable spreadsheet).
 
 > **Current state (2026-11-24):** the repository was found reduced to a partial snapshot and has been **rebuilt and
-> re-verified on real data** (see [TRACKER.md](TRACKER.md), Session 7). Present and tested (**287 tests passing**): the base
+> re-verified on real data** (see [TRACKER.md](TRACKER.md), Session 7). Present and tested (**335 tests passing**): the base
 > layer, all Phase 2 layers (macro, regime, cross-sectional, delivery %, fundamentals incl. insurance PDFs, FII/DII,
 > calibration, selective prediction, ensemble, costs, drift), Phase 3 (RAG + LLM + guardrails) and the new point-in-time
-> universe. Not rebuilt: `TRACKER.xlsx` (stale). Phase 4 is built (below). Bug/test counts and the *historical* Phase 1/2
+> universe. Phase 4 is built (below). Bug/test counts and the *historical* Phase 1/2
 > numbers quoted further down predate the rebuild; the current, re-run results are below and in `reports/`.
 >
 > **Current headline result (point-in-time universe, 101 scale-free features):** accuracy 54.2% (= the up-day base rate; balanced
@@ -86,7 +86,7 @@ Part 6's phase plan). Four phases, each with a distinct goal:
 | **1** | A solid, honest baseline: ingest real data, engineer simple features, label outcomes, validate without leakage, train two simple models, and lock the resulting (unimpressive, expected) metrics on disk *before* any tuning is allowed to touch them |
 | **2** | Enrichment: more technical indicators, fundamentals, macro data, FII/DII flows, cross-sectional ranking, probability calibration, a proper stacked ensemble, regime awareness, realistic transaction costs, and drift monitoring |
 | **3** | A retrieval-augmented generation (RAG) layer over corporate announcements/filings, fused into the ML feature matrix, with mechanical hallucination guardrails around the LLM explanation layer, and an honest ablation test of whether any of it actually helps |
-| **4** | Production operations: an API contract, a monitoring dashboard, an audit log, a kill switch (not started) |
+| **4** | Production operations: an API contract, a monitoring dashboard, an audit log, a kill switch (built, see below) |
 
 ---
 
@@ -100,7 +100,7 @@ Part 6's phase plan). Four phases, each with a distinct goal:
 | 3 | RAG + LLM intelligence layer over NSE announcements | ✅ 9/9 items complete |
 | 4 | Operations: `/v3/analyse` API, monitoring dashboard, hash-chained audit log + replay, kill switch | ✅ 4/4 built and verified (`nifty_analyser/ops/`) |
 
-**321/321 tests passing** across 39 test files. See [TRACKER.md](TRACKER.md) for the full
+**335/335 tests passing**. See [TRACKER.md](TRACKER.md) for the full
 itemised checklist, every known simplification, every real bug found and fixed (27 documented
 so far), and the complete, dated work log.
 
@@ -627,7 +627,7 @@ nifty_analyser/
     extraction.py, llm.py, guardrails.py, eval.py
 
 scripts/                  end-to-end pipeline runners & backfill jobs (one per phase)
-tests/                    pytest suite — 39 files, 321 tests, one file per module
+tests/                    pytest suite — one file per area, 335 tests, one file per module
 data/{raw,processed}/     parquet cache (gitignored except .gitkeep)
 reports/                  locked metrics output from each phase's pipeline run (.md + .json)
 *.pdf                     blueprint & reference documents driving the roadmap
@@ -660,7 +660,7 @@ The Phase 1/2 pipelines have no such dependency and run with only the packages i
 ## Running things
 
 ```bash
-# Run the full test suite (287 tests)
+# Run the full test suite (335 tests)
 pytest
 
 # End-to-end phase pipelines (produce reports/ output)
@@ -849,6 +849,26 @@ but the open-to-close part, the only part tradable after the open, stays at AUC 
 `python3 scripts/label_cli.py --n 120` (blind relevance labels, ~15 min) then `python3 scripts/human_agreement.py`. To keep the forward test accruing unattended:
 `cp scripts/launchd/com.stm.daily-refresh.plist ~/Library/LaunchAgents/ && launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.stm.daily-refresh.plist`
 (not installed by me; the harness blocked it). Real execution fills for `scripts/calibrate_impact.py` must come from your broker.
+
+## Volatility forecasting (2026-11-27)
+Direction stays at chance; the **size** of moves is forecastable. `features/volatility.py` (range-based HAR terms, own-median ratios, market and India VIX state,
+results-season timing; 21 scale-free features) + `models/volatility.py` (pre-registered blend of linear HAR and shallow LightGBM), purged walk-forward on the point-in-time
+universe (`scripts/run_vol_forecast_v2.py`). Target: will the next h-day realised volatility exceed the stock's own trailing-year median?
+
+| | 5-day | 20-day |
+|---|---|---|
+| Persistence rule AUC | 0.598 | 0.669 |
+| **Blend AUC** | **0.671** | **0.702** |
+| AUC gain, 95% date-block bootstrap | +0.056 to +0.089 | -0.003 to +0.065 (**not significant**) |
+| Accuracy, all / most-confident 20% | 62.7% / 73.8% | 61.4% / 79.0% |
+| Accuracy of persistence rule | 57.1% | 62.5% |
+| Out-of-sample R² of log volatility | 0.198 | 0.143 (LightGBM alone 0.267, post-hoc) |
+
+At 20 days the blend ranks better than persistence but its 0.5-threshold accuracy is slightly **worse**. Zero-shot Hugging Face `amazon/chronos-bolt-small`
+(`scripts/run_vol_chronos.py`, non-overlapping dates): AUC 0.638 vs our 0.661 at 5 days, 0.676 vs 0.673 at 20 days (only 38 dates); averaging the two looks helpful at 20 days
+and is untested forward. The same history has been examined many times, so `scripts/forecast_volatility.py` records live forecasts in a hash-chained ledger
+(`data/processed/vol_ledger.jsonl`, first entry 2026-11-25) and grades them as they mature; `daily_refresh.py` runs it and `scripts/serve.py` serves
+`GET /v3/volatility?instrument_id=NSE:INFY&horizon_days=5`. This is a risk forecast, not a direction or trading signal.
 
 ## Keeping these docs current
 
