@@ -450,3 +450,17 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 3. Chronos-Bolt zero-shot is competitive (0.638 / 0.676) on non-overlapping dates; averaging is a candidate to test forward only.
 4. `daily_refresh.py` now refreshes macro/VIX too (not yet run); open: forward ledger needs months before it says anything.
 
+### 2026-11-27 — Volatility: ablation, expected-move ranges, portfolio use
+1. Pre-set adoption rule (AUC gain CI above zero at both horizons): delivery, announcement counts and FII/FX/Brent all rejected (`reports/vol_ablation.json`).
+2. 90% ranges from the forecast are narrower than EWMA/trailing ones (significant pinball gain at 5 days only) but under-cover (88.7% / 87.1%); `reports/vol_ranges_h*.json`.
+3. Inverse-forecast-volatility portfolios do not meaningfully beat equal weight; they do beat inverse-trailing-volatility with less turnover.
+4. Live forecasts now carry the range and the forward ledger grades its coverage.
+
+### 2026-11-27 — Volatility: calibration follow-up and dashboard
+1. Adaptive conformal ranges: coverage 88.7→89.8% (5d), 87.1→89.0% (20d), but 20-day pinball 1.8% worse than static, over the pre-set 0.5% limit: not adopted (`reports/vol_calibration.json`).
+2. Walk-forward Platt recalibration: Brier score not improved at either horizon: not adopted.
+3. Dashboard shows volatility forecasts and ranges; hidden while the kill switch is tripped.
+
+### 2026-11-27 — Volatility: AUC search with holdout
+1. Development winners: 5-day four-model ensemble with Chronos feature, 20-day blend with Chronos feature. Holdout gains +0.0038 and +0.0067, both intervals include zero: not adopted (`reports/vol_auc_search.json`).
+2. Bug: importing PyTorch before LightGBM deadlocked the run on macOS (0% CPU for 26 minutes). Chronos features are now computed in a separate process and cached.

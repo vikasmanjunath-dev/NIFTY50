@@ -12,7 +12,7 @@ real bug found and fixed, every honestly-reported result) and **[TRACKER.xlsx](T
 (the same tracker as a structured, filterable spreadsheet).
 
 > **Current state (2026-11-24):** the repository was found reduced to a partial snapshot and has been **rebuilt and
-> re-verified on real data** (see [TRACKER.md](TRACKER.md), Session 7). Present and tested (**335 tests passing**): the base
+> re-verified on real data** (see [TRACKER.md](TRACKER.md), Session 7). Present and tested (**340 tests passing**): the base
 > layer, all Phase 2 layers (macro, regime, cross-sectional, delivery %, fundamentals incl. insurance PDFs, FII/DII,
 > calibration, selective prediction, ensemble, costs, drift), Phase 3 (RAG + LLM + guardrails) and the new point-in-time
 > universe. Phase 4 is built (below). Bug/test counts and the *historical* Phase 1/2
@@ -100,7 +100,7 @@ Part 6's phase plan). Four phases, each with a distinct goal:
 | 3 | RAG + LLM intelligence layer over NSE announcements | ✅ 9/9 items complete |
 | 4 | Operations: `/v3/analyse` API, monitoring dashboard, hash-chained audit log + replay, kill switch | ✅ 4/4 built and verified (`nifty_analyser/ops/`) |
 
-**335/335 tests passing**. See [TRACKER.md](TRACKER.md) for the full
+**340/340 tests passing**. See [TRACKER.md](TRACKER.md) for the full
 itemised checklist, every known simplification, every real bug found and fixed (27 documented
 so far), and the complete, dated work log.
 
@@ -627,7 +627,7 @@ nifty_analyser/
     extraction.py, llm.py, guardrails.py, eval.py
 
 scripts/                  end-to-end pipeline runners & backfill jobs (one per phase)
-tests/                    pytest suite — one file per area, 335 tests, one file per module
+tests/                    pytest suite — one file per area, 340 tests, one file per module
 data/{raw,processed}/     parquet cache (gitignored except .gitkeep)
 reports/                  locked metrics output from each phase's pipeline run (.md + .json)
 *.pdf                     blueprint & reference documents driving the roadmap
@@ -660,7 +660,7 @@ The Phase 1/2 pipelines have no such dependency and run with only the packages i
 ## Running things
 
 ```bash
-# Run the full test suite (335 tests)
+# Run the full test suite (340 tests)
 pytest
 
 # End-to-end phase pipelines (produce reports/ output)
@@ -869,6 +869,28 @@ At 20 days the blend ranks better than persistence but its 0.5-threshold accurac
 and is untested forward. The same history has been examined many times, so `scripts/forecast_volatility.py` records live forecasts in a hash-chained ledger
 (`data/processed/vol_ledger.jsonl`, first entry 2026-11-25) and grades them as they mature; `daily_refresh.py` runs it and `scripts/serve.py` serves
 `GET /v3/volatility?instrument_id=NSE:INFY&horizon_days=5`. This is a risk forecast, not a direction or trading signal.
+
+### Expected-move ranges, ablation and portfolio use
+`scripts/run_vol_ranges.py` turns a forecast into a 90% price-move range (`models/ranges.py`, quantiles of realised outcomes only).
+
+| Walk-forward | 5-day model / EWMA / trailing | 20-day model / EWMA / trailing |
+|---|---|---|
+| Coverage of the 90% range | 88.7% / 89.4% / 89.6% | 87.1% / 88.4% / 88.6% |
+| Mean range width | 10.7% / 11.7% / 14.3% | 21.2% / 23.1% / 23.9% |
+| Pinball loss gain | significant over both | **not significant** over either |
+
+The model's ranges are narrower but cover slightly less than 90% (widths are log-return units). **Portfolio test:** inverse-forecast-volatility weighting
+(net Sharpe 0.96 / 1.03) beats inverse-trailing-volatility (0.83 / 0.98) with far less turnover, but does **not** meaningfully beat equal weight (0.97 / 1.02).
+**Ablation** (`scripts/run_vol_ablation.py`): delivery % and announcement counts add nothing; FII flows with FX/Brent volatility make it worse. None adopted.
+
+**Calibration follow-up** (`scripts/run_vol_calibration.py`, rules set first): adaptive ranges restore coverage (89.8% / 89.0%) but cost 1.8% pinball loss at 20 days,
+and probability recalibration does not improve the Brier score — **neither adopted**. `/v3/dashboard` now shows the ten names most likely to be more volatile than usual.
+
+### AUC search (`scripts/run_vol_auc.py`)
+Seven candidates (more frequent refits, 18 extra features, zero-shot Chronos as a feature, a four-model ensemble) were chosen on the first 60% of out-of-sample dates and
+the winner scored once on the rest. Holdout AUC: **5-day 0.6973 → 0.7011** (95% interval of gain -0.0002 to +0.0084), **20-day 0.7288 → 0.7355** (-0.005 to +0.021).
+Neither interval clears zero, so **nothing was adopted**; the extra features made 20-day development AUC clearly worse. The holdout period scores higher than the full
+history for both models, so compare only within a row. The model is near what daily data supports; finer-grained data is the next lever.
 
 ## Keeping these docs current
 
