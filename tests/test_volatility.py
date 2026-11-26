@@ -172,3 +172,16 @@ def test_history_rows_join_training_only_once_realised(tmp_path, monkeypatch):
     vf.latest_forecasts(live, 5, history=history)
     vf.latest_forecasts(live, 5, history=history, as_of=live.available_time.max())
     assert sizes[1] - sizes[0] == len(history) == sizes[2] - sizes[0]
+
+
+@pytest.mark.parametrize("horizon,uses_extra", [(5, False), (20, True)])
+def test_extra_features_reach_only_the_adopted_classifier(monkeypatch, horizon, uses_extra):
+    from nifty_analyser.ops import vol_forecast as vf
+
+    width = {}
+    monkeypatch.setattr(vf, "instrument_ids_as_of", lambda d: {"NSE:AAA", "NSE:BBB"})
+    monkeypatch.setattr(vf, "membership_mask", lambda df: pd.Series(True, index=df.index))
+    monkeypatch.setattr(vf, "fit_predict_classifiers", lambda X, y, V: (width.update(cls=X.shape[1]), {"blend": np.full(len(V), 0.5)})[1])
+    monkeypatch.setattr(vf, "fit_predict_regressors", lambda X, y, V: (width.update(reg=X.shape[1]), {"blend": np.zeros(len(V))})[1])
+    assert len(vf.latest_forecasts(bars(), horizon)) == 2
+    assert (width["cls"] > width["reg"]) is uses_extra
