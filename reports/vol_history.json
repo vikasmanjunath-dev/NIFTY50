@@ -1,0 +1,31 @@
+{
+ "5": {
+  "n_oos": 56480,
+  "history_rows": 161697,
+  "auc_current": 0.6712,
+  "auc_with_history": 0.6843,
+  "gain_ci95": [
+   0.0027,
+   0.0225
+  ],
+  "accuracy_current": 0.6269,
+  "accuracy_with_history": 0.6362,
+  "r2_current": 0.1977,
+  "r2_with_history": 0.2042
+ },
+ "20": {
+  "n_oos": 55191,
+  "history_rows": 160017,
+  "auc_current": 0.7017,
+  "auc_with_history": 0.7392,
+  "gain_ci95": [
+   0.0057,
+   0.0616
+  ],
+  "accuracy_current": 0.6138,
+  "accuracy_with_history": 0.679,
+  "r2_current": 0.1432,
+  "r2_with_history": 0.3254
+ },
+ "adopted": true
+}

@@ -3,10 +3,10 @@
  "n": 42945,
  "ranges": {
   "model": {
-   "coverage_90": 0.8712,
-   "coverage_50": 0.4774,
-   "mean_width_90": 0.212,
-   "pinball_sum": 0.059702
+   "coverage_90": 0.8834,
+   "coverage_50": 0.4956,
+   "mean_width_90": 0.2135,
+   "pinball_sum": 0.05887
   },
   "trailing": {
    "coverage_90": 0.886,
@@ -22,18 +22,18 @@
   }
  },
  "pinball_model_minus_trailing_ci95_bps": [
-  -23.4367,
-  1.3019
+  -27.7079,
+  -13.3436
  ],
  "pinball_model_minus_ewma_ci95_bps": [
-  -16.4149,
-  5.7024
+  -20.5106,
+  -9.721
  ],
  "live_quantiles": {
-  "0.05": -1.5416677876380755,
-  "0.25": -0.486198678385958,
-  "0.75": 0.7757164809385765,
-  "0.95": 1.7410248264880552
+  "0.05": -1.571866627102914,
+  "0.25": -0.514029643887504,
+  "0.75": 0.8158308591402939,
+  "0.95": 1.7778041654163959
  },
  "portfolios": {
   "n_rebalances": 56,
@@ -52,11 +52,11 @@
    "mean_turnover": 0.275
   },
   "inverse_model": {
-   "ann_return_net": 0.1334,
+   "ann_return_net": 0.1325,
    "ann_vol": 0.1295,
-   "sharpe_net": 1.03,
-   "max_drawdown": -0.1405,
-   "mean_turnover": 0.074
+   "sharpe_net": 1.023,
+   "max_drawdown": -0.1408,
+   "mean_turnover": 0.077
   }
  }
 }
