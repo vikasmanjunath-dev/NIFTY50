@@ -1,0 +1,37 @@
+{
+ "logistic_elasticnet": {
+  "hold5_gross_sharpe": 0.195,
+  "hold5_net_sharpe": -1.068,
+  "hold20_gross_sharpe": 0.087,
+  "hold20_net_sharpe": -0.348,
+  "hold5_gross_perm_p": 0.3433
+ },
+ "lightgbm": {
+  "hold5_gross_sharpe": 0.997,
+  "hold5_net_sharpe": -0.279,
+  "hold20_gross_sharpe": 0.749,
+  "hold20_net_sharpe": 0.323,
+  "hold5_gross_perm_p": 0.0249
+ },
+ "catboost": {
+  "hold5_gross_sharpe": 0.74,
+  "hold5_net_sharpe": -0.436,
+  "hold20_gross_sharpe": 1.007,
+  "hold20_net_sharpe": 0.591,
+  "hold5_gross_perm_p": 0.0597
+ },
+ "ensemble": {
+  "hold5_gross_sharpe": 0.08,
+  "hold5_net_sharpe": -1.134,
+  "hold20_gross_sharpe": -0.421,
+  "hold20_net_sharpe": -0.83,
+  "hold5_gross_perm_p": 0.408
+ },
+ "rank_avg": {
+  "hold5_gross_sharpe": 0.734,
+  "hold5_net_sharpe": -0.412,
+  "hold20_gross_sharpe": 0.98,
+  "hold20_net_sharpe": 0.562,
+  "hold5_gross_perm_p": 0.0796
+ }
+}

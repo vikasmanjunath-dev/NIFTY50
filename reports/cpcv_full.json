@@ -1,0 +1,86 @@
+{
+ "lightgbm": {
+  "n_groups": 8,
+  "n_paths": 7,
+  "mean": {
+   "roc_auc": 0.4944,
+   "within_date_auc": 0.5066,
+   "information_coefficient": -0.009,
+   "daily_ic": 0.0147,
+   "daily_ic_t": 2.941,
+   "log_loss": 0.722
+  },
+  "min": {
+   "roc_auc": 0.4878,
+   "within_date_auc": 0.5032,
+   "information_coefficient": -0.0237,
+   "daily_ic": 0.0101,
+   "daily_ic_t": 2.0447,
+   "log_loss": 0.7158
+  },
+  "max": {
+   "roc_auc": 0.5022,
+   "within_date_auc": 0.5112,
+   "information_coefficient": 0.0098,
+   "daily_ic": 0.021,
+   "daily_ic_t": 4.0809,
+   "log_loss": 0.7266
+  }
+ },
+ "logistic": {
+  "n_groups": 8,
+  "n_paths": 7,
+  "mean": {
+   "roc_auc": 0.4877,
+   "within_date_auc": 0.5,
+   "information_coefficient": -0.0212,
+   "daily_ic": -0.001,
+   "daily_ic_t": -0.1962,
+   "log_loss": 0.717
+  },
+  "min": {
+   "roc_auc": 0.4782,
+   "within_date_auc": 0.4955,
+   "information_coefficient": -0.0418,
+   "daily_ic": -0.0062,
+   "daily_ic_t": -1.2427,
+   "log_loss": 0.7113
+  },
+  "max": {
+   "roc_auc": 0.5018,
+   "within_date_auc": 0.5027,
+   "information_coefficient": 0.007,
+   "daily_ic": 0.0034,
+   "daily_ic_t": 0.7308,
+   "log_loss": 0.723
+  }
+ },
+ "ensemble": {
+  "n_groups": 6,
+  "n_paths": 5,
+  "mean": {
+   "roc_auc": 0.4995,
+   "within_date_auc": 0.5048,
+   "information_coefficient": 0.0059,
+   "daily_ic": 0.0083,
+   "daily_ic_t": 1.6644,
+   "log_loss": 0.7
+  },
+  "min": {
+   "roc_auc": 0.4823,
+   "within_date_auc": 0.5,
+   "information_coefficient": -0.0324,
+   "daily_ic": 0.0028,
+   "daily_ic_t": 0.5623,
+   "log_loss": 0.6906
+  },
+  "max": {
+   "roc_auc": 0.5284,
+   "within_date_auc": 0.5113,
+   "information_coefficient": 0.0623,
+   "daily_ic": 0.0207,
+   "daily_ic_t": 4.0466,
+   "log_loss": 0.7045
+  }
+ }
+}

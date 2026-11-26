@@ -1,0 +1,122 @@
+{
+ "oos_days": 1242,
+ "n_names": 59,
+ "q=0.1": {
+  "gross": {
+   "sharpe": 0.932,
+   "ann_ret": 0.0865,
+   "ann_turnover": 57.8
+  },
+  "net_Rs10cr": {
+   "sharpe": -0.263,
+   "ann_ret": -0.0247,
+   "ann_turnover": 57.8
+  },
+  "net_Rs100cr": {
+   "sharpe": -0.811,
+   "ann_ret": -0.0773,
+   "ann_turnover": 57.8
+  },
+  "net_Rs1000cr": {
+   "sharpe": -2.365,
+   "ann_ret": -0.2429,
+   "ann_turnover": 57.8
+  }
+ },
+ "q=0.2": {
+  "gross": {
+   "sharpe": 0.997,
+   "ann_ret": 0.0673,
+   "ann_turnover": 47.8
+  },
+  "net_Rs10cr": {
+   "sharpe": -0.279,
+   "ann_ret": -0.0191,
+   "ann_turnover": 47.8
+  },
+  "net_Rs100cr": {
+   "sharpe": -0.718,
+   "ann_ret": -0.0498,
+   "ann_turnover": 47.8
+  },
+  "net_Rs1000cr": {
+   "sharpe": -2.002,
+   "ann_ret": -0.1468,
+   "ann_turnover": 47.8
+  }
+ },
+ "q=0.3": {
+  "gross": {
+   "sharpe": 0.978,
+   "ann_ret": 0.0549,
+   "ann_turnover": 39.6
+  },
+  "net_Rs10cr": {
+   "sharpe": -0.267,
+   "ann_ret": -0.0152,
+   "ann_turnover": 39.6
+  },
+  "net_Rs100cr": {
+   "sharpe": -0.646,
+   "ann_ret": -0.0371,
+   "ann_turnover": 39.6
+  },
+  "net_Rs1000cr": {
+   "sharpe": -1.769,
+   "ann_ret": -0.1064,
+   "ann_turnover": 39.6
+  }
+ },
+ "hold_sweep_q0.2": {
+  "hold=5": {
+   "gross": {
+    "sharpe": 0.997,
+    "ann_ret": 0.0673,
+    "ann_turnover": 47.8
+   },
+   "net_Rs10cr": {
+    "sharpe": -0.279,
+    "ann_ret": -0.0191,
+    "ann_turnover": 47.8
+   }
+  },
+  "hold=10": {
+   "gross": {
+    "sharpe": 0.779,
+    "ann_ret": 0.0496,
+    "ann_turnover": 27.8
+   },
+   "net_Rs10cr": {
+    "sharpe": -0.019,
+    "ann_ret": -0.0012,
+    "ann_turnover": 27.8
+   }
+  },
+  "hold=20": {
+   "gross": {
+    "sharpe": 0.749,
+    "ann_ret": 0.0495,
+    "ann_turnover": 15.2
+   },
+   "net_Rs10cr": {
+    "sharpe": 0.323,
+    "ann_ret": 0.0214,
+    "ann_turnover": 15.2
+   }
+  }
+ },
+ "flat_cost_sweep_q0.2_hold5": {
+  "0bps": 0.997,
+  "2bps": 0.856,
+  "5bps": 0.643,
+  "8bps": 0.43,
+  "10bps": 0.289,
+  "15bps": -0.063
+ },
+ "permutation_null_q0.2_gross": {
+  "null_mean": -0.04,
+  "null_sd": 0.48,
+  "real": 0.997,
+  "p_value_one_sided": 0.0249
+ }
+}
