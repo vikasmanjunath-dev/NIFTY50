@@ -131,6 +131,7 @@ def create_app(ctx: ServingContext, psi_provider=lambda: None, metrics: dict | N
     def dashboard():
         h = ctx.killswitch.effective(ctx.health_fn())
         ok, _ = ctx.audit.verify()
-        return render_dashboard(h.to_dict(), psi_provider(), ctx.meta, ctx.audit.read(), ok, metrics)
+        return render_dashboard(h.to_dict(), psi_provider(), ctx.meta, ctx.audit.read(), ok, metrics,
+                                None if ctx.killswitch.manual().get("tripped") else volatility)
 
     return app
