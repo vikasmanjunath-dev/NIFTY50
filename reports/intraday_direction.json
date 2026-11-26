@@ -1,0 +1,38 @@
+{
+ "n_days_instrument": 17352,
+ "instruments": 24,
+ "span": [
+  "2023-12-14",
+  "2026-11-26"
+ ],
+ "k0_pooled_all_instruments": {
+  "n": 15648,
+  "majority_baseline": 0.51,
+  "accuracy": 0.5121,
+  "auc": 0.5103,
+  "accuracy_top_decile_confidence": 0.507
+ },
+ "k0_index_only": {
+  "n": 220,
+  "majority_baseline": 0.523,
+  "accuracy": 0.5318,
+  "auc": 0.5606,
+  "accuracy_top_decile_confidence": 0.545
+ },
+ "k0_naive_continue_sofar_accuracy": 0.499,
+ "k3_pooled_all_instruments": {
+  "n": 15648,
+  "majority_baseline": 0.514,
+  "accuracy": 0.5134,
+  "auc": 0.5073,
+  "accuracy_top_decile_confidence": 0.502
+ },
+ "k3_index_only": {
+  "n": 220,
+  "majority_baseline": 0.591,
+  "accuracy": 0.5182,
+  "auc": 0.5065,
+  "accuracy_top_decile_confidence": 0.455
+ },
+ "k3_naive_continue_sofar_accuracy": 0.4925
+}
