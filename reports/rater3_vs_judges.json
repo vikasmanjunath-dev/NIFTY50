@@ -1,0 +1,9 @@
+{
+ "n": 240,
+ "rater3_mean": 1.162,
+ "local_judge_mean": 1.202,
+ "spearman": 0.862,
+ "weighted_kappa_vs_rounded_consensus": 0.855,
+ "within1": 0.967,
+ "local_minus_rater3_mean": 0.04
+}

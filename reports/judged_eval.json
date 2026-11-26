@@ -1,0 +1,332 @@
+{
+ "agreement": {
+  "weighted_kappa": 0.888,
+  "exact": 0.716,
+  "within1": 0.981,
+  "mean_grade": {
+   "qwen3:14b": 1.225,
+   "gemma3:12b-it-qat": 1.284
+  },
+  "n_judgments": 1722
+ },
+ "n_queries_scored": 59,
+ "mean_ndcg5": {
+  "auto": 0.6649,
+  "auto_recent": 0.6489,
+  "bm25": 0.6259,
+  "dense": 0.657,
+  "rerank_ce_bge": 0.6787,
+  "rerank_ce_minilm": 0.6897,
+  "rerank_llama3.2:3b": 0.7025,
+  "rerank_qwen3:8b": 0.7557,
+  "rerank_qwen3:8b+routed": 0.7684,
+  "routed_n1_w1": 0.6825,
+  "routed_n1_w3": 0.6904,
+  "routed_n2_w1": 0.6838,
+  "routed_n2_w10": 0.6929,
+  "routed_n2_w3": 0.6929,
+  "routed_n3_w3": 0.6667,
+  "rrf_w1": 0.6817
+ },
+ "by_kind": {
+  "company": {
+   "auto": 0.5531,
+   "auto_recent": 0.5464,
+   "bm25": 0.4984,
+   "dense": 0.5371,
+   "rerank_ce_bge": 0.5578,
+   "rerank_ce_minilm": 0.5601,
+   "rerank_llama3.2:3b": 0.5943,
+   "rerank_qwen3:8b": 0.6575,
+   "rerank_qwen3:8b+routed": 0.6691,
+   "routed_n1_w1": 0.5679,
+   "routed_n1_w3": 0.569,
+   "routed_n2_w1": 0.5682,
+   "routed_n2_w10": 0.5693,
+   "routed_n2_w3": 0.5693,
+   "routed_n3_w3": 0.5597,
+   "rrf_w1": 0.5536
+  },
+  "market": {
+   "auto": 0.7729,
+   "auto_recent": 0.748,
+   "bm25": 0.7492,
+   "dense": 0.7729,
+   "rerank_ce_bge": 0.7955,
+   "rerank_ce_minilm": 0.815,
+   "rerank_llama3.2:3b": 0.8071,
+   "rerank_qwen3:8b": 0.8506,
+   "rerank_qwen3:8b+routed": 0.8645,
+   "routed_n1_w1": 0.7932,
+   "routed_n1_w3": 0.8077,
+   "routed_n2_w1": 0.7956,
+   "routed_n2_w10": 0.8123,
+   "routed_n2_w3": 0.8123,
+   "routed_n3_w3": 0.7701,
+   "rrf_w1": 0.8055
+  }
+ },
+ "per_judge": {
+  "qwen3:14b": {
+   "auto": 0.6675,
+   "auto_recent": 0.6517,
+   "bm25": 0.6353,
+   "dense": 0.6371,
+   "rerank_ce_bge": 0.6815,
+   "rerank_ce_minilm": 0.6935,
+   "rerank_llama3.2:3b": 0.6989,
+   "rerank_qwen3:8b": 0.7464,
+   "rerank_qwen3:8b+routed": 0.7587,
+   "routed_n1_w1": 0.6837,
+   "routed_n1_w3": 0.69,
+   "routed_n2_w1": 0.6875,
+   "routed_n2_w10": 0.6955,
+   "routed_n2_w3": 0.6955,
+   "routed_n3_w3": 0.6865,
+   "rrf_w1": 0.6926
+  },
+  "gemma3:12b-it-qat": {
+   "auto": 0.6879,
+   "auto_recent": 0.667,
+   "bm25": 0.6469,
+   "dense": 0.6959,
+   "rerank_ce_bge": 0.702,
+   "rerank_ce_minilm": 0.7108,
+   "rerank_llama3.2:3b": 0.734,
+   "rerank_qwen3:8b": 0.792,
+   "rerank_qwen3:8b+routed": 0.8053,
+   "routed_n1_w1": 0.7091,
+   "routed_n1_w3": 0.7188,
+   "routed_n2_w1": 0.7081,
+   "routed_n2_w10": 0.718,
+   "routed_n2_w3": 0.718,
+   "routed_n3_w3": 0.6757,
+   "rrf_w1": 0.6954
+  }
+ },
+ "paired_vs_auto": {
+  "bm25": {
+   "mean": -0.0389,
+   "se": 0.0315,
+   "better": 21,
+   "worse": 27
+  },
+  "dense": {
+   "mean": -0.0079,
+   "se": 0.0262,
+   "better": 11,
+   "worse": 16
+  },
+  "rrf_w1": {
+   "mean": 0.0168,
+   "se": 0.0204,
+   "better": 17,
+   "worse": 8
+  },
+  "auto_recent": {
+   "mean": -0.016,
+   "se": 0.0122,
+   "better": 15,
+   "worse": 21
+  },
+  "routed_n1_w1": {
+   "mean": 0.0176,
+   "se": 0.0078,
+   "better": 10,
+   "worse": 3
+  },
+  "routed_n1_w3": {
+   "mean": 0.0255,
+   "se": 0.0102,
+   "better": 11,
+   "worse": 3
+  },
+  "routed_n2_w1": {
+   "mean": 0.019,
+   "se": 0.0078,
+   "better": 13,
+   "worse": 4
+  },
+  "routed_n2_w3": {
+   "mean": 0.028,
+   "se": 0.0102,
+   "better": 14,
+   "worse": 4
+  },
+  "routed_n2_w10": {
+   "mean": 0.028,
+   "se": 0.0102,
+   "better": 14,
+   "worse": 4
+  },
+  "routed_n3_w3": {
+   "mean": 0.0018,
+   "se": 0.0177,
+   "better": 16,
+   "worse": 9
+  },
+  "rerank_qwen3:8b+routed": {
+   "mean": 0.1036,
+   "se": 0.0215,
+   "better": 33,
+   "worse": 6
+  },
+  "rerank_llama3.2:3b": {
+   "mean": 0.0376,
+   "se": 0.0136,
+   "better": 22,
+   "worse": 5
+  },
+  "rerank_qwen3:8b": {
+   "mean": 0.0908,
+   "se": 0.0202,
+   "better": 32,
+   "worse": 5
+  },
+  "rerank_ce_minilm": {
+   "mean": 0.0248,
+   "se": 0.0074,
+   "better": 14,
+   "worse": 3
+  },
+  "rerank_ce_bge": {
+   "mean": 0.0138,
+   "se": 0.0051,
+   "better": 13,
+   "worse": 2
+  }
+ },
+ "paired_vs_auto_by_half": {
+  "tune_even_qids": {
+   "routed_n1_w1": {
+    "mean": 0.0028,
+    "se": 0.0061
+   },
+   "routed_n1_w3": {
+    "mean": 0.0165,
+    "se": 0.0125
+   },
+   "routed_n2_w1": {
+    "mean": 0.0055,
+    "se": 0.0065
+   },
+   "routed_n2_w3": {
+    "mean": 0.0216,
+    "se": 0.0128
+   },
+   "routed_n2_w10": {
+    "mean": 0.0216,
+    "se": 0.0128
+   },
+   "routed_n3_w3": {
+    "mean": 0.0272,
+    "se": 0.0132
+   },
+   "n": 29
+  },
+  "holdout_odd_qids": {
+   "routed_n1_w1": {
+    "mean": 0.032,
+    "se": 0.0137
+   },
+   "routed_n1_w3": {
+    "mean": 0.0342,
+    "se": 0.0159
+   },
+   "routed_n2_w1": {
+    "mean": 0.032,
+    "se": 0.0137
+   },
+   "routed_n2_w3": {
+    "mean": 0.0342,
+    "se": 0.0159
+   },
+   "routed_n2_w10": {
+    "mean": 0.0342,
+    "se": 0.0159
+   },
+   "routed_n3_w3": {
+    "mean": -0.0227,
+    "se": 0.032
+   },
+   "n": 30
+  }
+ },
+ "paired_vs_auto_company_only": {
+  "bm25": {
+   "mean": -0.0547,
+   "se": 0.0252,
+   "n": 29
+  },
+  "dense": {
+   "mean": -0.016,
+   "se": 0.0537,
+   "n": 29
+  },
+  "rrf_w1": {
+   "mean": 0.0005,
+   "se": 0.0005,
+   "n": 29
+  },
+  "auto_recent": {
+   "mean": -0.0067,
+   "se": 0.0189,
+   "n": 29
+  },
+  "routed_n1_w1": {
+   "mean": 0.0148,
+   "se": 0.0109,
+   "n": 29
+  },
+  "routed_n1_w3": {
+   "mean": 0.0159,
+   "se": 0.0141,
+   "n": 29
+  },
+  "routed_n2_w1": {
+   "mean": 0.0151,
+   "se": 0.0109,
+   "n": 29
+  },
+  "routed_n2_w3": {
+   "mean": 0.0162,
+   "se": 0.0141,
+   "n": 29
+  },
+  "routed_n2_w10": {
+   "mean": 0.0162,
+   "se": 0.0141,
+   "n": 29
+  },
+  "routed_n3_w3": {
+   "mean": 0.0066,
+   "se": 0.013,
+   "n": 29
+  },
+  "rerank_qwen3:8b+routed": {
+   "mean": 0.116,
+   "se": 0.0364,
+   "n": 29
+  },
+  "rerank_llama3.2:3b": {
+   "mean": 0.0412,
+   "se": 0.0251,
+   "n": 29
+  },
+  "rerank_qwen3:8b": {
+   "mean": 0.1045,
+   "se": 0.0346,
+   "n": 29
+  },
+  "rerank_ce_minilm": {
+   "mean": 0.007,
+   "se": 0.0083,
+   "n": 29
+  },
+  "rerank_ce_bge": {
+   "mean": 0.0048,
+   "se": 0.0035,
+   "n": 29
+  }
+ }
+}
