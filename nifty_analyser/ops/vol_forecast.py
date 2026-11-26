@@ -10,6 +10,7 @@ from nifty_analyser.config import DATA_RAW_DIR
 from nifty_analyser.data.index_membership import instrument_ids_as_of, membership_mask
 from nifty_analyser.data.store import load_all_macro_series, load_universe_bars
 from nifty_analyser.features.volatility import build_volatility_frame
+from nifty_analyser.features.volatility_extra import extra_features
 from nifty_analyser.models.volatility import fit_predict_classifiers, fit_predict_regressors
 
 LEDGER_KIND = "vol_forecast"
@@ -23,7 +24,17 @@ def load_inputs():
 HISTORY_DIR = DATA_RAW_DIR / "history"
 
 
-def load_history_training(horizon: int, directory=None) -> pd.DataFrame | None:
+# Horizons whose classifier also uses the second-tier features: only those where the held-out gain was clear
+# (reports/vol_auc_search2.json). The volatility-level regression, and so the price ranges, do not use them.
+EXTRA_FEATURE_HORIZONS = frozenset({20})
+
+
+def _with_extra(df, bars):
+    extra, cols = extra_features(bars)
+    return df.merge(extra, on=["instrument_id", "event_time"], how="left"), cols
+
+
+def load_history_training(horizon: int, directory=None, extra: bool = True) -> pd.DataFrame | None:
     """Pre-2021 rows (scripts/backfill_history.py) used only for training; None if not downloaded."""
     directory = directory or HISTORY_DIR
     if not (directory / "bars.parquet").exists():
@@ -32,7 +43,10 @@ def load_history_training(horizon: int, directory=None) -> pd.DataFrame | None:
     for frame in (bars, vix):
         for c in ("event_time", "available_time"):
             frame[c] = pd.to_datetime(frame[c], utc=True).dt.tz_convert("Asia/Kolkata").astype("datetime64[ns, Asia/Kolkata]")
-    df, _ = build_volatility_frame(bars[bars.quality_flag != "FAIL"], horizon, vix[vix.quality_flag != "FAIL"])
+    bars = bars[bars.quality_flag != "FAIL"]
+    df, _ = build_volatility_frame(bars, horizon, vix[vix.quality_flag != "FAIL"])
+    if extra and horizon in EXTRA_FEATURE_HORIZONS:
+        df, _ = _with_extra(df, bars)
     df = df.dropna(subset=["fwd_rv", "med_rv", "cur_rv", "outcome_time", "har_66"])
     return df[(df.fwd_rv > 0) & (df.cur_rv > 0)].reset_index(drop=True)
 
@@ -44,6 +58,10 @@ def latest_forecasts(bars, horizon: int, vix=None, announcements=None, as_of=Non
         vix = None if vix is None else vix[vix.available_time <= as_of]
         announcements = None if announcements is None else announcements[announcements.available_time <= as_of]
     df, cols = build_volatility_frame(bars, horizon, vix, announcements)
+    class_cols = cols
+    if horizon in EXTRA_FEATURE_HORIZONS:
+        df, extra_cols = _with_extra(df, bars)
+        class_cols = cols + extra_cols
     df = df[membership_mask(df).to_numpy() & df.har_66.notna().to_numpy()]
     train = df.dropna(subset=["fwd_rv", "med_rv", "outcome_time"])
     train = train[train.fwd_rv > 0]
@@ -53,7 +71,8 @@ def latest_forecasts(bars, horizon: int, vix=None, announcements=None, as_of=Non
     last = df.event_time.max()
     live = df[(df.event_time == last) & df.instrument_id.isin(instrument_ids_as_of(last)) & df.med_rv.notna()]
     X, X_live = train[cols].to_numpy(float), live[cols].to_numpy(float)
-    prob = fit_predict_classifiers(X, (train.fwd_rv > train.med_rv).astype(int).to_numpy(), X_live)["blend"]
+    prob = fit_predict_classifiers(train[class_cols].to_numpy(float), (train.fwd_rv > train.med_rv).astype(int).to_numpy(),
+                                   live[class_cols].to_numpy(float))["blend"]
     logrv = fit_predict_regressors(X, np.log(train.fwd_rv.to_numpy()), X_live)["blend"]
     out = live[["instrument_id", "event_time", "med_rv"]].copy()
     out["horizon_days"] = horizon
