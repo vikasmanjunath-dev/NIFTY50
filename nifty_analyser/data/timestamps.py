@@ -1,0 +1,22 @@
+"""IST timestamp helpers implementing the point-in-time "as-of" rule (Blueprint §3.2)."""
+from __future__ import annotations
+
+import datetime as dt
+
+import pandas as pd
+
+from nifty_analyser.config import IST, NSE_CLOSE_HOUR_IST, NSE_CLOSE_MINUTE_IST
+
+
+def to_ist(timestamp: pd.Timestamp | dt.datetime | str) -> pd.Timestamp:
+    """Coerce to a tz-aware IST Timestamp (naive input is taken as IST wall-clock)."""
+    ts = pd.Timestamp(timestamp)
+    return ts.tz_localize(IST) if ts.tzinfo is None else ts.tz_convert(IST)
+
+
+def eod_bar_available_time(trading_date: pd.Timestamp | dt.date | str) -> pd.Timestamp:
+    """A daily bar is only knowable once NSE's cash market has closed (15:30 IST)."""
+    day = pd.Timestamp(trading_date).normalize()
+    if day.tzinfo is not None:
+        day = day.tz_localize(None)
+    return to_ist(day + pd.Timedelta(hours=NSE_CLOSE_HOUR_IST, minutes=NSE_CLOSE_MINUTE_IST))
