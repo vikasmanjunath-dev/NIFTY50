@@ -40,3 +40,21 @@ def extra_features(bars: pd.DataFrame, index_bars: pd.DataFrame | None = None) -
         f = f.merge(m, on="event_time", how="left")
     f = f.drop(columns="_ret")
     return f, [c for c in f.columns if c not in ("instrument_id", "event_time")]
+
+
+def stock_features(df: pd.DataFrame, horizon: int) -> tuple[pd.DataFrame, list[str]]:
+    """What is persistent about a stock: how often its volatility has exceeded usual (realised outcomes only) and where it sits
+    versus its sector and the market today. `df` is a volatility frame (features/volatility.py) for the whole pool."""
+    from nifty_analyser.data.instrument_master import get_instrument
+
+    df = df.sort_values(["instrument_id", "event_time"]).copy()
+    above = (df.fwd_rv > df.med_rv).astype(float).where(df.fwd_rv.notna() & df.med_rv.notna())
+    past = above.groupby(df.instrument_id).shift(horizon)  # the newest outcome used is fully realised today
+    df["own_exceed_rate"] = past.groupby(df.instrument_id).transform(lambda s: s.rolling(504, min_periods=120).mean())
+    sector = df.instrument_id.map({i: get_instrument(i).sector for i in df.instrument_id.unique()})
+    for w in (5, 66):
+        col = df[f"har_{w}"]
+        df[f"vs_sector_{w}"] = col - col.groupby([df.event_time, sector]).transform("mean")
+        df[f"vs_market_{w}"] = col - col.groupby(df.event_time).transform("mean")
+    return df.sort_values(["event_time", "instrument_id"]).reset_index(drop=True), [
+        "own_exceed_rate", "vs_sector_5", "vs_market_5", "vs_sector_66", "vs_market_66"]

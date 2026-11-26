@@ -1,0 +1,58 @@
+{
+ "5": {
+  "dev_auc_2008_2020": {
+   "base/blend": 0.654,
+   "base/big_trees": 0.6518,
+   "base/cat3": 0.6514,
+   "base/reg_target": 0.6532,
+   "base/combo": 0.6454,
+   "extra/blend": 0.6601,
+   "extra/big_trees": 0.6592,
+   "extra/cat3": 0.6585,
+   "extra/reg_target": 0.6528,
+   "extra/combo": 0.6521,
+   "extra_stock/blend": 0.6616,
+   "extra_stock/big_trees": 0.6604,
+   "extra_stock/cat3": 0.6594,
+   "extra_stock/reg_target": 0.657,
+   "extra_stock/combo": 0.6542
+  },
+  "winner": "extra_stock/blend",
+  "live": "base/blend",
+  "auc_live_2021": 0.6843,
+  "auc_winner_2021": 0.689,
+  "gain_ci95": [
+   -0.0003,
+   0.0095
+  ],
+  "adopt": false
+ },
+ "20": {
+  "dev_auc_2008_2020": {
+   "base/blend": 0.6673,
+   "base/big_trees": 0.6664,
+   "base/cat3": 0.6689,
+   "base/reg_target": 0.6278,
+   "base/combo": 0.668,
+   "extra/blend": 0.6789,
+   "extra/big_trees": 0.6802,
+   "extra/cat3": 0.6792,
+   "extra/reg_target": 0.6367,
+   "extra/combo": 0.6774,
+   "extra_stock/blend": 0.6799,
+   "extra_stock/big_trees": 0.6788,
+   "extra_stock/cat3": 0.6798,
+   "extra_stock/reg_target": 0.6448,
+   "extra_stock/combo": 0.6836
+  },
+  "winner": "extra_stock/combo",
+  "live": "extra/blend",
+  "auc_live_2021": 0.7502,
+  "auc_winner_2021": 0.6385,
+  "gain_ci95": [
+   -0.1463,
+   -0.0736
+  ],
+  "adopt": false
+ }
+}
