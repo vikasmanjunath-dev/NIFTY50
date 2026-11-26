@@ -1,0 +1,46 @@
+{
+ "5": {
+  "dev_auc_2008_2020": {
+   "live/blend": 0.654,
+   "live/big_trees": 0.6518,
+   "us/blend": 0.6434,
+   "us/big_trees": 0.6413,
+   "index/blend": 0.6539,
+   "index/big_trees": 0.6525,
+   "us_index/blend": 0.6493,
+   "us_index/big_trees": 0.6487
+  },
+  "winner": "live/blend",
+  "auc_live_2021": 0.6843,
+  "auc_winner_2021": 0.6843,
+  "accuracy_live": 0.6362,
+  "accuracy_winner": 0.6362,
+  "gain_ci95": [
+   0.0,
+   0.0
+  ],
+  "adopt": false
+ },
+ "20": {
+  "dev_auc_2008_2020": {
+   "live/blend": 0.6789,
+   "live/big_trees": 0.6802,
+   "us/blend": 0.6782,
+   "us/big_trees": 0.678,
+   "index/blend": 0.6726,
+   "index/big_trees": 0.6755,
+   "us_index/blend": 0.6747,
+   "us_index/big_trees": 0.6754
+  },
+  "winner": "live/big_trees",
+  "auc_live_2021": 0.7502,
+  "auc_winner_2021": 0.7513,
+  "accuracy_live": 0.688,
+  "accuracy_winner": 0.6826,
+  "gain_ci95": [
+   -0.0063,
+   0.0087
+  ],
+  "adopt": false
+ }
+}
