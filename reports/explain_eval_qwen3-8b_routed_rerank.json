@@ -1,0 +1,56 @@
+{
+ "n_questions": 50,
+ "answer_source": {
+  "none": 29,
+  "llm": 16,
+  "digest": 5
+ },
+ "faith_of_digest_answers": {
+  "n": 5,
+  "mean_faith": 2.0,
+  "faith_0_rate": 0.0
+ },
+ "status": {
+  "ABSTAIN": 29,
+  "OK": 21
+ },
+ "answerable_packs": 26,
+ "released": {
+  "n": 48,
+  "mean_faith": 2.0,
+  "faith_0_rate": 0.0
+ },
+ "withheld_BLOCKED": {
+  "n": 0,
+  "mean_faith": null,
+  "faith_0_rate": null
+ },
+ "released_when_answerable": {
+  "n": 26,
+  "mean_faith": 2.0,
+  "faith_0_rate": 0.0
+ },
+ "released_when_NOT_answerable": {
+  "n": 22,
+  "mean_faith": 2.0,
+  "faith_0_rate": 0.0
+ },
+ "abstained_when_not_answerable": {
+  "n": 24,
+  "abstain_phrase_rate": 0.875
+ },
+ "leakage_unfaithful_released": 0,
+ "blocked_but_faithful": 0,
+ "by_window": {
+  "365": {
+   "OK": 20,
+   "ABSTAIN": 10
+  },
+  "14": {
+   "ABSTAIN": 19,
+   "OK": 1
+  }
+ },
+ "generator": "qwen3:8b",
+ "answer_rate_when_answerable": 0.769
+}
