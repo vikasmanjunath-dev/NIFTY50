@@ -20,8 +20,25 @@ def load_inputs():
             pd.read_parquet(DATA_RAW_DIR / "announcements_nifty50.parquet"))
 
 
+HISTORY_DIR = DATA_RAW_DIR / "history"
+
+
+def load_history_training(horizon: int, directory=None) -> pd.DataFrame | None:
+    """Pre-2021 rows (scripts/backfill_history.py) used only for training; None if not downloaded."""
+    directory = directory or HISTORY_DIR
+    if not (directory / "bars.parquet").exists():
+        return None
+    bars, vix = pd.read_parquet(directory / "bars.parquet"), pd.read_parquet(directory / "india_vix.parquet")
+    for frame in (bars, vix):
+        for c in ("event_time", "available_time"):
+            frame[c] = pd.to_datetime(frame[c], utc=True).dt.tz_convert("Asia/Kolkata").astype("datetime64[ns, Asia/Kolkata]")
+    df, _ = build_volatility_frame(bars[bars.quality_flag != "FAIL"], horizon, vix[vix.quality_flag != "FAIL"])
+    df = df.dropna(subset=["fwd_rv", "med_rv", "cur_rv", "outcome_time", "har_66"])
+    return df[(df.fwd_rv > 0) & (df.cur_rv > 0)].reset_index(drop=True)
+
+
 def latest_forecasts(bars, horizon: int, vix=None, announcements=None, as_of=None,
-                     quantiles: dict | None = None) -> pd.DataFrame:
+                     quantiles: dict | None = None, history: pd.DataFrame | None = None) -> pd.DataFrame:
     if as_of is not None:
         bars = bars[bars.available_time <= as_of]
         vix = None if vix is None else vix[vix.available_time <= as_of]
@@ -30,6 +47,9 @@ def latest_forecasts(bars, horizon: int, vix=None, announcements=None, as_of=Non
     df = df[membership_mask(df).to_numpy() & df.har_66.notna().to_numpy()]
     train = df.dropna(subset=["fwd_rv", "med_rv", "outcome_time"])
     train = train[train.fwd_rv > 0]
+    if history is not None:
+        old = history if as_of is None else history[history.outcome_time <= as_of]
+        train = pd.concat([old.reindex(columns=train.columns), train], ignore_index=True)  # missing features stay NaN
     last = df.event_time.max()
     live = df[(df.event_time == last) & df.instrument_id.isin(instrument_ids_as_of(last)) & df.med_rv.notna()]
     X, X_live = train[cols].to_numpy(float), live[cols].to_numpy(float)
@@ -47,7 +67,7 @@ def latest_forecasts(bars, horizon: int, vix=None, announcements=None, as_of=Non
     return out.sort_values("prob_above_usual", ascending=False).reset_index(drop=True)
 
 
-def record(ledger, forecasts: pd.DataFrame) -> bool:
+def record(ledger, forecasts: pd.DataFrame, model: str = "v2") -> bool:
     """Append once per (data date, horizon); returns False if already recorded."""
     date, horizon = str(forecasts.event_time.iloc[0].date()), int(forecasts.horizon_days.iloc[0])
     for e in ledger.read():
@@ -57,7 +77,7 @@ def record(ledger, forecasts: pd.DataFrame) -> bool:
     rows = [{**({"low_90": round(float(r.move_low_90), 5), "high_90": round(float(r.move_high_90), 5)} if ranged else {}),
              "instrument_id": r.instrument_id, "prob": round(float(r.prob_above_usual), 4), "med_rv": float(r.med_rv),
              "forecast_vol": round(float(r.forecast_vol_annualised), 4)} for r in forecasts.itertuples()]
-    ledger.append(LEDGER_KIND, {"date": date, "horizon_days": horizon, "forecasts": rows})
+    ledger.append(LEDGER_KIND, {"date": date, "horizon_days": horizon, "model": model, "forecasts": rows})
     return True
 
 
