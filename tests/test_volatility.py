@@ -216,3 +216,23 @@ def test_global_features_use_only_what_was_already_published():
     again, _ = add_global_features(rows, {"spx": stamp(changed, "spx")})
     pd.testing.assert_frame_equal(full.iloc[:251], again.iloc[:251])
     assert groups == {"us": [c for c in full.columns if c.startswith("spx_")], "index": []}
+
+
+def test_intraday_summaries_and_features_are_point_in_time():
+    from nifty_analyser.features.volatility_intraday import daily_summary, intraday_features
+
+    rng = np.random.default_rng(5)
+    rows = []
+    for day in pd.date_range("2023-01-02", periods=90, freq="B"):
+        times = pd.date_range(day + pd.Timedelta("03:45:00"), periods=375, freq="min")  # 09:15 IST in UTC
+        for symbol in ("AAA", "NIFTY"):
+            close = 100 * np.exp(np.cumsum(rng.normal(0, 0.001, len(times))))
+            rows.append(pd.DataFrame({"symbol": symbol, "timestamp": times, "open": close, "high": close, "low": close, "close": close, "volume": 10}))
+    minutes = pd.concat(rows, ignore_index=True)
+    summary = daily_summary(minutes)
+    assert len(summary) == 180 and (summary.n_bars == 75).all() and (summary.rv > 0).all() and (summary.late <= summary.rv).all()
+    full, cols = intraday_features(summary)
+    cut = sorted(summary.date.unique())[-20]
+    part, _ = intraday_features(summary[summary.date <= cut])
+    pd.testing.assert_frame_equal(full[full.date <= cut].reset_index(drop=True), part.reset_index(drop=True))
+    assert set(full.instrument_id) == {"NSE:AAA"} and "index_rv_5" in cols
