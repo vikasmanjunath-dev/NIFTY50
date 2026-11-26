@@ -1,0 +1,48 @@
+{
+ "index_ids": [
+  "NSE:NIFTY50_INDEX"
+ ],
+ "nifty_index": {
+  "gap": {
+   "n": 1208,
+   "majority_baseline": 0.608,
+   "logit_accuracy": 0.6084,
+   "logit_auc": 0.6411,
+   "naive_follow_spx_accuracy": 0.6879
+  },
+  "intra": {
+   "n": 1208,
+   "majority_baseline": 0.515,
+   "logit_accuracy": 0.5058,
+   "logit_auc": 0.4921,
+   "naive_follow_spx_accuracy": 0.4719
+  },
+  "c2c": {
+   "n": 1208,
+   "majority_baseline": 0.526,
+   "logit_accuracy": 0.5265,
+   "logit_auc": 0.5282,
+   "naive_follow_spx_accuracy": 0.5778
+  }
+ },
+ "stocks_mean_over_59_names": {
+  "gap": {
+   "majority_baseline": 0.6087,
+   "logit_accuracy": 0.6087,
+   "logit_auc": 0.5641,
+   "naive_follow_spx_accuracy": 0.6301
+  },
+  "intra": {
+   "majority_baseline": 0.5281,
+   "logit_accuracy": 0.5251,
+   "logit_auc": 0.496,
+   "naive_follow_spx_accuracy": 0.4859
+  },
+  "c2c": {
+   "majority_baseline": 0.5145,
+   "logit_accuracy": 0.508,
+   "logit_auc": 0.5112,
+   "naive_follow_spx_accuracy": 0.5395
+  }
+ }
+}
