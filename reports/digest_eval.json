@@ -1,0 +1,125 @@
+{
+ "n": 48,
+ "baseline_answer_rate_when_answerable": 0.538,
+ "baseline_answered_when_NOT_answerable": 0.0,
+ "gate>=5": {
+  "tune_even": {
+   "ans_when_answerable": 0.846,
+   "ans_when_NOT": 0.091,
+   "n_a": 13,
+   "n_not": 11
+  },
+  "holdout_odd": {
+   "ans_when_answerable": 0.769,
+   "ans_when_NOT": 0.091,
+   "n_a": 13,
+   "n_not": 11
+  },
+  "all": {
+   "ans_when_answerable": 0.808,
+   "ans_when_NOT": 0.091,
+   "n_a": 26,
+   "n_not": 22
+  }
+ },
+ "gate>=6": {
+  "tune_even": {
+   "ans_when_answerable": 0.769,
+   "ans_when_NOT": 0.091,
+   "n_a": 13,
+   "n_not": 11
+  },
+  "holdout_odd": {
+   "ans_when_answerable": 0.769,
+   "ans_when_NOT": 0.0,
+   "n_a": 13,
+   "n_not": 11
+  },
+  "all": {
+   "ans_when_answerable": 0.769,
+   "ans_when_NOT": 0.045,
+   "n_a": 26,
+   "n_not": 22
+  }
+ },
+ "gate>=7": {
+  "tune_even": {
+   "ans_when_answerable": 0.769,
+   "ans_when_NOT": 0.091,
+   "n_a": 13,
+   "n_not": 11
+  },
+  "holdout_odd": {
+   "ans_when_answerable": 0.769,
+   "ans_when_NOT": 0.0,
+   "n_a": 13,
+   "n_not": 11
+  },
+  "all": {
+   "ans_when_answerable": 0.769,
+   "ans_when_NOT": 0.045,
+   "n_a": 26,
+   "n_not": 22
+  }
+ },
+ "gate>=8": {
+  "tune_even": {
+   "ans_when_answerable": 0.538,
+   "ans_when_NOT": 0.0,
+   "n_a": 13,
+   "n_not": 11
+  },
+  "holdout_odd": {
+   "ans_when_answerable": 0.769,
+   "ans_when_NOT": 0.0,
+   "n_a": 13,
+   "n_not": 11
+  },
+  "all": {
+   "ans_when_answerable": 0.654,
+   "ans_when_NOT": 0.0,
+   "n_a": 26,
+   "n_not": 22
+  }
+ },
+ "gate>=9": {
+  "tune_even": {
+   "ans_when_answerable": 0.538,
+   "ans_when_NOT": 0.0,
+   "n_a": 13,
+   "n_not": 11
+  },
+  "holdout_odd": {
+   "ans_when_answerable": 0.538,
+   "ans_when_NOT": 0.0,
+   "n_a": 13,
+   "n_not": 11
+  },
+  "all": {
+   "ans_when_answerable": 0.538,
+   "ans_when_NOT": 0.0,
+   "n_a": 26,
+   "n_not": 22
+  }
+ },
+ "gate>=10": {
+  "tune_even": {
+   "ans_when_answerable": 0.538,
+   "ans_when_NOT": 0.0,
+   "n_a": 13,
+   "n_not": 11
+  },
+  "holdout_odd": {
+   "ans_when_answerable": 0.538,
+   "ans_when_NOT": 0.0,
+   "n_a": 13,
+   "n_not": 11
+  },
+  "all": {
+   "ans_when_answerable": 0.538,
+   "ans_when_NOT": 0.0,
+   "n_a": 26,
+   "n_not": 22
+  }
+ }
+}
