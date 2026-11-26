@@ -1,0 +1,37 @@
+{
+ "generator": "qwen3:8b",
+ "overall": {
+  "n": 108,
+  "accuracy_all": 0.991,
+  "strict_accuracy_all(<=2 dates in answer)": 0.991,
+  "precision_when_answered": 1.0,
+  "answered_rate": 0.991,
+  "retrieval_hit_rate": 1.0,
+  "accuracy_given_retrieved": 0.991,
+  "blocked_but_correct": 1
+ },
+ "record_date": {
+  "n": 54,
+  "accuracy_all": 1.0,
+  "strict_accuracy_all(<=2 dates in answer)": 1.0,
+  "precision_when_answered": 1.0,
+  "answered_rate": 1.0,
+  "retrieval_hit_rate": 1.0,
+  "accuracy_given_retrieved": 1.0,
+  "blocked_but_correct": 0
+ },
+ "results_period": {
+  "n": 54,
+  "accuracy_all": 0.981,
+  "strict_accuracy_all(<=2 dates in answer)": 0.981,
+  "precision_when_answered": 1.0,
+  "answered_rate": 0.981,
+  "retrieval_hit_rate": 1.0,
+  "accuracy_given_retrieved": 0.981,
+  "blocked_but_correct": 1
+ },
+ "status": {
+  "OK": 107,
+  "BLOCKED": 1
+ }
+}
