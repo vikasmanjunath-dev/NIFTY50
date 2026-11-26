@@ -80,4 +80,6 @@ if __name__ == "__main__":
     if args.classify:
         from nifty_analyser.documents.event_classifier import EventClassifier
         mp = DATA_PROCESSED_DIR / 'models'; clf = EventClassifier.load(mp / ('event_classifier_final.joblib' if (mp / 'event_classifier_final.joblib').exists() else 'event_classifier.joblib'))
-    uvicorn.run(create_app(ctx, psi, metrics, docs, clf), host=args.host, port=args.port)
+    vp = DATA_PROCESSED_DIR / "volatility_latest.json"      # written by scripts/forecast_volatility.py
+    vol = __import__("json").loads(vp.read_text()) if vp.exists() else None
+    uvicorn.run(create_app(ctx, psi, metrics, docs, clf, vol), host=args.host, port=args.port)

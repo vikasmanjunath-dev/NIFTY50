@@ -5,6 +5,8 @@ from __future__ import annotations
 import hmac
 import os
 
+from datetime import date
+
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
@@ -30,7 +32,8 @@ class ResetRequest(BaseModel):
     by: str
 
 
-def create_app(ctx: ServingContext, psi_provider=lambda: None, metrics: dict | None = None, docs: DocsContext | None = None, classifier=None) -> FastAPI:
+def create_app(ctx: ServingContext, psi_provider=lambda: None, metrics: dict | None = None, docs: DocsContext | None = None, classifier=None,
+               volatility: dict | None = None) -> FastAPI:
     app = FastAPI(title="Nifty 50 analyser", version="3.0")
 
     def admin(x_admin_token: str | None = Header(default=None)):
@@ -72,6 +75,28 @@ def create_app(ctx: ServingContext, psi_provider=lambda: None, metrics: dict | N
             (label, conf), = classifier.predict([m])
             return {"contract_version": "v3", "status": "OK" if label else "ABSTAIN", "label": label, "confidence": round(conf, 4), "threshold": classifier.threshold,
                     "classes": classifier.classes_, "model": classifier.meta.get("n_train")}
+
+    if volatility is not None:
+        @app.get("/v3/volatility")
+        def get_volatility(instrument_id: str, horizon_days: int = 5):
+            block = volatility.get(str(horizon_days))
+            if block is None:
+                raise HTTPException(422, f"horizon_days must be one of {sorted(map(int, volatility))}")
+            hit = block["forecasts"].get(instrument_id)
+            age = (ctx.now_fn().date() - date.fromisoformat(block["data_date"])).days
+            if ctx.killswitch.manual().get("tripped"):
+                status, hit = "REFUSED", None
+            elif hit is None:
+                status = "REFUSED"
+            elif age > ctx.stale_days:
+                status, hit = "ABSTAIN", None
+            else:
+                status = "OK"
+            out = {"contract_version": "v3", "instrument_id": instrument_id, "horizon_days": horizon_days,
+                   "data_date": block["data_date"], "status": status, "forecast": hit,
+                   "disclaimer": "Forecasts the size of price moves, not their direction. Not investment advice."}
+            ctx.audit.append("volatility", out)
+            return out
 
     @app.get("/v3/health")
     def get_health():
