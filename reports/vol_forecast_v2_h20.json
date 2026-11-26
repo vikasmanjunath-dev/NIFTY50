@@ -1,0 +1,53 @@
+{
+ "horizon_days": 20,
+ "n_oos": 55191,
+ "n_features": 21,
+ "base_rate": 0.474,
+ "classification": {
+  "naive_persistence": {
+   "auc": 0.6689,
+   "within_date_auc": 0.5674,
+   "accuracy": 0.6248
+  },
+  "har_logit": {
+   "auc": 0.6409,
+   "within_date_auc": 0.6135,
+   "accuracy": 0.5851,
+   "accuracy_top20pct_confidence": 0.619
+  },
+  "lgbm": {
+   "auc": 0.6983,
+   "within_date_auc": 0.5906,
+   "accuracy": 0.641,
+   "accuracy_top20pct_confidence": 0.7742
+  },
+  "blend": {
+   "auc": 0.7017,
+   "within_date_auc": 0.6101,
+   "accuracy": 0.6138,
+   "accuracy_top20pct_confidence": 0.7896
+  }
+ },
+ "regression_log_rv": {
+  "naive_persistence": {
+   "oos_r2": -0.1111,
+   "qlike": 0.4007
+  },
+  "har_ridge": {
+   "oos_r2": -0.2226,
+   "qlike": 0.3296
+  },
+  "lgbm": {
+   "oos_r2": 0.2672,
+   "qlike": 0.2781
+  },
+  "blend": {
+   "oos_r2": 0.1432,
+   "qlike": 0.2836
+  }
+ },
+ "auc_blend_minus_naive_ci95": [
+  -0.0034,
+  0.0652
+ ]
+}
