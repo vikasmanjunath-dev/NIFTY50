@@ -1,0 +1,810 @@
+{
+  "generated_at_utc": "2026-11-24T08:55:28.769154+00:00",
+  "layers": {
+    "price_technical_index_relative": "included",
+    "macro_and_regime": "included",
+    "delivery": "included",
+    "fundamentals": "included",
+    "fii_dii": "included"
+  },
+  "config": {
+    "horizon": 5,
+    "n_splits": 4,
+    "embargo_days": 5,
+    "seed": 42,
+    "cost_bps": 10.0,
+    "slippage_bps": 10.0
+  },
+  "results": {
+    "pit": {
+      "universe": "pit",
+      "n_rows": 63083,
+      "n_instruments": 59,
+      "n_features": 101,
+      "per_fold": [
+        {
+          "fold_id": 0,
+          "model_name": "ensemble_calibrated",
+          "n_train": 12237,
+          "n_val": 12544,
+          "accuracy": 0.5607461734693877,
+          "balanced_accuracy": 0.5,
+          "log_loss": 0.6883871706114592,
+          "brier_score": 0.2475909066969461,
+          "roc_auc": 0.5012304249982068,
+          "information_coefficient": 0.012569233122088238
+        },
+        {
+          "fold_id": 1,
+          "model_name": "ensemble_calibrated",
+          "n_train": 24776,
+          "n_val": 12739,
+          "accuracy": 0.5668419813172149,
+          "balanced_accuracy": 0.49874079460259907,
+          "log_loss": 0.6879404074756013,
+          "brier_score": 0.24736264192439072,
+          "roc_auc": 0.4779313444422913,
+          "information_coefficient": -0.047235917928923746
+        },
+        {
+          "fold_id": 2,
+          "model_name": "ensemble_calibrated",
+          "n_train": 37515,
+          "n_val": 12638,
+          "accuracy": 0.509811679063143,
+          "balanced_accuracy": 0.49765619468899025,
+          "log_loss": 0.6951144363031391,
+          "brier_score": 0.2509769563906978,
+          "roc_auc": 0.5586493778977879,
+          "information_coefficient": 0.1385327444543524
+        },
+        {
+          "fold_id": 3,
+          "model_name": "ensemble_calibrated",
+          "n_train": 50153,
+          "n_val": 12680,
+          "accuracy": 0.5307570977917981,
+          "balanced_accuracy": 0.5325023881818921,
+          "log_loss": 0.6935340094254567,
+          "brier_score": 0.25014233004176467,
+          "roc_auc": 0.5414291212035824,
+          "information_coefficient": 0.08614881684591412
+        }
+      ],
+      "aggregate": {
+        "accuracy": {
+          "mean": 0.542,
+          "std": 0.0267
+        },
+        "balanced_accuracy": {
+          "mean": 0.5072,
+          "std": 0.0169
+        },
+        "log_loss": {
+          "mean": 0.6912,
+          "std": 0.0036
+        },
+        "brier_score": {
+          "mean": 0.249,
+          "std": 0.0018
+        },
+        "roc_auc": {
+          "mean": 0.5198,
+          "std": 0.0369
+        },
+        "information_coefficient": {
+          "mean": 0.0475,
+          "std": 0.0816
+        }
+      },
+      "selective": [
+        {
+          "fold_id": 0,
+          "threshold": 0.0,
+          "coverage": 1.0,
+          "n_acted": 12544,
+          "accuracy_on_acted": 0.5607461734693877
+        },
+        {
+          "fold_id": 0,
+          "threshold": 0.1,
+          "coverage": 0.9944196428571429,
+          "n_acted": 12474,
+          "accuracy_on_acted": 0.5603655603655604
+        },
+        {
+          "fold_id": 0,
+          "threshold": 0.2,
+          "coverage": 0.3436702806122449,
+          "n_acted": 4311,
+          "accuracy_on_acted": 0.5734168406402227
+        },
+        {
+          "fold_id": 0,
+          "threshold": 0.4,
+          "coverage": 0.0011160714285714285,
+          "n_acted": 14,
+          "accuracy_on_acted": 0.7142857142857143
+        },
+        {
+          "fold_id": 1,
+          "threshold": 0.0,
+          "coverage": 1.0,
+          "n_acted": 12739,
+          "accuracy_on_acted": 0.5668419813172149
+        },
+        {
+          "fold_id": 1,
+          "threshold": 0.1,
+          "coverage": 0.5663709867336526,
+          "n_acted": 7215,
+          "accuracy_on_acted": 0.5575883575883576
+        },
+        {
+          "fold_id": 1,
+          "threshold": 0.2,
+          "coverage": 0.05706884370829735,
+          "n_acted": 727,
+          "accuracy_on_acted": 0.4759284731774415
+        },
+        {
+          "fold_id": 1,
+          "threshold": 0.4,
+          "coverage": 0.0,
+          "n_acted": 0,
+          "accuracy_on_acted": NaN
+        },
+        {
+          "fold_id": 2,
+          "threshold": 0.0,
+          "coverage": 1.0,
+          "n_acted": 12638,
+          "accuracy_on_acted": 0.509811679063143
+        },
+        {
+          "fold_id": 2,
+          "threshold": 0.1,
+          "coverage": 0.716806456717835,
+          "n_acted": 9059,
+          "accuracy_on_acted": 0.5379180925046915
+        },
+        {
+          "fold_id": 2,
+          "threshold": 0.2,
+          "coverage": 0.23540117107137204,
+          "n_acted": 2975,
+          "accuracy_on_acted": 0.5915966386554622
+        },
+        {
+          "fold_id": 2,
+          "threshold": 0.4,
+          "coverage": 0.0005538851084032284,
+          "n_acted": 7,
+          "accuracy_on_acted": 1.0
+        },
+        {
+          "fold_id": 3,
+          "threshold": 0.0,
+          "coverage": 1.0,
+          "n_acted": 12680,
+          "accuracy_on_acted": 0.5307570977917981
+        },
+        {
+          "fold_id": 3,
+          "threshold": 0.1,
+          "coverage": 0.3215299684542587,
+          "n_acted": 4077,
+          "accuracy_on_acted": 0.539121903360314
+        },
+        {
+          "fold_id": 3,
+          "threshold": 0.2,
+          "coverage": 0.07649842271293375,
+          "n_acted": 970,
+          "accuracy_on_acted": 0.49072164948453606
+        },
+        {
+          "fold_id": 3,
+          "threshold": 0.4,
+          "coverage": 0.0,
+          "n_acted": 0,
+          "accuracy_on_acted": NaN
+        }
+      ],
+      "regime_segmented": [
+        {
+          "fold_id": 0,
+          "axis": "trend_regime",
+          "regime": "Range",
+          "n": 6376,
+          "accuracy": 0.5793601003764115,
+          "roc_auc": 0.5403673732561862
+        },
+        {
+          "fold_id": 0,
+          "axis": "trend_regime",
+          "regime": "Uptrend",
+          "n": 6168,
+          "accuracy": 0.5415045395590142,
+          "roc_auc": 0.47300169815955073
+        },
+        {
+          "fold_id": 0,
+          "axis": "vol_regime",
+          "regime": "LowVol",
+          "n": 11513,
+          "accuracy": 0.5585859463215496,
+          "roc_auc": 0.49200097104424156
+        },
+        {
+          "fold_id": 0,
+          "axis": "vol_regime",
+          "regime": "MidVol",
+          "n": 835,
+          "accuracy": 0.5389221556886228,
+          "roc_auc": 0.613004329004329
+        },
+        {
+          "fold_id": 1,
+          "axis": "trend_regime",
+          "regime": "Range",
+          "n": 1998,
+          "accuracy": 0.6101101101101101,
+          "roc_auc": 0.4398216031280547
+        },
+        {
+          "fold_id": 1,
+          "axis": "trend_regime",
+          "regime": "Uptrend",
+          "n": 10741,
+          "accuracy": 0.5587934084349688,
+          "roc_auc": 0.4873258691003002
+        },
+        {
+          "fold_id": 1,
+          "axis": "vol_regime",
+          "regime": "HighVol",
+          "n": 6844,
+          "accuracy": 0.5864991233196961,
+          "roc_auc": 0.48273403312413804
+        },
+        {
+          "fold_id": 1,
+          "axis": "vol_regime",
+          "regime": "LowVol",
+          "n": 1999,
+          "accuracy": 0.5247623811905953,
+          "roc_auc": 0.49377246182619544
+        },
+        {
+          "fold_id": 1,
+          "axis": "vol_regime",
+          "regime": "MidVol",
+          "n": 3896,
+          "accuracy": 0.5539014373716632,
+          "roc_auc": 0.47745980031837787
+        },
+        {
+          "fold_id": 2,
+          "axis": "trend_regime",
+          "regime": "Downtrend",
+          "n": 2349,
+          "accuracy": 0.5525755640698169,
+          "roc_auc": 0.6013983606437294
+        },
+        {
+          "fold_id": 2,
+          "axis": "trend_regime",
+          "regime": "Range",
+          "n": 6342,
+          "accuracy": 0.5387890255439924,
+          "roc_auc": 0.5525770695602185
+        },
+        {
+          "fold_id": 2,
+          "axis": "trend_regime",
+          "regime": "Uptrend",
+          "n": 3947,
+          "accuracy": 0.4378008614137319,
+          "roc_auc": 0.5237859010798069
+        },
+        {
+          "fold_id": 2,
+          "axis": "vol_regime",
+          "regime": "HighVol",
+          "n": 4344,
+          "accuracy": 0.5651473296500921,
+          "roc_auc": 0.5468830924471464
+        },
+        {
+          "fold_id": 2,
+          "axis": "vol_regime",
+          "regime": "LowVol",
+          "n": 5446,
+          "accuracy": 0.49798016893132574,
+          "roc_auc": 0.5292873525610083
+        },
+        {
+          "fold_id": 2,
+          "axis": "vol_regime",
+          "regime": "MidVol",
+          "n": 2848,
+          "accuracy": 0.44803370786516855,
+          "roc_auc": 0.591245117815353
+        },
+        {
+          "fold_id": 3,
+          "axis": "trend_regime",
+          "regime": "Downtrend",
+          "n": 4743,
+          "accuracy": 0.5722116803710732,
+          "roc_auc": 0.5781675071373302
+        },
+        {
+          "fold_id": 3,
+          "axis": "trend_regime",
+          "regime": "Range",
+          "n": 5439,
+          "accuracy": 0.49862107004964146,
+          "roc_auc": 0.5058541543396938
+        },
+        {
+          "fold_id": 3,
+          "axis": "trend_regime",
+          "regime": "Uptrend",
+          "n": 2498,
+          "accuracy": 0.522017614091273,
+          "roc_auc": 0.5455547603656847
+        },
+        {
+          "fold_id": 3,
+          "axis": "vol_regime",
+          "regime": "HighVol",
+          "n": 5543,
+          "accuracy": 0.5152444524625654,
+          "roc_auc": 0.4955631354713924
+        },
+        {
+          "fold_id": 3,
+          "axis": "vol_regime",
+          "regime": "LowVol",
+          "n": 3443,
+          "accuracy": 0.5750798722044729,
+          "roc_auc": 0.5638157033889825
+        },
+        {
+          "fold_id": 3,
+          "axis": "vol_regime",
+          "regime": "MidVol",
+          "n": 3694,
+          "accuracy": 0.5127233351380617,
+          "roc_auc": 0.5316008788322495
+        }
+      ],
+      "cost_stress": [
+        {
+          "cost_stress_multiplier": 1.0,
+          "cost_bps": 10.0,
+          "slippage_bps": 10.0,
+          "annualised_sharpe": 0.5115640176267188,
+          "total_return": 0.0430250272831334,
+          "max_drawdown": -0.04052111303120631,
+          "mean_daily_turnover": 0.02933421956539724
+        },
+        {
+          "cost_stress_multiplier": 2.0,
+          "cost_bps": 20.0,
+          "slippage_bps": 20.0,
+          "annualised_sharpe": -0.19863435976712374,
+          "total_return": -0.017447636852409243,
+          "max_drawdown": -0.0539833630576082,
+          "mean_daily_turnover": 0.02933421956539724
+        },
+        {
+          "cost_stress_multiplier": 5.0,
+          "cost_bps": 50.0,
+          "slippage_bps": 50.0,
+          "annualised_sharpe": -2.2978360366870767,
+          "total_return": -0.17865848210343904,
+          "max_drawdown": -0.18597689501659376,
+          "mean_daily_turnover": 0.02933421956539724
+        }
+      ]
+    },
+    "biased": {
+      "universe": "biased",
+      "n_rows": 63054,
+      "n_instruments": 50,
+      "n_features": 101,
+      "per_fold": [
+        {
+          "fold_id": 0,
+          "model_name": "ensemble_calibrated",
+          "n_train": 12237,
+          "n_val": 12518,
+          "accuracy": 0.5669436012142515,
+          "balanced_accuracy": 0.5,
+          "log_loss": 0.6978179714440108,
+          "brier_score": 0.25194056724414543,
+          "roc_auc": 0.5061767605024813,
+          "information_coefficient": 0.0074923060135073175
+        },
+        {
+          "fold_id": 1,
+          "model_name": "ensemble_calibrated",
+          "n_train": 24750,
+          "n_val": 12737,
+          "accuracy": 0.5780796105833399,
+          "balanced_accuracy": 0.5,
+          "log_loss": 0.6849921462904774,
+          "brier_score": 0.24588139787992008,
+          "roc_auc": 0.4727044530733613,
+          "information_coefficient": -0.041219560827772624
+        },
+        {
+          "fold_id": 2,
+          "model_name": "ensemble_calibrated",
+          "n_train": 37487,
+          "n_val": 12637,
+          "accuracy": 0.5152330458178365,
+          "balanced_accuracy": 0.5001728267292639,
+          "log_loss": 0.6969476495467426,
+          "brier_score": 0.25186368960857186,
+          "roc_auc": 0.5552165291900046,
+          "information_coefficient": 0.13318610382203644
+        },
+        {
+          "fold_id": 3,
+          "model_name": "ensemble_calibrated",
+          "n_train": 50124,
+          "n_val": 12680,
+          "accuracy": 0.4969242902208202,
+          "balanced_accuracy": 0.5051427097537922,
+          "log_loss": 0.6945430758193026,
+          "brier_score": 0.25069613301352567,
+          "roc_auc": 0.5122401401315654,
+          "information_coefficient": 0.024147738026658854
+        }
+      ],
+      "aggregate": {
+        "accuracy": {
+          "mean": 0.5393,
+          "std": 0.0393
+        },
+        "balanced_accuracy": {
+          "mean": 0.5013,
+          "std": 0.0025
+        },
+        "log_loss": {
+          "mean": 0.6936,
+          "std": 0.0059
+        },
+        "brier_score": {
+          "mean": 0.2501,
+          "std": 0.0029
+        },
+        "roc_auc": {
+          "mean": 0.5116,
+          "std": 0.0339
+        },
+        "information_coefficient": {
+          "mean": 0.0309,
+          "std": 0.0736
+        }
+      },
+      "selective": [
+        {
+          "fold_id": 0,
+          "threshold": 0.0,
+          "coverage": 1.0,
+          "n_acted": 12518,
+          "accuracy_on_acted": 0.5669436012142515
+        },
+        {
+          "fold_id": 0,
+          "threshold": 0.1,
+          "coverage": 1.0,
+          "n_acted": 12518,
+          "accuracy_on_acted": 0.5669436012142515
+        },
+        {
+          "fold_id": 0,
+          "threshold": 0.2,
+          "coverage": 1.0,
+          "n_acted": 12518,
+          "accuracy_on_acted": 0.5669436012142515
+        },
+        {
+          "fold_id": 0,
+          "threshold": 0.4,
+          "coverage": 0.0,
+          "n_acted": 0,
+          "accuracy_on_acted": NaN
+        },
+        {
+          "fold_id": 1,
+          "threshold": 0.0,
+          "coverage": 1.0,
+          "n_acted": 12737,
+          "accuracy_on_acted": 0.5780796105833399
+        },
+        {
+          "fold_id": 1,
+          "threshold": 0.1,
+          "coverage": 0.905629269058648,
+          "n_acted": 11535,
+          "accuracy_on_acted": 0.5719982661465106
+        },
+        {
+          "fold_id": 1,
+          "threshold": 0.2,
+          "coverage": 0.2490382350632017,
+          "n_acted": 3172,
+          "accuracy_on_acted": 0.5488650693568726
+        },
+        {
+          "fold_id": 1,
+          "threshold": 0.4,
+          "coverage": 0.0,
+          "n_acted": 0,
+          "accuracy_on_acted": NaN
+        },
+        {
+          "fold_id": 2,
+          "threshold": 0.0,
+          "coverage": 1.0,
+          "n_acted": 12637,
+          "accuracy_on_acted": 0.5152330458178365
+        },
+        {
+          "fold_id": 2,
+          "threshold": 0.1,
+          "coverage": 0.8100023739811664,
+          "n_acted": 10236,
+          "accuracy_on_acted": 0.5292106291520126
+        },
+        {
+          "fold_id": 2,
+          "threshold": 0.2,
+          "coverage": 0.2638284402943737,
+          "n_acted": 3334,
+          "accuracy_on_acted": 0.5854829034193162
+        },
+        {
+          "fold_id": 2,
+          "threshold": 0.4,
+          "coverage": 0.0,
+          "n_acted": 0,
+          "accuracy_on_acted": NaN
+        },
+        {
+          "fold_id": 3,
+          "threshold": 0.0,
+          "coverage": 1.0,
+          "n_acted": 12680,
+          "accuracy_on_acted": 0.4969242902208202
+        },
+        {
+          "fold_id": 3,
+          "threshold": 0.1,
+          "coverage": 0.007176656151419558,
+          "n_acted": 91,
+          "accuracy_on_acted": 0.43956043956043955
+        },
+        {
+          "fold_id": 3,
+          "threshold": 0.2,
+          "coverage": 0.0,
+          "n_acted": 0,
+          "accuracy_on_acted": NaN
+        },
+        {
+          "fold_id": 3,
+          "threshold": 0.4,
+          "coverage": 0.0,
+          "n_acted": 0,
+          "accuracy_on_acted": NaN
+        }
+      ],
+      "regime_segmented": [
+        {
+          "fold_id": 0,
+          "axis": "trend_regime",
+          "regime": "Range",
+          "n": 6375,
+          "accuracy": 0.5860392156862745,
+          "roc_auc": 0.4834242863390762
+        },
+        {
+          "fold_id": 0,
+          "axis": "trend_regime",
+          "regime": "Uptrend",
+          "n": 6143,
+          "accuracy": 0.5471268110043952,
+          "roc_auc": 0.5234235215076476
+        },
+        {
+          "fold_id": 0,
+          "axis": "vol_regime",
+          "regime": "LowVol",
+          "n": 11487,
+          "accuracy": 0.5642030121006355,
+          "roc_auc": 0.5139175683208849
+        },
+        {
+          "fold_id": 0,
+          "axis": "vol_regime",
+          "regime": "MidVol",
+          "n": 835,
+          "accuracy": 0.555688622754491,
+          "roc_auc": 0.45197044334975367
+        },
+        {
+          "fold_id": 1,
+          "axis": "trend_regime",
+          "regime": "Range",
+          "n": 1998,
+          "accuracy": 0.6301301301301301,
+          "roc_auc": 0.3888656611504072
+        },
+        {
+          "fold_id": 1,
+          "axis": "trend_regime",
+          "regime": "Uptrend",
+          "n": 10739,
+          "accuracy": 0.5683955675575006,
+          "roc_auc": 0.48948212995598767
+        },
+        {
+          "fold_id": 1,
+          "axis": "vol_regime",
+          "regime": "HighVol",
+          "n": 6842,
+          "accuracy": 0.6020169541069863,
+          "roc_auc": 0.4766908311732566
+        },
+        {
+          "fold_id": 1,
+          "axis": "vol_regime",
+          "regime": "LowVol",
+          "n": 1999,
+          "accuracy": 0.5372686343171585,
+          "roc_auc": 0.43760128843927726
+        },
+        {
+          "fold_id": 1,
+          "axis": "vol_regime",
+          "regime": "MidVol",
+          "n": 3896,
+          "accuracy": 0.5569815195071869,
+          "roc_auc": 0.48179376411724184
+        },
+        {
+          "fold_id": 2,
+          "axis": "trend_regime",
+          "regime": "Downtrend",
+          "n": 2350,
+          "accuracy": 0.5604255319148936,
+          "roc_auc": 0.5738554798704263
+        },
+        {
+          "fold_id": 2,
+          "axis": "trend_regime",
+          "regime": "Range",
+          "n": 6340,
+          "accuracy": 0.5298107255520504,
+          "roc_auc": 0.5639521065243955
+        },
+        {
+          "fold_id": 2,
+          "axis": "trend_regime",
+          "regime": "Uptrend",
+          "n": 3947,
+          "accuracy": 0.4649100582721054,
+          "roc_auc": 0.5036748616959789
+        },
+        {
+          "fold_id": 2,
+          "axis": "vol_regime",
+          "regime": "HighVol",
+          "n": 4343,
+          "accuracy": 0.5691918029012204,
+          "roc_auc": 0.560240919571245
+        },
+        {
+          "fold_id": 2,
+          "axis": "vol_regime",
+          "regime": "LowVol",
+          "n": 5445,
+          "accuracy": 0.511662075298439,
+          "roc_auc": 0.5155891524142493
+        },
+        {
+          "fold_id": 2,
+          "axis": "vol_regime",
+          "regime": "MidVol",
+          "n": 2849,
+          "accuracy": 0.4398034398034398,
+          "roc_auc": 0.5788453576079065
+        },
+        {
+          "fold_id": 3,
+          "axis": "trend_regime",
+          "regime": "Downtrend",
+          "n": 4743,
+          "accuracy": 0.5178157284419144,
+          "roc_auc": 0.5199256472513496
+        },
+        {
+          "fold_id": 3,
+          "axis": "trend_regime",
+          "regime": "Range",
+          "n": 5439,
+          "accuracy": 0.477293620150763,
+          "roc_auc": 0.5165058848015098
+        },
+        {
+          "fold_id": 3,
+          "axis": "trend_regime",
+          "regime": "Uptrend",
+          "n": 2498,
+          "accuracy": 0.5,
+          "roc_auc": 0.48513251454427925
+        },
+        {
+          "fold_id": 3,
+          "axis": "vol_regime",
+          "regime": "HighVol",
+          "n": 5543,
+          "accuracy": 0.5049612123398881,
+          "roc_auc": 0.47709676154630287
+        },
+        {
+          "fold_id": 3,
+          "axis": "vol_regime",
+          "regime": "LowVol",
+          "n": 3443,
+          "accuracy": 0.46471100784199826,
+          "roc_auc": 0.5337176927797382
+        },
+        {
+          "fold_id": 3,
+          "axis": "vol_regime",
+          "regime": "MidVol",
+          "n": 3694,
+          "accuracy": 0.5148890092041147,
+          "roc_auc": 0.5211278835767124
+        }
+      ],
+      "cost_stress": [
+        {
+          "cost_stress_multiplier": 1.0,
+          "cost_bps": 10.0,
+          "slippage_bps": 10.0,
+          "annualised_sharpe": 1.0609659026785287,
+          "total_return": 0.1051749346043036,
+          "max_drawdown": -0.03806283608263705,
+          "mean_daily_turnover": 0.02055486362291842
+        },
+        {
+          "cost_stress_multiplier": 2.0,
+          "cost_bps": 20.0,
+          "slippage_bps": 20.0,
+          "annualised_sharpe": 0.620857020320898,
+          "total_return": 0.05987742110311589,
+          "max_drawdown": -0.04490895675315587,
+          "mean_daily_turnover": 0.02055486362291842
+        },
+        {
+          "cost_stress_multiplier": 5.0,
+          "cost_bps": 50.0,
+          "slippage_bps": 50.0,
+          "annualised_sharpe": -0.6858591510678634,
+          "total_return": -0.06520079113143629,
+          "max_drawdown": -0.12709292030661523,
+          "mean_daily_turnover": 0.02055486362291842
+        }
+      ]
+    }
+  }
+}

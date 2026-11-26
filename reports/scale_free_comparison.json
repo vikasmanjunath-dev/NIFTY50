@@ -1,0 +1,171 @@
+{
+  "n_new_features": 101,
+  "n_old_features": 100,
+  "level_features_removed": [
+    "sma_5",
+    "sma_10",
+    "sma_20",
+    "sma_50",
+    "sma_100",
+    "sma_200",
+    "ema_5",
+    "ema_9",
+    "ema_12",
+    "ema_21",
+    "ema_26",
+    "ema_50",
+    "ema_100",
+    "ema_200",
+    "atr_14",
+    "macd",
+    "macd_signal",
+    "macd_hist",
+    "obv",
+    "obv_slope_10",
+    "ad_line_slope_10",
+    "india_vix_level",
+    "usd_inr_level",
+    "brent_crude_level",
+    "fii_net_cr",
+    "fii_net_cr_5d_sum",
+    "fii_net_cr_20d_sum",
+    "dii_net_cr",
+    "dii_net_cr_5d_sum",
+    "dii_net_cr_20d_sum",
+    "revenue",
+    "profit",
+    "eps_basic"
+  ],
+  "replacements_added": [
+    "price_over_sma5",
+    "price_over_sma10",
+    "price_over_sma100",
+    "price_over_ema5",
+    "price_over_ema9",
+    "price_over_ema12",
+    "price_over_ema21",
+    "price_over_ema26",
+    "price_over_ema50",
+    "price_over_ema100",
+    "price_over_ema200",
+    "sma50_over_sma200",
+    "macd_pct",
+    "macd_signal_pct",
+    "macd_hist_pct",
+    "obv_flow_10",
+    "ad_flow_10",
+    "profit_growth_yoy",
+    "earnings_yield",
+    "india_vix_ret_5d",
+    "india_vix_ret_20d",
+    "india_vix_dev_252d",
+    "usd_inr_ret_5d",
+    "usd_inr_ret_20d",
+    "usd_inr_dev_252d",
+    "brent_crude_ret_5d",
+    "brent_crude_ret_20d",
+    "brent_crude_dev_252d",
+    "fii_net_rel",
+    "fii_net_rel_5d",
+    "fii_net_rel_20d",
+    "dii_net_rel",
+    "dii_net_rel_5d",
+    "dii_net_rel_20d"
+  ],
+  "results": {
+    "lightgbm": {
+      "old": {
+        "roc_auc": 0.5208912601620647,
+        "information_coefficient": 0.044147835863296014,
+        "log_loss": 0.7317733012909508,
+        "balanced_accuracy": 0.5171626941642777
+      },
+      "new": {
+        "roc_auc": 0.5128163575330946,
+        "information_coefficient": 0.03141591956414162,
+        "log_loss": 0.7337879206321716,
+        "balanced_accuracy": 0.5066167934793253
+      },
+      "mean_diff": {
+        "roc_auc": -0.008074902628970121,
+        "information_coefficient": -0.012731916299154392,
+        "log_loss": 0.002014619341220908,
+        "balanced_accuracy": -0.010545900684952397
+      },
+      "per_fold_diff": {
+        "roc_auc": [
+          -0.0558,
+          -0.0014,
+          -0.0183,
+          0.0432
+        ],
+        "information_coefficient": [
+          -0.1045,
+          -0.0054,
+          -0.0216,
+          0.0806
+        ],
+        "log_loss": [
+          0.0335,
+          -0.0062,
+          0.0123,
+          -0.0315
+        ],
+        "balanced_accuracy": [
+          -0.0353,
+          -0.014,
+          0.002,
+          0.0052
+        ]
+      },
+      "non_inferior": true
+    },
+    "logistic": {
+      "old": {
+        "roc_auc": 0.517540737076884,
+        "information_coefficient": 0.038086972589672634,
+        "log_loss": 0.7564680785278896,
+        "balanced_accuracy": 0.5031791390917381
+      },
+      "new": {
+        "roc_auc": 0.5139755192632185,
+        "information_coefficient": 0.02954734037709979,
+        "log_loss": 0.7448491874677821,
+        "balanced_accuracy": 0.5054716562076458
+      },
+      "mean_diff": {
+        "roc_auc": -0.0035652178136654777,
+        "information_coefficient": -0.008539632212572843,
+        "log_loss": -0.011618891060107439,
+        "balanced_accuracy": 0.002292517115907819
+      },
+      "per_fold_diff": {
+        "roc_auc": [
+          0.0037,
+          -0.0303,
+          -0.0132,
+          0.0256
+        ],
+        "information_coefficient": [
+          0.0053,
+          -0.0501,
+          -0.0327,
+          0.0434
+        ],
+        "log_loss": [
+          0.0431,
+          0.0233,
+          -0.094,
+          -0.0189
+        ],
+        "balanced_accuracy": [
+          -0.005,
+          -0.015,
+          0.0163,
+          0.0128
+        ]
+      },
+      "non_inferior": true
+    }
+  }
+}
