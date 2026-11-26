@@ -20,7 +20,8 @@ def load_inputs():
             pd.read_parquet(DATA_RAW_DIR / "announcements_nifty50.parquet"))
 
 
-def latest_forecasts(bars, horizon: int, vix=None, announcements=None, as_of=None) -> pd.DataFrame:
+def latest_forecasts(bars, horizon: int, vix=None, announcements=None, as_of=None,
+                     quantiles: dict | None = None) -> pd.DataFrame:
     if as_of is not None:
         bars = bars[bars.available_time <= as_of]
         vix = None if vix is None else vix[vix.available_time <= as_of]
@@ -39,6 +40,10 @@ def latest_forecasts(bars, horizon: int, vix=None, announcements=None, as_of=Non
     out["prob_above_usual"] = prob
     out["forecast_vol_annualised"] = np.exp(logrv) * np.sqrt(252 / horizon)  # median forecast
     out["usual_vol_annualised"] = out.med_rv * np.sqrt(252 / horizon)
+    if quantiles:  # expected h-day price move: 90% range, from scripts/run_vol_ranges.py
+        scale = np.exp(logrv)
+        out["move_low_90"] = np.expm1(scale * float(quantiles["0.05"]))
+        out["move_high_90"] = np.expm1(scale * float(quantiles["0.95"]))
     return out.sort_values("prob_above_usual", ascending=False).reset_index(drop=True)
 
 
@@ -48,7 +53,9 @@ def record(ledger, forecasts: pd.DataFrame) -> bool:
     for e in ledger.read():
         if e["kind"] == LEDGER_KIND and (e["payload"]["date"], e["payload"]["horizon_days"]) == (date, horizon):
             return False
-    rows = [{"instrument_id": r.instrument_id, "prob": round(float(r.prob_above_usual), 4), "med_rv": float(r.med_rv),
+    ranged = "move_low_90" in forecasts
+    rows = [{**({"low_90": round(float(r.move_low_90), 5), "high_90": round(float(r.move_high_90), 5)} if ranged else {}),
+             "instrument_id": r.instrument_id, "prob": round(float(r.prob_above_usual), 4), "med_rv": float(r.med_rv),
              "forecast_vol": round(float(r.forecast_vol_annualised), 4)} for r in forecasts.itertuples()]
     ledger.append(LEDGER_KIND, {"date": date, "horizon_days": horizon, "forecasts": rows})
     return True
@@ -70,10 +77,14 @@ def score(ledger, bars: pd.DataFrame) -> dict:
             i = int(np.searchsorted(c.index.strftime("%Y-%m-%d"), p["date"]))
             if i + h < len(c):
                 rv = np.sqrt((np.log(c.iloc[i: i + h + 1]).diff() ** 2).sum())
-                graded.setdefault(h, []).append((int(rv > f["med_rv"]), f["prob"]))
+                move = c.iloc[i + h] / c.iloc[i] - 1
+                inside = float(f["low_90"] <= move <= f["high_90"]) if "low_90" in f else np.nan
+                graded.setdefault(h, []).append((int(rv > f["med_rv"]), f["prob"], inside))
     out = {}
     for h, rows in graded.items():
-        y, p = np.array(rows).T
+        y, p, inside = np.array(rows, float).T
         out[str(h)] = {"n": len(y), "accuracy": round(float(((p > 0.5) == y).mean()), 4),
                        "auc": round(float(roc_auc_score(y, p)), 4) if len(set(y)) > 1 else None}
+        if np.isfinite(inside).any():
+            out[str(h)]["coverage_90"] = round(float(np.nanmean(inside)), 4)
     return out
