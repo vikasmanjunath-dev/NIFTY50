@@ -149,3 +149,26 @@ def test_extra_features_do_not_change_when_the_future_is_removed():
     part, _ = extra_features(b[b.event_time <= cut], index[index.event_time <= cut])
     key = ["instrument_id", "event_time"]
     pd.testing.assert_frame_equal(full[full.event_time <= cut].set_index(key)[cols].sort_index(), part.set_index(key)[cols].sort_index())
+
+
+def test_history_rows_join_training_only_once_realised(tmp_path, monkeypatch):
+    from nifty_analyser.ops import vol_forecast as vf
+
+    old = bars(seed=3)
+    for c in ("event_time", "available_time"):
+        old[c] = old[c] - pd.Timedelta(days=700)
+    old["quality_flag"] = "PASS"
+    old.to_parquet(tmp_path / "bars.parquet")
+    old[old.instrument_id == "NSE:AAA"][["event_time", "available_time", "close", "quality_flag"]].to_parquet(tmp_path / "india_vix.parquet")
+    history = vf.load_history_training(5, tmp_path)
+    assert len(history) and history.outcome_time.notna().all() and vf.load_history_training(5, tmp_path / "absent") is None
+    sizes = []
+    monkeypatch.setattr(vf, "instrument_ids_as_of", lambda d: {"NSE:AAA", "NSE:BBB"})
+    monkeypatch.setattr(vf, "membership_mask", lambda df: pd.Series(True, index=df.index))
+    monkeypatch.setattr(vf, "fit_predict_classifiers", lambda X, y, V: (sizes.append(len(y)), {"blend": np.full(len(V), 0.5)})[1])
+    monkeypatch.setattr(vf, "fit_predict_regressors", lambda X, y, V: {"blend": np.zeros(len(V))})
+    live = bars()
+    vf.latest_forecasts(live, 5)
+    vf.latest_forecasts(live, 5, history=history)
+    vf.latest_forecasts(live, 5, history=history, as_of=live.available_time.max())
+    assert sizes[1] - sizes[0] == len(history) == sizes[2] - sizes[0]
