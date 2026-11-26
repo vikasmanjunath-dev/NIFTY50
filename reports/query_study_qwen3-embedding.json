@@ -1,0 +1,49 @@
+{
+ "model": "qwen3-embedding:0.6b",
+ "filtered": {
+  "tune": {
+   "filtered w=16 | category only": 0.6991,
+   "filtered w=16 | symbol+category": 0.6658,
+   "filtered w=4 | category only": 0.6896,
+   "filtered w=4 | symbol+category": 0.6259,
+   "filtered w=64 | category only": 0.701,
+   "filtered w=64 | symbol+category": 0.6719
+  },
+  "chosen": "filtered w=64 | category only",
+  "holdout": {
+   "filtered w=16 | category only": 0.6886,
+   "filtered w=16 | symbol+category": 0.6817,
+   "filtered w=4 | category only": 0.6715,
+   "filtered w=4 | symbol+category": 0.6699,
+   "filtered w=64 | category only": 0.6956,
+   "filtered w=64 | symbol+category": 0.6863
+  },
+  "baseline": "filtered w=4 | symbol+category",
+  "holdout_chosen_minus_baseline": {
+   "mean": 0.0258,
+   "se": 0.0136,
+   "better": 18,
+   "worse": 7
+  }
+ },
+ "unfiltered": {
+  "tune": {
+   "unfiltered dense w=0 | category only": 0.0137,
+   "unfiltered dense w=0 | symbol+category": 0.2788,
+   "unfiltered dense w=0 | symbol: category announcement": 0.333
+  },
+  "chosen": "unfiltered dense w=0 | symbol: category announcement",
+  "holdout": {
+   "unfiltered dense w=0 | category only": 0.0105,
+   "unfiltered dense w=0 | symbol+category": 0.3104,
+   "unfiltered dense w=0 | symbol: category announcement": 0.3775
+  },
+  "baseline": "unfiltered dense w=0 | symbol+category",
+  "holdout_chosen_minus_baseline": {
+   "mean": 0.0671,
+   "se": 0.0255,
+   "better": 19,
+   "worse": 9
+  }
+ }
+}

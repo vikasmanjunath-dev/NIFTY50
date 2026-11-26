@@ -1,0 +1,84 @@
+{
+ "mean": {
+  "bm25 + instrument filter": {
+   "mrr": 0.8719,
+   "recall10": 0.7502,
+   "p5": 0.74,
+   "ndcg5": 0.7833
+  },
+  "bm25 only": {
+   "mrr": 0.2188,
+   "recall10": 0.1762,
+   "p5": 0.175,
+   "ndcg5": 0.1896
+  },
+  "dense + instrument filter": {
+   "mrr": 0.7252,
+   "recall10": 0.6135,
+   "p5": 0.565,
+   "ndcg5": 0.6004
+  },
+  "dense only": {
+   "mrr": 0.5475,
+   "recall10": 0.4503,
+   "p5": 0.41,
+   "ndcg5": 0.4292
+  },
+  "rrf (k=50)": {
+   "mrr": 0.4549,
+   "recall10": 0.3639,
+   "p5": 0.3,
+   "ndcg5": 0.3195
+  },
+  "rrf + instrument filter": {
+   "mrr": 0.8365,
+   "recall10": 0.7149,
+   "p5": 0.665,
+   "ndcg5": 0.7122
+  },
+  "rrf candidate_k=200": {
+   "mrr": 0.4909,
+   "recall10": 0.3397,
+   "p5": 0.315,
+   "ndcg5": 0.3464
+  }
+ },
+ "ndcg5_delta_vs_rrf": {
+  "bm25 only": {
+   "mean": -0.1299,
+   "se": 0.0347,
+   "better": 2,
+   "worse": 18
+  },
+  "dense only": {
+   "mean": 0.1098,
+   "se": 0.0617,
+   "better": 16,
+   "worse": 6
+  },
+  "rrf candidate_k=200": {
+   "mean": 0.0269,
+   "se": 0.0287,
+   "better": 5,
+   "worse": 5
+  },
+  "rrf + instrument filter": {
+   "mean": 0.3928,
+   "se": 0.0628,
+   "better": 27,
+   "worse": 2
+  },
+  "bm25 + instrument filter": {
+   "mean": 0.4639,
+   "se": 0.0633,
+   "better": 29,
+   "worse": 1
+  },
+  "dense + instrument filter": {
+   "mean": 0.281,
+   "se": 0.0652,
+   "better": 24,
+   "worse": 4
+  }
+ }
+}

@@ -1,0 +1,49 @@
+{
+ "model": "bge-m3",
+ "filtered": {
+  "tune": {
+   "filtered w=16 | category only": 0.6994,
+   "filtered w=16 | symbol+category": 0.6725,
+   "filtered w=4 | category only": 0.6833,
+   "filtered w=4 | symbol+category": 0.6608,
+   "filtered w=64 | category only": 0.701,
+   "filtered w=64 | symbol+category": 0.676
+  },
+  "chosen": "filtered w=64 | category only",
+  "holdout": {
+   "filtered w=16 | category only": 0.695,
+   "filtered w=16 | symbol+category": 0.6882,
+   "filtered w=4 | category only": 0.6753,
+   "filtered w=4 | symbol+category": 0.6703,
+   "filtered w=64 | category only": 0.6954,
+   "filtered w=64 | symbol+category": 0.6859
+  },
+  "baseline": "filtered w=4 | symbol+category",
+  "holdout_chosen_minus_baseline": {
+   "mean": 0.0251,
+   "se": 0.0129,
+   "better": 14,
+   "worse": 3
+  }
+ },
+ "unfiltered": {
+  "tune": {
+   "unfiltered dense w=0 | category only": 0.0169,
+   "unfiltered dense w=0 | symbol+category": 0.3937,
+   "unfiltered dense w=0 | symbol: category announcement": 0.4409
+  },
+  "chosen": "unfiltered dense w=0 | symbol: category announcement",
+  "holdout": {
+   "unfiltered dense w=0 | category only": 0.0314,
+   "unfiltered dense w=0 | symbol+category": 0.4288,
+   "unfiltered dense w=0 | symbol: category announcement": 0.4502
+  },
+  "baseline": "unfiltered dense w=0 | symbol+category",
+  "holdout_chosen_minus_baseline": {
+   "mean": 0.0214,
+   "se": 0.021,
+   "better": 13,
+   "worse": 13
+  }
+ }
+}
