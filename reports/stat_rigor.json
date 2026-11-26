@@ -1,0 +1,102 @@
+{
+ "n_oos_days": 1242,
+ "trial_sharpe_sd_ann": 0.565,
+ "market_neutral|hold5|gross": {
+  "sharpe": 0.445,
+  "n_eff": 1242.0
+ },
+ "market_neutral|hold5|net": {
+  "sharpe": -0.691,
+  "n_eff": 1242.0,
+  "boot_ci95": [
+   -1.48,
+   0.15
+  ],
+  "boot_p_sharpe_le_0": 0.948,
+  "dsr_by_n_trials": {
+   "10": 0.0,
+   "50": 0.0,
+   "100": 0.0,
+   "500": 0.0
+  }
+ },
+ "market_neutral|hold20|gross": {
+  "sharpe": 0.565,
+  "n_eff": 1242.0,
+  "boot_ci95": [
+   -0.37,
+   1.34
+  ],
+  "boot_p_sharpe_le_0": 0.091,
+  "dsr_by_n_trials": {
+   "10": 0.235,
+   "50": 0.054,
+   "100": 0.027,
+   "500": 0.005
+  }
+ },
+ "market_neutral|hold20|net": {
+  "sharpe": 0.143,
+  "n_eff": 1242.0,
+  "boot_ci95": [
+   -0.76,
+   0.89
+  ],
+  "boot_p_sharpe_le_0": 0.368,
+  "dsr_by_n_trials": {
+   "10": 0.049,
+   "50": 0.006,
+   "100": 0.002,
+   "500": 0.0
+  }
+ },
+ "sector_neutral|hold5|gross": {
+  "sharpe": 0.189,
+  "n_eff": 1242.0
+ },
+ "sector_neutral|hold5|net": {
+  "sharpe": -1.151,
+  "n_eff": 1242.0,
+  "boot_ci95": [
+   -1.97,
+   -0.36
+  ],
+  "boot_p_sharpe_le_0": 0.996,
+  "dsr_by_n_trials": {
+   "10": 0.0,
+   "50": 0.0,
+   "100": 0.0,
+   "500": 0.0
+  }
+ },
+ "sector_neutral|hold20|gross": {
+  "sharpe": -0.089,
+  "n_eff": 1242.0,
+  "boot_ci95": [
+   -0.84,
+   0.72
+  ],
+  "boot_p_sharpe_le_0": 0.617,
+  "dsr_by_n_trials": {
+   "10": 0.015,
+   "50": 0.001,
+   "100": 0.0,
+   "500": 0.0
+  }
+ },
+ "sector_neutral|hold20|net": {
+  "sharpe": -0.579,
+  "n_eff": 1242.0,
+  "boot_ci95": [
+   -1.34,
+   0.22
+  ],
+  "boot_p_sharpe_le_0": 0.941,
+  "dsr_by_n_trials": {
+   "10": 0.001,
+   "50": 0.0,
+   "100": 0.0,
+   "500": 0.0
+  }
+ }
+}
