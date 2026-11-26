@@ -1,0 +1,79 @@
+"""Live volatility forecasts and their forward (untainted) scorecard.
+
+`latest_forecasts` trains only on outcomes already realised at `as_of` and forecasts the newest row of each current
+index member. `record` appends them to a hash-chained ledger once per data date; `score` grades matured entries."""
+import numpy as np
+import pandas as pd
+from sklearn.metrics import roc_auc_score
+
+from nifty_analyser.config import DATA_RAW_DIR
+from nifty_analyser.data.index_membership import instrument_ids_as_of, membership_mask
+from nifty_analyser.data.store import load_all_macro_series, load_universe_bars
+from nifty_analyser.features.volatility import build_volatility_frame
+from nifty_analyser.models.volatility import fit_predict_classifiers, fit_predict_regressors
+
+LEDGER_KIND = "vol_forecast"
+
+
+def load_inputs():
+    return (load_universe_bars(), load_all_macro_series()["india_vix"],
+            pd.read_parquet(DATA_RAW_DIR / "announcements_nifty50.parquet"))
+
+
+def latest_forecasts(bars, horizon: int, vix=None, announcements=None, as_of=None) -> pd.DataFrame:
+    if as_of is not None:
+        bars = bars[bars.available_time <= as_of]
+        vix = None if vix is None else vix[vix.available_time <= as_of]
+        announcements = None if announcements is None else announcements[announcements.available_time <= as_of]
+    df, cols = build_volatility_frame(bars, horizon, vix, announcements)
+    df = df[membership_mask(df).to_numpy() & df.har_66.notna().to_numpy()]
+    train = df.dropna(subset=["fwd_rv", "med_rv", "outcome_time"])
+    train = train[train.fwd_rv > 0]
+    last = df.event_time.max()
+    live = df[(df.event_time == last) & df.instrument_id.isin(instrument_ids_as_of(last)) & df.med_rv.notna()]
+    X, X_live = train[cols].to_numpy(float), live[cols].to_numpy(float)
+    prob = fit_predict_classifiers(X, (train.fwd_rv > train.med_rv).astype(int).to_numpy(), X_live)["blend"]
+    logrv = fit_predict_regressors(X, np.log(train.fwd_rv.to_numpy()), X_live)["blend"]
+    out = live[["instrument_id", "event_time", "med_rv"]].copy()
+    out["horizon_days"] = horizon
+    out["prob_above_usual"] = prob
+    out["forecast_vol_annualised"] = np.exp(logrv) * np.sqrt(252 / horizon)  # median forecast
+    out["usual_vol_annualised"] = out.med_rv * np.sqrt(252 / horizon)
+    return out.sort_values("prob_above_usual", ascending=False).reset_index(drop=True)
+
+
+def record(ledger, forecasts: pd.DataFrame) -> bool:
+    """Append once per (data date, horizon); returns False if already recorded."""
+    date, horizon = str(forecasts.event_time.iloc[0].date()), int(forecasts.horizon_days.iloc[0])
+    for e in ledger.read():
+        if e["kind"] == LEDGER_KIND and (e["payload"]["date"], e["payload"]["horizon_days"]) == (date, horizon):
+            return False
+    rows = [{"instrument_id": r.instrument_id, "prob": round(float(r.prob_above_usual), 4), "med_rv": float(r.med_rv),
+             "forecast_vol": round(float(r.forecast_vol_annualised), 4)} for r in forecasts.itertuples()]
+    ledger.append(LEDGER_KIND, {"date": date, "horizon_days": horizon, "forecasts": rows})
+    return True
+
+
+def score(ledger, bars: pd.DataFrame) -> dict:
+    """AUC and accuracy of recorded forecasts whose horizon has fully elapsed."""
+    closes = {i: g.sort_values("event_time").set_index("event_time").close for i, g in bars.groupby("instrument_id")}
+    graded: dict[int, list] = {}
+    for e in ledger.read():
+        if e["kind"] != LEDGER_KIND:
+            continue
+        p = e["payload"]
+        h = p["horizon_days"]
+        for f in p["forecasts"]:
+            c = closes.get(f["instrument_id"])
+            if c is None:
+                continue
+            i = int(np.searchsorted(c.index.strftime("%Y-%m-%d"), p["date"]))
+            if i + h < len(c):
+                rv = np.sqrt((np.log(c.iloc[i: i + h + 1]).diff() ** 2).sum())
+                graded.setdefault(h, []).append((int(rv > f["med_rv"]), f["prob"]))
+    out = {}
+    for h, rows in graded.items():
+        y, p = np.array(rows).T
+        out[str(h)] = {"n": len(y), "accuracy": round(float(((p > 0.5) == y).mean()), 4),
+                       "auc": round(float(roc_auc_score(y, p)), 4) if len(set(y)) > 1 else None}
+    return out
