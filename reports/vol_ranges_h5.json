@@ -1,0 +1,62 @@
+{
+ "horizon_days": 5,
+ "n": 44234,
+ "ranges": {
+  "model": {
+   "coverage_90": 0.8873,
+   "coverage_50": 0.4836,
+   "mean_width_90": 0.1072,
+   "pinball_sum": 0.029086
+  },
+  "trailing": {
+   "coverage_90": 0.8959,
+   "coverage_50": 0.4993,
+   "mean_width_90": 0.1426,
+   "pinball_sum": 0.031562
+  },
+  "ewma": {
+   "coverage_90": 0.8942,
+   "coverage_50": 0.4971,
+   "mean_width_90": 0.1173,
+   "pinball_sum": 0.029735
+  }
+ },
+ "pinball_model_minus_trailing_ci95_bps": [
+  -28.0241,
+  -22.21
+ ],
+ "pinball_model_minus_ewma_ci95_bps": [
+  -8.651,
+  -4.8854
+ ],
+ "live_quantiles": {
+  "0.05": -1.9189782854464283,
+  "0.25": -0.6544453983332204,
+  "0.75": 0.8045804774015304,
+  "0.95": 2.028197047389208
+ },
+ "portfolios": {
+  "n_rebalances": 228,
+  "equal": {
+   "ann_return_net": 0.132,
+   "ann_vol": 0.136,
+   "sharpe_net": 0.971,
+   "max_drawdown": -0.1725,
+   "mean_turnover": 0.007
+  },
+  "inverse_trailing": {
+   "ann_return_net": 0.111,
+   "ann_vol": 0.133,
+   "sharpe_net": 0.834,
+   "max_drawdown": -0.1818,
+   "mean_turnover": 0.462
+  },
+  "inverse_model": {
+   "ann_return_net": 0.1276,
+   "ann_vol": 0.1331,
+   "sharpe_net": 0.958,
+   "max_drawdown": -0.1709,
+   "mean_turnover": 0.062
+  }
+ }
+}
