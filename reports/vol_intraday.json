@@ -1,0 +1,48 @@
+{
+ "5": {
+  "intraday_coverage": 0.979,
+  "first_half_auc": {
+   "live": 0.6589,
+   "intraday": 0.6531,
+   "intraday_recent_only": 0.6734
+  },
+  "winner": "intraday_recent_only",
+  "second_half_live": 0.7,
+  "second_half_winner": 0.7009,
+  "second_half_all": {
+   "live": 0.7,
+   "intraday": 0.701,
+   "intraday_recent_only": 0.7009
+  },
+  "gain_ci95": [
+   -0.0073,
+   0.01
+  ],
+  "all_scored_live": 0.6804,
+  "all_scored_winner": 0.6879,
+  "adopt": false
+ },
+ "20": {
+  "intraday_coverage": 0.979,
+  "first_half_auc": {
+   "live": 0.7363,
+   "intraday": 0.7239,
+   "intraday_recent_only": 0.5528
+  },
+  "winner": "live",
+  "second_half_live": 0.7667,
+  "second_half_winner": 0.7667,
+  "second_half_all": {
+   "live": 0.7667,
+   "intraday": 0.7607,
+   "intraday_recent_only": 0.7312
+  },
+  "gain_ci95": [
+   0.0,
+   0.0
+  ],
+  "all_scored_live": 0.7496,
+  "all_scored_winner": 0.7496,
+  "adopt": false
+ }
+}
