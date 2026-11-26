@@ -1,0 +1,9 @@
+{
+ "n_real_answers": 48,
+ "with_factual_claims": 21,
+ "lexical_pass": 48,
+ "nli_veto_withholds@contra<=0.9,entail>=0.003": 3,
+ "nli_veto_withholds@contra<=0.7,entail>=0.003": 7,
+ "nli_veto_withholds@contra<=0.9,entail>=0.001": 3,
+ "nli_veto_withholds@contra<=0.9,entail>=0.0": 3
+}

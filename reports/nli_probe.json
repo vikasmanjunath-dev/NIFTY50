@@ -1,0 +1,156 @@
+{
+ "lexical_only": {
+  "faithful_pass": 1.0,
+  "fabrication_block": 0.957,
+  "per_type_pass": {
+   "fab_invented_event": 0.0,
+   "fab_invented_figure": 0.0,
+   "fab_unrelated": 0.007,
+   "fab_wrong_category": 0.207,
+   "fab_wrong_company": 0.0,
+   "faithful_cited": 1.0,
+   "faithful_dates": 1.0,
+   "faithful_partial": 1.0
+  }
+ },
+ "nli_only@0.1": {
+  "faithful_pass": 0.702,
+  "fabrication_block": 0.964,
+  "per_type_pass": {
+   "fab_invented_event": 0.0,
+   "fab_invented_figure": 0.0,
+   "fab_unrelated": 0.0,
+   "fab_wrong_category": 0.0,
+   "fab_wrong_company": 0.18,
+   "faithful_cited": 0.467,
+   "faithful_dates": 0.873,
+   "faithful_partial": 0.767
+  }
+ },
+ "lexical+nli@0.1": {
+  "faithful_pass": 0.702,
+  "fabrication_block": 1.0,
+  "per_type_pass": {
+   "fab_invented_event": 0.0,
+   "fab_invented_figure": 0.0,
+   "fab_unrelated": 0.0,
+   "fab_wrong_category": 0.0,
+   "fab_wrong_company": 0.0,
+   "faithful_cited": 0.467,
+   "faithful_dates": 0.873,
+   "faithful_partial": 0.767
+  }
+ },
+ "nli_only@0.3": {
+  "faithful_pass": 0.553,
+  "fabrication_block": 0.984,
+  "per_type_pass": {
+   "fab_invented_event": 0.0,
+   "fab_invented_figure": 0.0,
+   "fab_unrelated": 0.0,
+   "fab_wrong_category": 0.0,
+   "fab_wrong_company": 0.08,
+   "faithful_cited": 0.167,
+   "faithful_dates": 0.813,
+   "faithful_partial": 0.68
+  }
+ },
+ "lexical+nli@0.3": {
+  "faithful_pass": 0.553,
+  "fabrication_block": 1.0,
+  "per_type_pass": {
+   "fab_invented_event": 0.0,
+   "fab_invented_figure": 0.0,
+   "fab_unrelated": 0.0,
+   "fab_wrong_category": 0.0,
+   "fab_wrong_company": 0.0,
+   "faithful_cited": 0.167,
+   "faithful_dates": 0.813,
+   "faithful_partial": 0.68
+  }
+ },
+ "nli_only@0.5": {
+  "faithful_pass": 0.438,
+  "fabrication_block": 0.991,
+  "per_type_pass": {
+   "fab_invented_event": 0.0,
+   "fab_invented_figure": 0.0,
+   "fab_unrelated": 0.0,
+   "fab_wrong_category": 0.0,
+   "fab_wrong_company": 0.047,
+   "faithful_cited": 0.04,
+   "faithful_dates": 0.773,
+   "faithful_partial": 0.5
+  }
+ },
+ "lexical+nli@0.5": {
+  "faithful_pass": 0.438,
+  "fabrication_block": 1.0,
+  "per_type_pass": {
+   "fab_invented_event": 0.0,
+   "fab_invented_figure": 0.0,
+   "fab_unrelated": 0.0,
+   "fab_wrong_category": 0.0,
+   "fab_wrong_company": 0.0,
+   "faithful_cited": 0.04,
+   "faithful_dates": 0.773,
+   "faithful_partial": 0.5
+  }
+ },
+ "nli_only@0.7": {
+  "faithful_pass": 0.311,
+  "fabrication_block": 0.996,
+  "per_type_pass": {
+   "fab_invented_event": 0.0,
+   "fab_invented_figure": 0.0,
+   "fab_unrelated": 0.0,
+   "fab_wrong_category": 0.0,
+   "fab_wrong_company": 0.02,
+   "faithful_cited": 0.007,
+   "faithful_dates": 0.693,
+   "faithful_partial": 0.233
+  }
+ },
+ "lexical+nli@0.7": {
+  "faithful_pass": 0.311,
+  "fabrication_block": 1.0,
+  "per_type_pass": {
+   "fab_invented_event": 0.0,
+   "fab_invented_figure": 0.0,
+   "fab_unrelated": 0.0,
+   "fab_wrong_category": 0.0,
+   "fab_wrong_company": 0.0,
+   "faithful_cited": 0.007,
+   "faithful_dates": 0.693,
+   "faithful_partial": 0.233
+  }
+ },
+ "nli_only@0.9": {
+  "faithful_pass": 0.142,
+  "fabrication_block": 1.0,
+  "per_type_pass": {
+   "fab_invented_event": 0.0,
+   "fab_invented_figure": 0.0,
+   "fab_unrelated": 0.0,
+   "fab_wrong_category": 0.0,
+   "fab_wrong_company": 0.0,
+   "faithful_cited": 0.0,
+   "faithful_dates": 0.427,
+   "faithful_partial": 0.0
+  }
+ },
+ "lexical+nli@0.9": {
+  "faithful_pass": 0.142,
+  "fabrication_block": 1.0,
+  "per_type_pass": {
+   "fab_invented_event": 0.0,
+   "fab_invented_figure": 0.0,
+   "fab_unrelated": 0.0,
+   "fab_wrong_category": 0.0,
+   "fab_wrong_company": 0.0,
+   "faithful_cited": 0.0,
+   "faithful_dates": 0.427,
+   "faithful_partial": 0.0
+  }
+ }
+}
