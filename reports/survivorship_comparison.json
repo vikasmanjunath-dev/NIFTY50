@@ -1,0 +1,326 @@
+{
+  "generated_at_utc": "2026-11-23T18:52:11.590843+00:00",
+  "config": {
+    "horizon": 5,
+    "n_splits": 4,
+    "embargo_days": 5,
+    "seed": 42,
+    "n_features": 59
+  },
+  "bias_diagnostics": {
+    "phantom_rows (in biased, not real members)": {
+      "n_rows": 5756,
+      "n_instruments": 9,
+      "mean_daily_return": 0.001287209374453335,
+      "annualised_return": 0.3243767623622404
+    },
+    "omitted_rows (real members missing from biased)": {
+      "n_rows": 5785,
+      "n_instruments": 9,
+      "mean_daily_return": 0.00013601371845037015,
+      "annualised_return": 0.03427545704949328
+    },
+    "equal_weight_biased": {
+      "annualised_return": 0.11789774423982788,
+      "sharpe": 0.8166583135291494
+    },
+    "equal_weight_pit": {
+      "annualised_return": 0.09154152129146555,
+      "sharpe": 0.6506061834102728
+    },
+    "survivorship_premium_annualised": 0.026356222948362314,
+    "survivorship_premium_tstat": 3.1339583015015178,
+    "row_counts": {
+      "biased": 63054,
+      "pit": 63083
+    }
+  },
+  "per_fold": [
+    {
+      "fold_id": 0,
+      "model_name": "lightgbm",
+      "n_train": 12237,
+      "n_val": 12518,
+      "accuracy": 0.49081322895031154,
+      "balanced_accuracy": 0.5066985832107989,
+      "log_loss": 0.7180459618605387,
+      "brier_score": 0.26186345291874996,
+      "roc_auc": 0.514388905086464,
+      "information_coefficient": 0.02547125147978948,
+      "cross_sectional_ic": 0.0282748266091004,
+      "universe": "biased"
+    },
+    {
+      "fold_id": 0,
+      "model_name": "logistic_elasticnet",
+      "n_train": 12237,
+      "n_val": 12518,
+      "accuracy": 0.5141396389199553,
+      "balanced_accuracy": 0.5014594582666208,
+      "log_loss": 0.6994569161151012,
+      "brier_score": 0.25261031898012243,
+      "roc_auc": 0.5036670937472066,
+      "information_coefficient": 0.0002177001907405613,
+      "cross_sectional_ic": 0.01835996182224318,
+      "universe": "biased"
+    },
+    {
+      "fold_id": 1,
+      "model_name": "lightgbm",
+      "n_train": 24750,
+      "n_val": 12737,
+      "accuracy": 0.51919604302426,
+      "balanced_accuracy": 0.5144418089198748,
+      "log_loss": 0.6961671919856631,
+      "brier_score": 0.25144407264353563,
+      "roc_auc": 0.5158716110450966,
+      "information_coefficient": 0.01666523572313444,
+      "cross_sectional_ic": 0.01138883272740995,
+      "universe": "biased"
+    },
+    {
+      "fold_id": 1,
+      "model_name": "logistic_elasticnet",
+      "n_train": 24750,
+      "n_val": 12737,
+      "accuracy": 0.5297950851848944,
+      "balanced_accuracy": 0.50129075304403,
+      "log_loss": 0.6934764002030438,
+      "brier_score": 0.25002618166740137,
+      "roc_auc": 0.5143241024321155,
+      "information_coefficient": 0.0034790350050495286,
+      "cross_sectional_ic": -0.023713963508894882,
+      "universe": "biased"
+    },
+    {
+      "fold_id": 2,
+      "model_name": "lightgbm",
+      "n_train": 37487,
+      "n_val": 12637,
+      "accuracy": 0.5135712590013453,
+      "balanced_accuracy": 0.500595585954942,
+      "log_loss": 0.7019555934843189,
+      "brier_score": 0.2542191514167311,
+      "roc_auc": 0.5200887161331941,
+      "information_coefficient": 0.04395209626396784,
+      "cross_sectional_ic": 0.043135673241628654,
+      "universe": "biased"
+    },
+    {
+      "fold_id": 2,
+      "model_name": "logistic_elasticnet",
+      "n_train": 37487,
+      "n_val": 12637,
+      "accuracy": 0.5195062119173854,
+      "balanced_accuracy": 0.505688603012979,
+      "log_loss": 0.6982561063472383,
+      "brier_score": 0.25246841032824396,
+      "roc_auc": 0.5349674591349463,
+      "information_coefficient": 0.08520367935871699,
+      "cross_sectional_ic": 0.04145621094287517,
+      "universe": "biased"
+    },
+    {
+      "fold_id": 3,
+      "model_name": "lightgbm",
+      "n_train": 50124,
+      "n_val": 12680,
+      "accuracy": 0.4906940063091483,
+      "balanced_accuracy": 0.500060704990946,
+      "log_loss": 0.7100189231426154,
+      "brier_score": 0.2581884316575142,
+      "roc_auc": 0.47945317163226525,
+      "information_coefficient": -0.03487397332624583,
+      "cross_sectional_ic": -0.008346639237687544,
+      "universe": "biased"
+    },
+    {
+      "fold_id": 3,
+      "model_name": "logistic_elasticnet",
+      "n_train": 50124,
+      "n_val": 12680,
+      "accuracy": 0.4801261829652997,
+      "balanced_accuracy": 0.4908447737409104,
+      "log_loss": 0.7097506439973678,
+      "brier_score": 0.25810328837343516,
+      "roc_auc": 0.47550748413996535,
+      "information_coefficient": -0.04597123701129806,
+      "cross_sectional_ic": -0.02114495691565867,
+      "universe": "biased"
+    },
+    {
+      "fold_id": 0,
+      "model_name": "lightgbm",
+      "n_train": 12237,
+      "n_val": 12544,
+      "accuracy": 0.49649234693877553,
+      "balanced_accuracy": 0.513348078067277,
+      "log_loss": 0.7170244426675988,
+      "brier_score": 0.26130273676313376,
+      "roc_auc": 0.5205963825174793,
+      "information_coefficient": 0.035685825838652235,
+      "cross_sectional_ic": 0.03010785019599975,
+      "universe": "pit"
+    },
+    {
+      "fold_id": 0,
+      "model_name": "logistic_elasticnet",
+      "n_train": 12237,
+      "n_val": 12544,
+      "accuracy": 0.5049426020408163,
+      "balanced_accuracy": 0.511583354275603,
+      "log_loss": 0.7039118210889844,
+      "brier_score": 0.2543091248252993,
+      "roc_auc": 0.5085853931152138,
+      "information_coefficient": 0.013919912847761015,
+      "cross_sectional_ic": 0.029916638117763652,
+      "universe": "pit"
+    },
+    {
+      "fold_id": 1,
+      "model_name": "lightgbm",
+      "n_train": 24776,
+      "n_val": 12739,
+      "accuracy": 0.516053065389748,
+      "balanced_accuracy": 0.5137770190499935,
+      "log_loss": 0.6993207584857868,
+      "brier_score": 0.2529387901358549,
+      "roc_auc": 0.5168459753420009,
+      "information_coefficient": 0.02331178579686572,
+      "cross_sectional_ic": 0.015119042360373432,
+      "universe": "pit"
+    },
+    {
+      "fold_id": 1,
+      "model_name": "logistic_elasticnet",
+      "n_train": 24776,
+      "n_val": 12739,
+      "accuracy": 0.5234319805322238,
+      "balanced_accuracy": 0.5107511631444834,
+      "log_loss": 0.6949331395493826,
+      "brier_score": 0.25077292776159144,
+      "roc_auc": 0.5210271530171126,
+      "information_coefficient": 0.021881218897000846,
+      "cross_sectional_ic": -0.014536246037839422,
+      "universe": "pit"
+    },
+    {
+      "fold_id": 2,
+      "model_name": "lightgbm",
+      "n_train": 37515,
+      "n_val": 12638,
+      "accuracy": 0.5101281848393733,
+      "balanced_accuracy": 0.4994622602936354,
+      "log_loss": 0.7031289854684726,
+      "brier_score": 0.2547876274156293,
+      "roc_auc": 0.5169703779527973,
+      "information_coefficient": 0.042076066029064475,
+      "cross_sectional_ic": 0.04846231773341748,
+      "universe": "pit"
+    },
+    {
+      "fold_id": 2,
+      "model_name": "logistic_elasticnet",
+      "n_train": 37515,
+      "n_val": 12638,
+      "accuracy": 0.5196233581262858,
+      "balanced_accuracy": 0.5085146923584799,
+      "log_loss": 0.6980169406839953,
+      "brier_score": 0.2523370775508135,
+      "roc_auc": 0.534615367747221,
+      "information_coefficient": 0.0889013912074328,
+      "cross_sectional_ic": 0.0579416035188779,
+      "universe": "pit"
+    },
+    {
+      "fold_id": 3,
+      "model_name": "lightgbm",
+      "n_train": 50153,
+      "n_val": 12680,
+      "accuracy": 0.488801261829653,
+      "balanced_accuracy": 0.4972929955452221,
+      "log_loss": 0.7086804596290429,
+      "brier_score": 0.25751858769655395,
+      "roc_auc": 0.48499446560177883,
+      "information_coefficient": -0.03338721762472825,
+      "cross_sectional_ic": -0.007036486726793535,
+      "universe": "pit"
+    },
+    {
+      "fold_id": 3,
+      "model_name": "logistic_elasticnet",
+      "n_train": 50153,
+      "n_val": 12680,
+      "accuracy": 0.48201892744479496,
+      "balanced_accuracy": 0.49211749986849534,
+      "log_loss": 0.7112365326095964,
+      "brier_score": 0.2587745732740509,
+      "roc_auc": 0.47241328465681787,
+      "information_coefficient": -0.053667324008325856,
+      "cross_sectional_ic": -0.015705052086463524,
+      "universe": "pit"
+    }
+  ],
+  "summary": {
+    "('accuracy', 'mean')": {
+      "('biased', 'lightgbm')": 0.5036,
+      "('biased', 'logistic_elasticnet')": 0.5109,
+      "('pit', 'lightgbm')": 0.5029,
+      "('pit', 'logistic_elasticnet')": 0.5075
+    },
+    "('accuracy', 'std')": {
+      "('biased', 'lightgbm')": 0.015,
+      "('biased', 'logistic_elasticnet')": 0.0215,
+      "('pit', 'lightgbm')": 0.0125,
+      "('pit', 'logistic_elasticnet')": 0.0188
+    },
+    "('roc_auc', 'mean')": {
+      "('biased', 'lightgbm')": 0.5075,
+      "('biased', 'logistic_elasticnet')": 0.5071,
+      "('pit', 'lightgbm')": 0.5099,
+      "('pit', 'logistic_elasticnet')": 0.5092
+    },
+    "('roc_auc', 'std')": {
+      "('biased', 'lightgbm')": 0.0188,
+      "('biased', 'logistic_elasticnet')": 0.0248,
+      "('pit', 'lightgbm')": 0.0167,
+      "('pit', 'logistic_elasticnet')": 0.0267
+    },
+    "('information_coefficient', 'mean')": {
+      "('biased', 'lightgbm')": 0.0128,
+      "('biased', 'logistic_elasticnet')": 0.0107,
+      "('pit', 'lightgbm')": 0.0169,
+      "('pit', 'logistic_elasticnet')": 0.0178
+    },
+    "('information_coefficient', 'std')": {
+      "('biased', 'lightgbm')": 0.0338,
+      "('biased', 'logistic_elasticnet')": 0.0545,
+      "('pit', 'lightgbm')": 0.0344,
+      "('pit', 'logistic_elasticnet')": 0.0583
+    },
+    "('cross_sectional_ic', 'mean')": {
+      "('biased', 'lightgbm')": 0.0186,
+      "('biased', 'logistic_elasticnet')": 0.0037,
+      "('pit', 'lightgbm')": 0.0217,
+      "('pit', 'logistic_elasticnet')": 0.0144
+    },
+    "('cross_sectional_ic', 'std')": {
+      "('biased', 'lightgbm')": 0.0222,
+      "('biased', 'logistic_elasticnet')": 0.0317,
+      "('pit', 'lightgbm')": 0.0235,
+      "('pit', 'logistic_elasticnet')": 0.036
+    },
+    "('log_loss', 'mean')": {
+      "('biased', 'lightgbm')": 0.7065,
+      "('biased', 'logistic_elasticnet')": 0.7002,
+      "('pit', 'lightgbm')": 0.707,
+      "('pit', 'logistic_elasticnet')": 0.702
+    },
+    "('log_loss', 'std')": {
+      "('biased', 'lightgbm')": 0.0095,
+      "('biased', 'logistic_elasticnet')": 0.0068,
+      "('pit', 'lightgbm')": 0.0077,
+      "('pit', 'logistic_elasticnet')": 0.0072
+    }
+  }
+}
