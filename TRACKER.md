@@ -474,3 +474,11 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 1. 20-day extra features passed the holdout rule (0.7632→0.7761, gain CI +0.007..+0.029) and are live; 5-day winner did not pass. Ledger tag `v4-history-extra`.
 2. Direction with history and extra features: AUC 0.49-0.52, no edge.
 3. Bug: the Chronos step segfaulted when LightGBM was imported in the same process; moved to `scripts/build_chronos_history.py`. `run_vol_auc.py`'s one-time Chronos step has the same weakness on a clean cache.
+
+### 2026-11-27 — Volatility: AUC round 4 (selection on 2008-2020 only)
+1. 15 candidates per horizon; nothing adopted. 5-day 0.6843→0.6890 (CI -0.0003..+0.0095); 20-day winner collapsed to 0.639 vs 0.750.
+2. Design flaw found: the rank-average `combo` candidate ranked within validation blocks (non-causal). Plan and full trial log: `docs/AUC_PLAN.md`.
+
+### 2026-11-27 — Volatility: AUC round 5 (US and index features)
+1. Approved download of S&P 500, US VIX and Nifty 50 index; joined on publication time. Nothing adopted (`reports/vol_auc_search4.json`).
+2. Standing result: 5-day AUC 0.684, 20-day 0.750. Next candidates need intraday data or the forward ledger.
