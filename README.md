@@ -12,7 +12,7 @@ real bug found and fixed, every honestly-reported result) and **[TRACKER.xlsx](T
 (the same tracker as a structured, filterable spreadsheet).
 
 > **Current state (2026-11-24):** the repository was found reduced to a partial snapshot and has been **rebuilt and
-> re-verified on real data** (see [TRACKER.md](TRACKER.md), Session 7). Present and tested (**345 tests passing**): the base
+> re-verified on real data** (see [TRACKER.md](TRACKER.md), Session 7). Present and tested (**346 tests passing**): the base
 > layer, all Phase 2 layers (macro, regime, cross-sectional, delivery %, fundamentals incl. insurance PDFs, FII/DII,
 > calibration, selective prediction, ensemble, costs, drift), Phase 3 (RAG + LLM + guardrails) and the new point-in-time
 > universe. Phase 4 is built (below). Bug/test counts and the *historical* Phase 1/2
@@ -100,7 +100,7 @@ Part 6's phase plan). Four phases, each with a distinct goal:
 | 3 | RAG + LLM intelligence layer over NSE announcements | ✅ 9/9 items complete |
 | 4 | Operations: `/v3/analyse` API, monitoring dashboard, hash-chained audit log + replay, kill switch | ✅ 4/4 built and verified (`nifty_analyser/ops/`) |
 
-**345/345 tests passing**. See [TRACKER.md](TRACKER.md) for the full
+**346/346 tests passing**. See [TRACKER.md](TRACKER.md) for the full
 itemised checklist, every known simplification, every real bug found and fixed (27 documented
 so far), and the complete, dated work log.
 
@@ -627,7 +627,7 @@ nifty_analyser/
     extraction.py, llm.py, guardrails.py, eval.py
 
 scripts/                  end-to-end pipeline runners & backfill jobs (one per phase)
-tests/                    pytest suite — one file per area, 345 tests, one file per module
+tests/                    pytest suite — one file per area, 346 tests, one file per module
 data/{raw,processed}/     parquet cache (gitignored except .gitkeep)
 reports/                  locked metrics output from each phase's pipeline run (.md + .json)
 *.pdf                     blueprint & reference documents driving the roadmap
@@ -660,7 +660,7 @@ The Phase 1/2 pipelines have no such dependency and run with only the packages i
 ## Running things
 
 ```bash
-# Run the full test suite (345 tests)
+# Run the full test suite (346 tests)
 pytest
 
 # End-to-end phase pipelines (produce reports/ output)
@@ -921,6 +921,8 @@ The live 20-day classifier now uses `features/volatility_extra.py` (without inde
 **Direction** with the same data stays at chance: AUC 0.517 / 0.494 (up, 5/20-day) and about 0.51 for beating the median stock.
 
 Round 4 (selection on 2008-2020 only, `scripts/run_vol_auc3.py`) adopted nothing; every trial and the plan are in [docs/AUC_PLAN.md](docs/AUC_PLAN.md). Round 5 added overnight US and Nifty-index features (`scripts/backfill_global.py`, `scripts/run_vol_auc4.py`): also no gain.
+
+Round 6 tested true intraday realised volatility from public 1-minute data (`scripts/backfill_intraday.py`, `features/volatility_intraday.py`, `scripts/run_vol_intraday.py`): also no reliable gain.
 
 ## Keeping these docs current
 

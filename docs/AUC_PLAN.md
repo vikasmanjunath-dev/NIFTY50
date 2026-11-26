@@ -50,8 +50,19 @@ Every US or index feature set scored **below** the live features on 2008-2020 (e
 ## Current best and status
 **5-day 0.684, 20-day 0.750** (2021+ out-of-sample). Rounds 4 and 5 added nothing, including genuinely new data. Stop searching on daily data.
 
+## Round 6 (done, nothing adopted): intraday realised volatility
+Source: Hugging Face `xxparthparekhxx/indian-stock-market-minute-data` (MIT, from Upstox; approved, 2 GB cap). 1.3 GB streamed, 4.8 MB of daily summaries kept.
+59 symbols 2022-01 to 2026-11-13 (TATAMOTORS absent); daily returns correlate 0.98 with ours, 0.2% of days differ by more than 2%.
+
+| `reports/vol_intraday.json`, scored from 2023 | first-half pick | second half live → pick | 95% interval | Outcome |
+|---|---|---|---|---|
+| 5-day | intraday, trained 2022+ only | 0.700 → 0.701 | -0.007 to +0.010 | rejected |
+| 20-day | live (intraday was worse) | 0.767 | none | no change |
+
+The dataset refreshes about monthly, so it could not feed a daily live forecast even if it had helped.
+Standing result unchanged: **5-day 0.684, 20-day 0.750**.
+
 ## Backlog (in order)
 | Idea | Needs |
 |---|---|
-| Minute-level data for realised variance | Kaggle API token set up by the owner, then approval |
 | Score the forward ledger | months of new data (`scripts/daily_refresh.py`) |
