@@ -1,0 +1,29 @@
+{
+ "horizon_days": 20,
+ "n_oos": 55139,
+ "base_rate": 0.474,
+ "lgbm_accuracy": 0.5031,
+ "lgbm_auc": 0.5402,
+ "lgbm_within_date_auc": 0.5169,
+ "naive_accuracy": 0.6248,
+ "naive_auc": 0.6688,
+ "accuracy_by_confidence_quintile": {
+  "0": 0.466,
+  "1": 0.425,
+  "2": 0.463,
+  "3": 0.53,
+  "4": 0.631
+ },
+ "conf>=0.5": {
+  "coverage": 0.324,
+  "accuracy": 0.598
+ },
+ "conf>=0.7": {
+  "coverage": 0.083,
+  "accuracy": 0.667
+ },
+ "conf>=0.9": {
+  "coverage": 0.001,
+  "accuracy": 0.767
+ }
+}
