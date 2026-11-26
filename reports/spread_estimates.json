@@ -1,0 +1,14 @@
+{
+ "n_instruments": 59,
+ "cs_half_spread_bps": {
+  "median": 26.77,
+  "p25": 24.61,
+  "p75": 28.94
+ },
+ "ar_half_spread_bps": {
+  "median": 69.35,
+  "p25": 63.61,
+  "p75": 81.42
+ },
+ "assumed_half_spread_bps": 5.0
+}
