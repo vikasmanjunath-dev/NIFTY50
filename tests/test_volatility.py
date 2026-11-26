@@ -84,3 +84,68 @@ def test_volatility_endpoint_statuses(tmp_path):
     assert get().json()["status"] == "ABSTAIN"
     ctx.killswitch.trip("test", "t")
     assert get().json()["forecast"] is None
+
+
+def test_walk_forward_ranges_use_only_realised_outcomes_and_cover():
+    from nifty_analyser.models.ranges import walk_forward_ranges
+
+    rng = np.random.default_rng(1)
+    dates = np.repeat(np.arange(600), 20)
+    scale = rng.uniform(0.01, 0.05, len(dates))
+    returns = scale * rng.standard_normal(len(dates))
+    q = walk_forward_ranges(dates, returns, scale, horizon=5)
+    m = ~np.isnan(q[:, 0])
+    assert np.isnan(q[dates < 250]).all()
+    assert abs(((returns >= q[:, 0]) & (returns <= q[:, 3]))[m].mean() - 0.9) < 0.01
+    changed = returns.copy()
+    changed[dates >= 394] = 10.0  # unrealised at date 400 with a 5-day horizon
+    np.testing.assert_array_equal(walk_forward_ranges(dates, changed, scale, horizon=5)[dates == 399], q[dates == 399])
+
+
+def test_ledger_scores_range_coverage(tmp_path):
+    b = bars()
+    day = pd.Timestamp(np.sort(b.event_time.unique())[100])
+    ledger = AuditLog(tmp_path / "v.jsonl")
+    record(ledger, pd.DataFrame({"instrument_id": ["NSE:AAA", "NSE:BBB"], "event_time": pd.Series([day, day]), "horizon_days": 5,
+                                 "prob_above_usual": [0.9, 0.1], "med_rv": [0.0, 1.0], "forecast_vol_annualised": [0.2, 0.2],
+                                 "move_low_90": [-1.0, 0.5], "move_high_90": [1.0, 0.6]}))
+    assert score(ledger, b)["5"]["coverage_90"] == 0.5
+
+
+def test_dashboard_lists_volatility_and_omits_it_when_absent():
+    from nifty_analyser.ops.dashboard import render_dashboard
+
+    health = {"state": "GREEN", "reasons": [], "data_age_days": 1.0, "psi_significant_frac": 0.0}
+    block = {"5": {"data_date": "2026-01-09", "forecasts": {"NSE:<A>": {"prob_above_usual": 0.7, "forecast_vol_annualised": 0.25,
+             "usual_vol_annualised": 0.2, "move_low_90": -0.05, "move_high_90": 0.06}}}}
+    html = render_dashboard(health, None, {}, [], True, None, block)
+    assert "NSE:&lt;A&gt;" in html and "-5.0% to 6.0%" in html
+    assert "Expected volatility" not in render_dashboard(health, None, {}, [], True)
+
+
+def test_adaptive_ranges_restore_coverage_and_recalibration_ignores_future():
+    from nifty_analyser.models.ranges import adaptive_ranges, walk_forward_recalibrate
+
+    rng = np.random.default_rng(2)
+    dates = np.repeat(np.arange(900), 20)
+    scale = np.full(len(dates), 0.02)
+    returns = scale * rng.standard_normal(len(dates)) * (1 + dates / 900)  # tails keep widening
+    q, final = adaptive_ranges(dates, returns, scale, horizon=5, gamma=0.02)
+    m = ~np.isnan(q[:, 0])
+    assert ((returns >= q[:, 0]) & (returns <= q[:, 3]))[m].mean() > 0.86 and final[0.05] < 0 < final[0.95]
+    prob, y = rng.uniform(0.1, 0.9, len(dates)), rng.integers(0, 2, len(dates))
+    a = walk_forward_recalibrate(dates, prob, y, horizon=5)
+    b = walk_forward_recalibrate(dates, prob, np.where(dates >= 600, 1 - y, y), horizon=5)
+    np.testing.assert_array_equal(a[dates < 600], b[dates < 600])
+
+
+def test_extra_features_do_not_change_when_the_future_is_removed():
+    from nifty_analyser.features.volatility_extra import extra_features
+
+    b = bars()
+    index = b[b.instrument_id == "NSE:AAA"]
+    cut = np.sort(b.event_time.unique())[-30]
+    full, cols = extra_features(b, index)
+    part, _ = extra_features(b[b.event_time <= cut], index[index.event_time <= cut])
+    key = ["instrument_id", "event_time"]
+    pd.testing.assert_frame_equal(full[full.event_time <= cut].set_index(key)[cols].sort_index(), part.set_index(key)[cols].sort_index())
