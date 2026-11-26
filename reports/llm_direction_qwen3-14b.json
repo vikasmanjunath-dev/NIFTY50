@@ -1,0 +1,31 @@
+{
+ "model": "qwen3:14b",
+ "n": 400,
+ "base_rate_up": 0.54,
+ "majority_baseline_acc": 0.54,
+ "accuracy": 0.52,
+ "auc": 0.5153,
+ "pct_called_up": 0.825,
+ "conf>=10": {
+  "n": 330,
+  "accuracy": 0.539
+ },
+ "conf>=20": {
+  "n": 190,
+  "accuracy": 0.563
+ },
+ "conf>=30": {
+  "n": 12,
+  "accuracy": 0.333
+ },
+ "by_category_accuracy": {
+  "Acquisition": 0.613,
+  "Allotment of Securities": 0.478,
+  "Change in Director(s)": 0.412,
+  "Credit Rating": 0.429,
+  "Dividend": 0.476,
+  "Financial Result Updates": 0.545,
+  "Outcome of Board Meeting": 0.45,
+  "Press Release": 0.533
+ }
+}
