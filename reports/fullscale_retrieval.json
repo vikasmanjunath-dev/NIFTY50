@@ -1,0 +1,42 @@
+{
+ "corpus_docs": 58445,
+ "n_queries": 40,
+ "mean": {
+  "rrf": {
+   "mrr": 0.4694,
+   "recall10": 0.3639,
+   "p5": 0.305,
+   "ndcg5": 0.3265
+  },
+  "rrf+llm_rerank": {
+   "mrr": 0.5071,
+   "recall10": 0.3899,
+   "p5": 0.34,
+   "ndcg5": 0.3603
+  }
+ },
+ "delta_mrr": {
+  "mean": 0.0377,
+  "se": 0.0335,
+  "better": 8,
+  "worse": 3
+ },
+ "delta_recall10": {
+  "mean": 0.026,
+  "se": 0.0169,
+  "better": 9,
+  "worse": 1
+ },
+ "delta_p5": {
+  "mean": 0.035,
+  "se": 0.0122,
+  "better": 7,
+  "worse": 0
+ },
+ "delta_ndcg5": {
+  "mean": 0.0338,
+  "se": 0.0131,
+  "better": 9,
+  "worse": 2
+ }
+}
