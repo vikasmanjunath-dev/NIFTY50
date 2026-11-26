@@ -185,3 +185,34 @@ def test_extra_features_reach_only_the_adopted_classifier(monkeypatch, horizon, 
     monkeypatch.setattr(vf, "fit_predict_regressors", lambda X, y, V: (width.update(reg=X.shape[1]), {"blend": np.zeros(len(V))})[1])
     assert len(vf.latest_forecasts(bars(), horizon)) == 2
     assert (width["cls"] > width["reg"]) is uses_extra
+
+
+def test_stock_features_do_not_change_when_the_future_is_removed(monkeypatch):
+    from nifty_analyser.data import instrument_master
+    from nifty_analyser.features.volatility_extra import stock_features
+
+    monkeypatch.setattr(instrument_master, "get_instrument", lambda i: type("I", (), {"sector": "X"})())
+    b = bars()
+    cut = np.sort(b.event_time.unique())[-30]
+    full, cols = stock_features(build_volatility_frame(b, 20)[0], 20)
+    part, _ = stock_features(build_volatility_frame(b[b.event_time <= cut], 20)[0], 20)
+    key = ["instrument_id", "event_time"]
+    pd.testing.assert_frame_equal(full[full.event_time <= cut].set_index(key)[cols].sort_index(), part.set_index(key)[cols].sort_index())
+
+
+def test_global_features_use_only_what_was_already_published():
+    from nifty_analyser.features.volatility_global import add_global_features, stamp
+
+    days = pd.date_range("2022-01-03", periods=300, freq="B")
+    rng = np.random.default_rng(4)
+    close = 100 * np.exp(np.cumsum(rng.normal(0, 0.01, len(days))))
+    raw = pd.DataFrame({"open": close, "high": close * 1.01, "low": close * 0.99, "close": close}, index=days)
+    us = stamp(raw, "spx")
+    rows = pd.DataFrame({"available_time": (days + pd.Timedelta("15:30:00")).tz_localize("Asia/Kolkata")})
+    full, groups = add_global_features(rows, {"spx": us})
+    assert full.spx_ret_1.iloc[250] == pytest.approx(np.log(close[249] / close[248]))  # previous US day, not the same date
+    changed = raw.copy()
+    changed.iloc[250:] *= 5
+    again, _ = add_global_features(rows, {"spx": stamp(changed, "spx")})
+    pd.testing.assert_frame_equal(full.iloc[:251], again.iloc[:251])
+    assert groups == {"us": [c for c in full.columns if c.startswith("spx_")], "index": []}
