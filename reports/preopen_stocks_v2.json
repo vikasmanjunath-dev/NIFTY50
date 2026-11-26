@@ -1,0 +1,82 @@
+{
+ "n_stocks": 59,
+ "n_rows": 79465,
+ "gap": {
+  "v1_features_lgbm": {
+   "n": 68115,
+   "base": 0.608,
+   "auc": 0.6768,
+   "acc": 0.6558,
+   "acc_top50": 0.741,
+   "acc_top25": 0.798
+  },
+  "v2_features_logit": {
+   "n": 68115,
+   "base": 0.608,
+   "auc": 0.6955,
+   "acc": 0.6661,
+   "acc_top50": 0.753,
+   "acc_top25": 0.814
+  },
+  "v2_features_lgbm": {
+   "n": 68115,
+   "base": 0.608,
+   "auc": 0.6841,
+   "acc": 0.6588,
+   "acc_top50": 0.745,
+   "acc_top25": 0.8
+  }
+ },
+ "c2c": {
+  "v1_features_lgbm": {
+   "n": 68115,
+   "base": 0.509,
+   "auc": 0.5342,
+   "acc": 0.5262,
+   "acc_top50": 0.546,
+   "acc_top25": 0.561
+  },
+  "v2_features_logit": {
+   "n": 68115,
+   "base": 0.509,
+   "auc": 0.5621,
+   "acc": 0.5425,
+   "acc_top50": 0.573,
+   "acc_top25": 0.607
+  },
+  "v2_features_lgbm": {
+   "n": 68115,
+   "base": 0.509,
+   "auc": 0.5389,
+   "acc": 0.5254,
+   "acc_top50": 0.547,
+   "acc_top25": 0.571
+  }
+ },
+ "intra": {
+  "v1_features_lgbm": {
+   "n": 68115,
+   "base": 0.528,
+   "auc": 0.501,
+   "acc": 0.514,
+   "acc_top50": 0.512,
+   "acc_top25": 0.518
+  },
+  "v2_features_logit": {
+   "n": 68115,
+   "base": 0.528,
+   "auc": 0.5181,
+   "acc": 0.5254,
+   "acc_top50": 0.537,
+   "acc_top25": 0.544
+  },
+  "v2_features_lgbm": {
+   "n": 68115,
+   "base": 0.528,
+   "auc": 0.5019,
+   "acc": 0.5128,
+   "acc_top50": 0.519,
+   "acc_top25": 0.523
+  }
+ }
+}

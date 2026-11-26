@@ -1,0 +1,115 @@
+{
+ "nifty_index": {
+  "gap": {
+   "logit": {
+    "n": 924,
+    "base": 0.607,
+    "auc": 0.7514,
+    "acc": 0.6861,
+    "acc_top50pct_conf": 0.807,
+    "acc_top25pct_conf": 0.883
+   },
+   "lgbm": {
+    "n": 924,
+    "base": 0.607,
+    "auc": 0.7468,
+    "acc": 0.6807,
+    "acc_top50pct_conf": 0.799,
+    "acc_top25pct_conf": 0.861
+   }
+  },
+  "c2c": {
+   "logit": {
+    "n": 924,
+    "base": 0.53,
+    "auc": 0.5995,
+    "acc": 0.5942,
+    "acc_top50pct_conf": 0.615,
+    "acc_top25pct_conf": 0.628
+   },
+   "lgbm": {
+    "n": 924,
+    "base": 0.53,
+    "auc": 0.5844,
+    "acc": 0.5639,
+    "acc_top50pct_conf": 0.623,
+    "acc_top25pct_conf": 0.632
+   }
+  },
+  "intra": {
+   "logit": {
+    "n": 924,
+    "base": 0.522,
+    "auc": 0.499,
+    "acc": 0.4989,
+    "acc_top50pct_conf": 0.496,
+    "acc_top25pct_conf": 0.506
+   },
+   "lgbm": {
+    "n": 924,
+    "base": 0.522,
+    "auc": 0.5221,
+    "acc": 0.5076,
+    "acc_top50pct_conf": 0.522,
+    "acc_top25pct_conf": 0.506
+   }
+  }
+ },
+ "stocks_pooled": {
+  "n_stocks": 59,
+  "gap": {
+   "logit": {
+    "n": 68155,
+    "base": 0.608,
+    "auc": 0.6908,
+    "acc": 0.664,
+    "acc_top50pct_conf": 0.747,
+    "acc_top25pct_conf": 0.804
+   },
+   "lgbm": {
+    "n": 68155,
+    "base": 0.608,
+    "auc": 0.6864,
+    "acc": 0.6612,
+    "acc_top50pct_conf": 0.748,
+    "acc_top25pct_conf": 0.809
+   }
+  },
+  "c2c": {
+   "logit": {
+    "n": 68155,
+    "base": 0.509,
+    "auc": 0.5597,
+    "acc": 0.5429,
+    "acc_top50pct_conf": 0.566,
+    "acc_top25pct_conf": 0.603
+   },
+   "lgbm": {
+    "n": 68155,
+    "base": 0.509,
+    "auc": 0.5464,
+    "acc": 0.5378,
+    "acc_top50pct_conf": 0.555,
+    "acc_top25pct_conf": 0.58
+   }
+  },
+  "intra": {
+   "logit": {
+    "n": 68155,
+    "base": 0.528,
+    "auc": 0.5073,
+    "acc": 0.5223,
+    "acc_top50pct_conf": 0.532,
+    "acc_top25pct_conf": 0.532
+   },
+   "lgbm": {
+    "n": 68155,
+    "base": 0.528,
+    "auc": 0.503,
+    "acc": 0.5145,
+    "acc_top50pct_conf": 0.526,
+    "acc_top25pct_conf": 0.509
+   }
+  }
+ }
+}
