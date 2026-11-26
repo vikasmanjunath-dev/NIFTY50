@@ -1,0 +1,93 @@
+{
+ "summary": {
+  "n_outer": 5,
+  "default_auc": 0.5092668233926307,
+  "tuned_auc": 0.5126809799640479,
+  "tuned_minus_default": 0.003414156571417215,
+  "se": 0.007480313351239556,
+  "folds_tuned_better": 3,
+  "selection_optimism": 0.007446440520857167
+ },
+ "folds": [
+  {
+   "fold": 0,
+   "default_auc": 0.482226673711312,
+   "tuned_auc": 0.4965165746671172,
+   "inner_best": 0.5366535814738983,
+   "inner_default": 0.5254945138384691,
+   "best_params": {
+    "n_estimators": 324,
+    "learning_rate": 0.058804091202084754,
+    "num_leaves": 43,
+    "min_child_samples": 113,
+    "subsample": 0.6136193608923884,
+    "colsample_bytree": 0.6882093509110843,
+    "reg_lambda": 0.14867599716649843
+   }
+  },
+  {
+   "fold": 1,
+   "default_auc": 0.4834343371589619,
+   "tuned_auc": 0.49952066659779004,
+   "inner_best": 0.5279511506650632,
+   "inner_default": 0.5125212751245524,
+   "best_params": {
+    "n_estimators": 316,
+    "learning_rate": 0.06955626705338044,
+    "num_leaves": 38,
+    "min_child_samples": 510,
+    "subsample": 0.7482676447478975,
+    "colsample_bytree": 0.38588371982790515,
+    "reg_lambda": 2.2440949745216865
+   }
+  },
+  {
+   "fold": 2,
+   "default_auc": 0.5083391956101487,
+   "tuned_auc": 0.5247699497646542,
+   "inner_best": 0.5083768038289195,
+   "inner_default": 0.49096100183705293,
+   "best_params": {
+    "n_estimators": 184,
+    "learning_rate": 0.020858577246976998,
+    "num_leaves": 50,
+    "min_child_samples": 103,
+    "subsample": 0.8008295985502378,
+    "colsample_bytree": 0.3827115573607905,
+    "reg_lambda": 0.7098447065649744
+   }
+  },
+  {
+   "fold": 3,
+   "default_auc": 0.540087558223795,
+   "tuned_auc": 0.5241418929102857,
+   "inner_best": 0.5034936735618407,
+   "inner_default": 0.4975589580530044,
+   "best_params": {
+    "n_estimators": 383,
+    "learning_rate": 0.02244017724065068,
+    "num_leaves": 53,
+    "min_child_samples": 99,
+    "subsample": 0.8114099503754699,
+    "colsample_bytree": 0.5076528183227852,
+    "reg_lambda": 0.16054948082916137
+   }
+  },
+  {
+   "fold": 4,
+   "default_auc": 0.5322463522589362,
+   "tuned_auc": 0.5184558158803928,
+   "inner_best": 0.5241618928948041,
+   "inner_default": 0.5138147024244206,
+   "best_params": {
+    "n_estimators": 105,
+    "learning_rate": 0.010876130406605823,
+    "num_leaves": 6,
+    "min_child_samples": 39,
+    "subsample": 0.7726006082695521,
+    "colsample_bytree": 0.6137321410867723,
+    "reg_lambda": 0.3314059205131418
+   }
+  }
+ ]
+}
