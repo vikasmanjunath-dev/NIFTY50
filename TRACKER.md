@@ -464,3 +464,8 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 ### 2026-11-27 — Volatility: AUC search with holdout
 1. Development winners: 5-day four-model ensemble with Chronos feature, 20-day blend with Chronos feature. Holdout gains +0.0038 and +0.0067, both intervals include zero: not adopted (`reports/vol_auc_search.json`).
 2. Bug: importing PyTorch before LightGBM deadlocked the run on macOS (0% CPU for 26 minutes). Chronos features are now computed in a separate process and cached.
+
+### 2026-11-27 — Volatility: 2008–2020 training history adopted
+1. Downloaded (approved) Yahoo daily bars for 57 pool stocks plus India VIX; no pre-2021 data for ETERNAL and JIOFIN.
+2. Passed the pre-set rule: AUC 0.671→0.684 (5d), 0.702→0.739 (20d) on identical rows; 20-day R² 0.143→0.325. Live forecaster now trains with it; ranges recalibrated.
+3. Open: older rows are survivorship-biased (training only); inverse-volatility portfolio still does not beat equal weight; first `v3-history` ledger entry awaits a new data date.
