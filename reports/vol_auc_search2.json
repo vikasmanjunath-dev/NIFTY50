@@ -1,0 +1,50 @@
+{
+ "5": {
+  "dev_auc": {
+   "live": 0.6674,
+   "refit_often": 0.6673,
+   "big_trees": 0.6738,
+   "more_features": 0.6723,
+   "plus_chronos": 0.6684,
+   "chronos_ensemble4": 0.6702
+  },
+  "winner": "big_trees",
+  "holdout_live": 0.7054,
+  "holdout_winner": 0.7077,
+  "gain_ci95": [
+   -0.0017,
+   0.0077
+  ],
+  "full_oos_live": 0.6843,
+  "full_oos_winner": 0.6884,
+  "adopt": false,
+  "direction_auc": {
+   "up": 0.5169,
+   "beats_median_stock": 0.5099
+  }
+ },
+ "20": {
+  "dev_auc": {
+   "live": 0.7255,
+   "refit_often": 0.7256,
+   "big_trees": 0.7329,
+   "more_features": 0.7363,
+   "plus_chronos": 0.7283,
+   "chronos_ensemble4": 0.7328
+  },
+  "winner": "more_features",
+  "holdout_live": 0.7632,
+  "holdout_winner": 0.7761,
+  "gain_ci95": [
+   0.0071,
+   0.0294
+  ],
+  "full_oos_live": 0.7392,
+  "full_oos_winner": 0.7516,
+  "adopt": true,
+  "direction_auc": {
+   "up": 0.4941,
+   "beats_median_stock": 0.5079
+  }
+ }
+}

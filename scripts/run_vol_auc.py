@@ -113,4 +113,5 @@ def main():
     Path("reports/vol_auc_search.json").write_text(json.dumps(out, indent=1))
 
 
-main()
+if __name__ == "__main__":
+    main()
