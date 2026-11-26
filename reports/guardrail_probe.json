@@ -1,0 +1,13 @@
+{
+ "fab_invented_event": 0.0,
+ "fab_invented_figure": 0.0,
+ "fab_unrelated": 0.007,
+ "fab_wrong_category": 0.207,
+ "fab_wrong_company": 0.0,
+ "faithful_cited": 1.0,
+ "faithful_dates": 1.0,
+ "faithful_partial": 1.0,
+ "n_packs": 150,
+ "faithful_pass_rate": 1.0,
+ "fabrication_block_rate": 0.957
+}

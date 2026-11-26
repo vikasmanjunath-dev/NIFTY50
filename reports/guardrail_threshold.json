@@ -1,0 +1,38 @@
+{
+ "0.05": {
+  "OK": 21,
+  "ABSTAIN": 27,
+  "BLOCKED": 0,
+  "other": 0
+ },
+ "0.1": {
+  "OK": 21,
+  "ABSTAIN": 27,
+  "BLOCKED": 0,
+  "other": 0
+ },
+ "0.15": {
+  "OK": 21,
+  "ABSTAIN": 27,
+  "BLOCKED": 0,
+  "other": 0
+ },
+ "0.25": {
+  "OK": 21,
+  "ABSTAIN": 27,
+  "BLOCKED": 0,
+  "other": 0
+ },
+ "0.35": {
+  "OK": 20,
+  "ABSTAIN": 27,
+  "BLOCKED": 1,
+  "other": 0
+ },
+ "0.5": {
+  "OK": 17,
+  "ABSTAIN": 27,
+  "BLOCKED": 4,
+  "other": 0
+ }
+}
