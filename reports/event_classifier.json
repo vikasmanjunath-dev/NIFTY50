@@ -1,0 +1,55 @@
+{
+ "excluded_empty_after_masking": 8899,
+ "n_train": 7872,
+ "n_test": 1914,
+ "classes": [
+  "acquisition_mna",
+  "board_meeting",
+  "credit_rating",
+  "dividend_record_date",
+  "esop_allotment",
+  "investor_meet",
+  "newspaper",
+  "personnel",
+  "press_release",
+  "results",
+  "share_admin",
+  "shareholder_meeting",
+  "takeover_disclosure",
+  "trading_window"
+ ],
+ "majority_baseline": 0.078,
+ "tfidf_lr": {
+  "accuracy": 0.8511,
+  "macro_f1": 0.8115
+ },
+ "embedding_lr": {
+  "accuracy": 0.8318,
+  "macro_f1": 0.7924
+ },
+ "tfidf+embedding_ensemble": {
+  "accuracy": 0.8516,
+  "macro_f1": 0.8119
+ },
+ "per_class_f1_ensemble": {
+  "acquisition_mna": 0.825,
+  "board_meeting": 0.661,
+  "credit_rating": 0.642,
+  "dividend_record_date": 0.976,
+  "esop_allotment": 0.997,
+  "investor_meet": 0.973,
+  "newspaper": 0.684,
+  "personnel": 0.931,
+  "press_release": 0.96,
+  "results": 0.156,
+  "share_admin": 0.58,
+  "shareholder_meeting": 0.983,
+  "takeover_disclosure": 1.0,
+  "trading_window": 1.0
+ },
+ "llm_zero_shot_qwen3_14b": {
+  "n": 300,
+  "accuracy": 0.55
+ },
+ "ensemble_on_same_300": 0.8367
+}

@@ -1,0 +1,98 @@
+{
+ "excluded_empty_after_masking": 21048,
+ "n_train": 14737,
+ "n_val": 1264,
+ "n_test": 1751,
+ "classes": [
+  "acquisition_mna",
+  "board_meeting",
+  "credit_rating",
+  "dividend_record_date",
+  "esop_allotment",
+  "investor_meet",
+  "newspaper",
+  "personnel",
+  "press_release",
+  "results",
+  "share_admin",
+  "shareholder_meeting",
+  "takeover_disclosure",
+  "trading_window"
+ ],
+ "val_macro_f1": {
+  "lr_tfidf": 0.9583,
+  "svm_tfidf": 0.961,
+  "lr_emb": 0.9548
+ },
+ "ensemble_weights_chosen_on_val(lr_tfidf,svm,emb)": [
+  0.4,
+  0.0,
+  0.6
+ ],
+ "val_ensemble_macro_f1": 0.9645,
+ "classes_with_>=30_test_examples": [
+  "acquisition_mna",
+  "board_meeting",
+  "dividend_record_date",
+  "esop_allotment",
+  "investor_meet",
+  "newspaper",
+  "personnel",
+  "press_release",
+  "share_admin",
+  "shareholder_meeting",
+  "takeover_disclosure",
+  "trading_window"
+ ],
+ "classes_dropped_from_macro(<30 test examples)": [
+  "credit_rating",
+  "results"
+ ],
+ "TEST": {
+  "n": 1751,
+  "lr_tfidf": {
+   "accuracy": 0.9172,
+   "macro_f1": 0.9284
+  },
+  "svm_tfidf": {
+   "accuracy": 0.9218,
+   "macro_f1": 0.9328
+  },
+  "lr_emb": {
+   "accuracy": 0.9058,
+   "macro_f1": 0.915
+  },
+  "ensemble": {
+   "accuracy": 0.9189,
+   "macro_f1": 0.9291
+  }
+ },
+ "TEST_natural_distribution": {
+  "n": 4000,
+  "accuracy": 0.9095,
+  "macro_f1": 0.9238
+ },
+ "per_class_f1": {
+  "acquisition_mna": 0.939,
+  "board_meeting": 0.483,
+  "credit_rating": 0.977,
+  "dividend_record_date": 0.987,
+  "esop_allotment": 1.0,
+  "investor_meet": 0.98,
+  "newspaper": 0.91,
+  "personnel": 0.97,
+  "press_release": 0.952,
+  "results": 0.126,
+  "share_admin": 0.948,
+  "shareholder_meeting": 0.98,
+  "takeover_disclosure": 1.0,
+  "trading_window": 1.0
+ },
+ "top_confusions(true,pred,n)": [
+  [
+   "board_meeting",
+   "results",
+   83
+  ]
+ ]
+}

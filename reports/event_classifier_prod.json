@@ -1,0 +1,39 @@
+{
+ "final_refit_on_all_data": false,
+ "n_train": 15777,
+ "threshold": 0.8,
+ "val_accepted_accuracy_at_threshold": 0.9906,
+ "val_coverage": 0.9574,
+ "TEST": {
+  "n": 1745,
+  "accuracy_no_abstain": 0.9731,
+  "accuracy_when_accepted": 0.9945,
+  "coverage": 0.9433,
+  "natural_n": 4000,
+  "natural_accuracy_no_abstain": 0.973,
+  "natural_accuracy_when_accepted": 0.9923,
+  "natural_coverage": 0.9437,
+  "accuracy_vs_coverage": {
+   "conf>=0.5": {
+    "coverage": 0.99,
+    "accuracy": 0.9774
+   },
+   "conf>=0.6": {
+    "coverage": 0.981,
+    "accuracy": 0.9819
+   },
+   "conf>=0.7": {
+    "coverage": 0.967,
+    "accuracy": 0.9893
+   },
+   "conf>=0.8": {
+    "coverage": 0.943,
+    "accuracy": 0.9945
+   },
+   "conf>=0.9": {
+    "coverage": 0.915,
+    "accuracy": 0.9962
+   }
+  }
+ }
+}

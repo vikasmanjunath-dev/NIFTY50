@@ -1,0 +1,7 @@
+{
+ "final_refit_on_all_data": true,
+ "n_train": 19675,
+ "threshold": 0.8,
+ "val_accepted_accuracy_at_threshold": 0.9906,
+ "val_coverage": 0.9574
+}
