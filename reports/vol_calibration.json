@@ -1,0 +1,54 @@
+{
+ "5": {
+  "ranges": {
+   "static": {
+    "coverage_90": 0.8873,
+    "coverage_50": 0.4836,
+    "pinball_sum": 0.029086
+   },
+   "adaptive": {
+    "coverage_90": 0.8975,
+    "coverage_50": 0.4962,
+    "pinball_sum": 0.029155
+   }
+  },
+  "recalibration": {
+   "n": 44234,
+   "brier_raw": 0.2282,
+   "brier_new": 0.2308,
+   "accuracy_raw": 0.6276,
+   "accuracy_new": 0.6197,
+   "brier_change_ci95": [
+    0.0008,
+    0.0049
+   ]
+  }
+ },
+ "20": {
+  "ranges": {
+   "static": {
+    "coverage_90": 0.8712,
+    "coverage_50": 0.4774,
+    "pinball_sum": 0.059702
+   },
+   "adaptive": {
+    "coverage_90": 0.8895,
+    "coverage_50": 0.4821,
+    "pinball_sum": 0.060797
+   }
+  },
+  "recalibration": {
+   "n": 42945,
+   "brier_raw": 0.2243,
+   "brier_new": 0.2309,
+   "accuracy_raw": 0.6221,
+   "accuracy_new": 0.6339,
+   "brier_change_ci95": [
+    -0.015,
+    0.0271
+   ]
+  }
+ },
+ "adopt_adaptive_ranges": false,
+ "adopt_recalibration": false
+}
