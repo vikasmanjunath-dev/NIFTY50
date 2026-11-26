@@ -11,12 +11,34 @@ replacement for, **[TRACKER.md](TRACKER.md)** (the line-item build log — every
 real bug found and fixed, every honestly-reported result) and **[TRACKER.xlsx](TRACKER.xlsx)**
 (the same tracker as a structured, filterable spreadsheet).
 
-> **Current state (2026-09-22):** Phases 0–3 are complete — data ingestion, feature
-> engineering, labelling, validation, modelling, calibration, cost-aware backtesting, drift
-> monitoring, **and** a full local RAG + LLM layer over NSE announcements. Fundamentals and
-> FII/DII flow are now wired into the live Phase 2 pipeline, not just built and verified in
-> isolation. 321/321 tests passing. Phase 4 (production operations) has not started. See
-> [Status at a glance](#status-at-a-glance).
+> **Current state (2026-11-24):** the repository was found reduced to a partial snapshot and has been **rebuilt and
+> re-verified on real data** (see [TRACKER.md](TRACKER.md), Session 7). Present and tested (**287 tests passing**): the base
+> layer, all Phase 2 layers (macro, regime, cross-sectional, delivery %, fundamentals incl. insurance PDFs, FII/DII,
+> calibration, selective prediction, ensemble, costs, drift), Phase 3 (RAG + LLM + guardrails) and the new point-in-time
+> universe. Not rebuilt: `TRACKER.xlsx` (stale). Phase 4 is built (below). Bug/test counts and the *historical* Phase 1/2
+> numbers quoted further down predate the rebuild; the current, re-run results are below and in `reports/`.
+>
+> **Current headline result (point-in-time universe, 101 scale-free features):** accuracy 54.2% (= the up-day base rate; balanced
+> accuracy 0.507), ROC-AUC 0.520, IC +0.048 ± 0.082 — **no detectable directional edge** (a faint cross-sectional *ranking* signal exists but does not survive costs — see Results). Cost-stressed Sharpe 0.51 at 20 bps, *below* an
+> equal-weight buy-and-hold of the same universe (0.89). All model inputs are scale-free (no raw price/volume/macro/flow/revenue
+> levels); a paired old-vs-new comparison on identical folds found no measurable loss (AUC -0.004 to -0.008, IC -0.009 to -0.013,
+> within noise and the pre-set margin). Adding fundamentals + FII/DII earlier: paired-ablation IC change -0.0086, sign-flipping.
+
+## Survivorship-bias-free universe (new, 2026-11-24)
+
+Backtesting only today's Nifty 50 projected backward is a documented bias (Blueprint §3.4). `nifty_analyser/data/index_membership.py`
+reconstructs the *real* membership on any date from 2021-09-20 (sourced, dated replacement history; announcement dates kept as
+`available_time`), `data/instrument_master.py` holds the 60-name pool (59 ingestible; HDFC's data no longer exists on Yahoo), and
+`scripts/run_survivorship_comparison.py` runs identical features, labels, date folds and models on both universes.
+
+| Measured on real data (2021-09 → 2026-11) | Result |
+|---|---|
+| Phantom rows (stock before joining the index) | 5,756 rows, 9 names, **+32.4%/yr** forward return |
+| Omitted rows (members that later left) | 5,785 rows, 9 names, **+3.4%/yr** |
+| Equal-weight universe, biased vs point-in-time | **+11.8% vs +9.2%/yr** → premium **+2.6%/yr, t = 3.13** |
+| Model skill (LightGBM / Elastic-Net, 4 folds) | accuracy 50.3–51.1%, AUC 0.507–0.510 in **both** universes — no edge to inflate |
+
+Run: `python3 scripts/backfill_bars.py && python3 scripts/run_survivorship_comparison.py` → `reports/survivorship_comparison.md`.
 
 ---
 
@@ -76,7 +98,7 @@ Part 6's phase plan). Four phases, each with a distinct goal:
 | 1 | Baseline: ingestion, labels, technical features, walk-forward validation | ✅ complete |
 | 2 | Enrichment: fundamentals (incl. insurance PDFs), macro, FII/DII flows, cross-sectional features, calibration, ensemble, regime, costs, drift | ✅ 10/10 items, all data-coverage gaps closed |
 | 3 | RAG + LLM intelligence layer over NSE announcements | ✅ 9/9 items complete |
-| 4 | Operations: production API, monitoring, audit log, kill switch | ⬜ not started |
+| 4 | Operations: `/v3/analyse` API, monitoring dashboard, hash-chained audit log + replay, kill switch | ✅ 4/4 built and verified (`nifty_analyser/ops/`) |
 
 **321/321 tests passing** across 39 test files. See [TRACKER.md](TRACKER.md) for the full
 itemised checklist, every known simplification, every real bug found and fixed (27 documented
@@ -638,7 +660,7 @@ The Phase 1/2 pipelines have no such dependency and run with only the packages i
 ## Running things
 
 ```bash
-# Run the full test suite (321 tests)
+# Run the full test suite (287 tests)
 pytest
 
 # End-to-end phase pipelines (produce reports/ output)
@@ -679,6 +701,11 @@ not a cherry-picked or illustrative figure.
 | **2, re-run** (110-feature: adds fundamentals + FII/DII flow, 2026-09-22) | 50.10% ± 5.23% accuracy, ROC-AUC 0.5069 ± 0.0212, IC +0.0065 ± 0.0540 — flat to slightly worse than the 98-feature version on classification metrics (both within noise of "no edge"). Cost-stressed Sharpe: **+0.149 at baseline cost, −0.685 at 2×, −3.057 at 5×** — improved at baseline, still not robust to cost stress. DII columns were entirely `NaN` in 3 of 4 folds' training windows (its real coverage starts June 2026). |
 | **2, fundamentals + FII/DII ablation** (2026-09-23) | Paired, identical-fold comparison (`scripts/run_phase2_fundamentals_fii_dii_ablation.py`): mean IC difference **−0.0089, but not uniformly negative** (per-fold: +0.0418, −0.0783, +0.0020, −0.0012) — a high-variance, sign-flipping pattern that is itself the signature of no real incremental signal, not a consistent effect either way. Same disciplined non-conclusion as the Phase 3 ablation below: not evidence to promote, not grounds to remove. |
 | **3** (RAG event-feature ablation) | Mean IC difference with vs. without RAG features: **−0.011, negative in all 4 folds** — no incremental trading value found; features kept in the research/explanation layer only. |
+| **Robustness** (2026-11-24, `reports/robustness.md`) | **CPCV** (8 groups, 7 paths): ROC-AUC **0.494** (0.488–0.502), IC −0.009 — no path shows edge. **Impact-cost model**: strategy Sharpe 0.68 gross → −0.24 net at Rs 10 cr (negative from Rs 1 cr to Rs 1000 cr) vs equal-weight buy&hold 0.77. **Learned GMM regime** vs rule-based: AUC −0.004 ± 0.004 — no benefit, not adopted. |
+| **Nested HPO + reranker** (2026-11-24) | Nested random search (5 outer folds): tuned AUC 0.513 vs default 0.509, **+0.003 ± 0.007** — no edge; inner scores overstate outer by +0.0074 (selection bias). LLM reranker (opt-in `documents/rerank.py`): nDCG@5 0.760 → 0.791 (+0.031 ± 0.015) on a 40-query metadata-labelled benchmark — modest, small sample. |
+| **Cross-sectional refinement** (2026-11-24) | Pooled CPCV AUC ≈ 0.49–0.50 for LightGBM/logistic/ensemble (no directional edge) — but **within each date** LightGBM ranks stocks slightly better than chance: daily IC +0.015, market-neutral top/bottom-quintile **gross Sharpe ≈ 1.0, permutation p = 0.025**. **Net of impact costs it is negative** (Sharpe −0.28 at Rs 10 cr; break-even ≈ 14 bps/side); only a post-hoc 20-day hold nets +0.32 (+2.1%/yr). Faint ranking signal, not a tradable strategy; multiple-testing caveats in TRACKER. |
+| **Label design** (2026-11-24) | Rebuilt vol-scaled triple-barrier labels, uniqueness weights, meta-labels (the Phase-1 triple-barrier code had been lost). Paired 6-fold × 3-seed study on the same target: **no variant beats plain direction labels** (within-date AUC 0.5137 vs 0.5140 / 0.5145; ±0.002); uniqueness weights are a no-op for fixed-horizon labels; meta-labelling +0.08 pp hit rate (noise). |
+| **Scalable retrieval** (2026-11-24) | Persistent PIT vector index over all **58,445** announcements (embedded once in 500 s; 0.35 s/query). **Full-corpus** retrieval is much harder than the earlier 600–700-doc pools suggested: **RRF MRR 0.47** (vs 0.91 on the small pool — that figure was optimistic). LLM rerank: nDCG@5 0.327 → 0.360 (+0.034 ± 0.013), P@5 +0.035 ± 0.012, consistent but modest; opt-in. Ablation: restricting retrieval to the instrument named in the query lifts nDCG@5 **0.32 → 0.71**; unfiltered BM25 is the weakest component at scale (0.19) and drags RRF below dense-only; rerank on top of the filter adds +0.024 ± 0.013. A tune/holdout fusion study (200 queries) then chose the weights: whole-corpus search is best dense-only (held-out nDCG@5 0.44 vs 0.27 classic RRF), instrument-filtered search is best BM25-heavy (0.67 vs 0.64); these are now `retrieve()`'s defaults (BM25 weight 16 and ticker-stripped queries when instrument-filtered). Embedding comparison on 200 queries: mxbai-embed-large 0.451 ≈ bge-m3 0.429 > qwen3-embedding 0.310 (unfiltered); identical (~0.69) when instrument-filtered — mxbai kept. |
 
 The consistent, honest theme across all three phases: this is a hard problem, an
 untuned/lightly-tuned technical+fundamental+macro+news-event system does not currently show a
@@ -710,21 +737,118 @@ looked good by chance.
 
 ---
 
-## What's next — Phase 4
+## Phase 4 — operations (`nifty_analyser/ops/`)
 
-Phase 4 (production operations) has not started. Per the blueprint, it covers:
-- A production API contract (`/v3/analyse`)
-- A monitoring dashboard surfacing data/feature/prediction/calibration drift live
-- An audit log with reproducible decision replay
-- A kill switch for degraded data or model health
+`python3 scripts/build_serving_artifacts.py` builds a point-in-time serving feature store and a checksummed model registry entry;
+`STM_ADMIN_TOKEN=... python3 scripts/serve.py` serves it on `127.0.0.1:8310`.
 
-There are also several explicitly flagged, non-blocking refinements documented in
-[TRACKER.md's Known Simplifications](TRACKER.md#known-simplifications--deviations-kept-honest-on-purpose)
-— e.g., a true cross-encoder reranker beyond RRF fusion, a learned (rather than rule-based)
-regime model, and making `hybrid_retrieve` safe to call against the full 43,000+ document
-corpus in one pass (currently a real, flagged architecture limit for large-corpus retrieval).
+| Endpoint | Purpose |
+|---|---|
+| `POST /v3/analyse` | `{instrument_id, as_of?}` → status **OK / ABSTAIN / DEGRADED / REFUSED**, signal, regime, index-membership flag, health, warnings, disclaimer, audit seq/hash. Only data available at `as_of` is used; future `as_of` → 422. |
+| `GET /v3/health`, `GET /v3/dashboard` | Serving state (GREEN/AMBER/RED from data freshness + feature drift), drift table, model, audit integrity. |
+| `POST /v3/admin/kill` / `reset` | Manual kill switch (persistent; only an explicit reset clears it). **Disabled unless `STM_ADMIN_TOKEN` is set.** |
+| `GET /v3/audit/verify`, `POST /v3/audit/replay/{seq}` | Verify the SHA-256 hash chain; recompute any logged signal and detect a changed model, edited features or altered output. |
+
+Drift monitoring is deliberately **scale-free and self-calibrated**: unit-bearing levels (prices, ₹ flows, USD-INR, Brent, VIX level,
+revenue) are excluded, market-wide features are monitored per distinct day, and the alert levels are learned from the model's own history
+(textbook PSI cut-offs would have alarmed in 100% of historical months). Honest operating note: with the validated no-edge model, all 50
+current constituents return **ABSTAIN** (confidence below 0.10); all 101 model features are scale-free and monitored. The API
+has no authentication of its own — keep it on localhost or behind a gateway. `python3 scripts/calibrate_drift.py` re-learns the alert levels.
+
+Remaining refinements (all optional): a trained cross-encoder reranker for retrieval, a learned regime model, combinatorial purged CV, a fuller
+cost/market-impact model, scale-free drift features, and rebuilding `TRACKER.xlsx`.
 
 ---
+
+## Robustness tooling (2026-11-24)
+`validation/cpcv.py` (combinatorial purged CV), `eval/costs.py: ImpactCostModel` (spread + square-root impact vs ADV),
+`features/regime_learned.py` (fold-wise GMM regime), `eval/dataset.py` (fast labelled PIT dataset); run
+`python3 scripts/run_robustness.py` -> `reports/robustness.{md,json}`; `validation/nested.py` (nested HPO, `scripts/run_nested_hpo.py`); `documents/index.py` (`scripts/build_vector_index.py`, `scripts/run_phase3_fullscale_eval.py`); `labels/triple_barrier.py` (`scripts/run_label_study.py`); `eval/longshort.py` (market-neutral test, `scripts/run_longshort.py`, `scripts/run_cpcv_full.py`); `documents/rerank.py` (LLM reranker, `scripts/run_phase3_rerank_eval.py`). Result: no edge, costs and complexity do not help.
+
+## Forward paper trading (`ops/paper.py`)
+Historical results have been looked at many times, so the only untainted evidence is the future. A **pre-registered**
+market-neutral spec (top/bottom quintile, 20-day hold, impact-cost model; hashed into every entry) is recorded as books in
+a hash-chained, append-only ledger (`data/processed/paper_ledger.jsonl`) using only data published at decision time;
+`python3 scripts/paper_trade.py` adds a book when a rebalance is due and scores past books on later prices. First book:
+2026-11-20; no realised P&L yet — a meaningful sample needs 1–2+ years. Back up the ledger (gitignored, irreproducible).
+
+## Content-judged retrieval evaluation (`documents/judge.py`)
+Metadata-derived relevance (same instrument + category) was a weak proxy, so retrieval is now also scored on 60 natural-language
+topical queries with graded 0–3 relevance from two local LLM judges (κ = 0.89): `python3 scripts/run_judged_eval.py` →
+`reports/judged_eval.json`. Result: classic RRF (w=1) beats the earlier metadata-tuned BM25 weight (default changed to 1.0);
+LLM reranking is a robust gain (qwen3:8b +0.075 ± 0.015 nDCG@5, now the default reranker model). A label sheet
+(`reports/label_sheet.csv`) is exported for a **human** to fill `human_grade` (0–3); `load_human_labels` overrides model grades.
+LLM judges are a proxy, not ground truth. `scripts/run_longshort_models.py` runs the market-neutral test for every model family:
+LightGBM/CatBoost carry the faint gross cross-sectional signal; the production stacked ensemble carries none.
+
+## Cost calibration & robustness add-ons
+`eval/calibrate_impact.py` + `python3 scripts/calibrate_impact.py fills.csv` fit the impact-cost model from real executions (none exist yet:
+the coefficient is still an assumption). `scripts/run_cost_sensitivity.py`: at Rs 10 cr the 20-day-hold long/short stays net-positive across all
+tested fee/impact assumptions (Sharpe 0.24–0.59) while the 5-day hold does not. `scripts/run_blend_seeds.py`: the faint cross-sectional signal is
+positive in 9/9 seed runs of LightGBM/CatBoost/blend; the blend is no better than its parts. Selection is in-sample — only the forward ledger is clean.
+`python3 scripts/build_tracker_xlsx.py` regenerates `TRACKER.xlsx` from `TRACKER.md`.
+
+## Cross-encoders, spread estimates, second paper arm (2026-11-24)
+`documents/crossencoder.py` (MiniLM-L6 and bge-reranker-v2-m3 via sentence-transformers): +0.025 / +0.014 nDCG@5 on the content-judged benchmark, consistent
+but weaker than the LLM reranker (qwen3:8b, +0.09), which stays the default. `eval/spread_estimators.py` (Corwin–Schultz / Abdi–Ranaldo on Yahoo OHLC) gives 27–69 bps
+half-spreads — loose upper bounds, not usable for calibration; real fills are still required. Forward testing now has two pre-registered arms
+(`production`, `blend`); `python3 scripts/daily_refresh.py` (Yahoo refresh → serving rebuild when due → both books) keeps them accruing. A third LLM rater
+(240 graded pairs, κ 0.855 vs the local judges) supports the judged benchmark but is not a human labelling.
+
+## Selection-aware statistics (`eval/stat_rigor.py`)
+`python3 scripts/run_stat_rigor.py`: deflated Sharpe, effective sample size, bootstrap CIs and a sector-neutral long/short on a seed-averaged tree blend.
+Honest bottom line: gross Sharpe ≈0.5 (earlier single-seed ≈1.0 was optimistic), hold-20 net +0.14 with a CI spanning zero, deflated Sharpe ≈0.03, and the signal
+vanishes when sector bets are removed — the faint ranking signal is mostly sector rotation. No statistically established, tradable edge.
+
+## `/v3/evidence` (2026-11-25)
+`STM_ADMIN_TOKEN=... python3 scripts/serve.py --evidence [--rerank]` adds `POST /v3/evidence` (`{query, instrument_id?, as_of?, top_k, rerank?, window_days?}`):
+point-in-time, audited retrieval of company announcements as a citable evidence pack, with graceful degradation (BM25-only if the embedder is down, first-stage
+order if the reranker is down). Same guarantees as `/v3/analyse` (future `as_of` rejected, unknown instrument refused, every call in the hash-chained audit log).
+
+## `/v3/explain` (2026-11-25)
+`python3 scripts/serve.py --evidence --explain` adds `POST /v3/explain` (same request as `/v3/evidence`): the local LLM answers only from the retrieved evidence, then guardrails
+(citations exist, numbers appear in the evidence, claim overlap, abstention) decide whether the text is released — otherwise it is withheld (BLOCKED) and only the evidence is returned.
+No evidence → the model is not called; LLM down → evidence only. Guardrails check support, not full semantic faithfulness. A 50-question study (`scripts/run_explain_eval.py`) found and fixed an over-blocking bug (explicit abstentions were withheld) and moved the default generator to `qwen3:8b` (answers 50% of answerable questions vs 29% for `llama3.2:3b`, no unfaithful releases under a `qwen3:14b` judge; the judge is lenient, see TRACKER).
+
+## Where high accuracy is real (2026-11-26)
+Return/direction forecasting stays at chance (AUC ≈ 0.50, LLM 52%). Understanding the filings is a different story: `scripts/run_event_classifier.py` recovers the announcement type
+(category string masked, time-split holdout) at **85% on all rows (v1, conservative)**, **92%** (v2, 14-way, content-bearing texts only) and **97%** (v2 with NSE's 2025 results/board-outcome taxonomy drift merged); `scripts/run_filing_qa.py` answers dividend-record-date / results-period questions through `/v3/explain`
+at **96.7%** on fresh questions (the pipeline now lists evidence newest-first with an as-of time, which moved a hard-window dev set from 57.5% to 91.2%). Recency is now handled by default — `ops/temporal.py` restricts a question that names a month/year to that period, otherwise company-specific questions favour the freshest filing (`prefer_recent` overrides) — which takes the no-flag pipeline from **57.5% to 100% on a fresh 120-question draw and 99.1% on 108 historical-period questions** (with a guardrail overlap fix and a former-names hint) on 120 fresh questions; the benchmark asks for the *latest* filing, so it rewards recency by construction. Caveats are in TRACKER.md.
+
+## `/v3/classify` (2026-11-26)
+`python3 scripts/train_event_classifier.py [--final]` trains/evaluates/saves the event-type classifier; `python3 scripts/serve.py --classify` serves `POST /v3/classify` (`{text, category?}` → label +
+confidence, ABSTAIN when unsure). Untouched test period: 97.3% raw, **99.5% on the 94% of texts it accepts** (threshold chosen on validation). Labels are NSE's own category field.
+
+## Topical search & answer quality (2026-11-26)
+`CategoryRouter` (question → likely NSE categories → fused category-restricted search) lifts judged nDCG@5 0.665 → 0.693, **0.768 with the `qwen3:8b` reranker**; `/v3/evidence` and `/v3/explain` use it by default. The answer guardrails were rebuilt and calibrated
+(`scripts/run_guardrail_probe.py`: faithful answers pass 100%, planted fabrications blocked 95.7%; leaks are fabrications reusing evidence words). `/v3/explain` answers 54% of answerable packs with `qwen3:8b` (61.5% with `qwen3:14b`), nothing unfaithful released
+under the judge; the rest abstain. These open-ended tasks are inherently below the templated date questions (99–100%).
+
+## Pretrained models (2026-11-26)
+Pretrained NLI (`documents/nli.py`, DeBERTa-v3) is available as an opt-in strict faithfulness veto (`serve.py --nli`, request `strict_faithfulness=true`): blocks 99.9% of planted fabrications
+but withheld 3 of 21 real faithful answers in a replay, so it is not the default. FinBERT sentiment and the Chronos-Bolt time-series foundation model were tested zero-shot on direction: 50–53%, i.e. chance — pretrained
+knowledge does not create a forecasting edge on these stocks.
+
+## Digest fallback (2026-11-26)
+When the model refuses (or is down) but the reranker rates the top filing ≥ 7/10, `/v3/explain` answers with a deterministic digest of the retrieved filings (`answer_source: "digest"`, faithful by construction):
+answer rate on answerable questions 54% → **76.9%**, every released answer judged faithful. NLI strict mode (`strict_faithfulness`) withheld 3 of 21 real answers in a replay (earlier "half" figure was from a mismatched replay and is corrected in TRACKER.md).
+
+## Overnight (US-close) direction signal (2026-11-26)
+`python3 scripts/overnight_signal.py` / `ops/overnight.py`: following the S&P 500's sign predicts the Nifty's next **opening gap** 68% of the time on all days, **78% when |S&P| ≥ 0.5% (54% of days), 85% at ≥ 1% (26%)**; close-to-close 58–72%.
+This is real and leak-free but **not a trading edge**: the gap is set in the pre-open auction after the US move is known, and the tradable part (open → close) is at chance (47–48%). Tradable direction accuracy remains ≈ 50%.
+
+## Tradable direction — every horizon tested (2026-11-26)
+Hourly-bar test (`scripts/run_intraday_direction.py`): predicting the remainder-of-day direction after the first or fourth hour is 51% (AUC 0.51), naive intraday momentum 49–50%. With the daily, LLM, FinBERT, Chronos
+and overnight-US results, **no tradable direction signal exists at any horizon from intraday to 20 days**; only the non-tradable opening gap is predictable (78–86% on big US-move days).
+
+## Pre-open direction model (2026-11-26)
+`python3 scripts/run_preopen_direction.py`: US indices, VIX, dollar, Brent, gold, US yields and USD/INR (all known at 09:00 IST) give the Nifty **opening-gap direction AUC 0.75** (accuracy 68.6%; 88% on the most confident quarter), stocks AUC 0.69, close-to-close AUC 0.60/0.56 —
+but the open-to-close part, the only part tradable after the open, stays at AUC ≈ 0.50.
+
+## Needs a human (2026-11-25)
+`python3 scripts/label_cli.py --n 120` (blind relevance labels, ~15 min) then `python3 scripts/human_agreement.py`. To keep the forward test accruing unattended:
+`cp scripts/launchd/com.stm.daily-refresh.plist ~/Library/LaunchAgents/ && launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.stm.daily-refresh.plist`
+(not installed by me; the harness blocked it). Real execution fills for `scripts/calibrate_impact.py` must come from your broker.
 
 ## Keeping these docs current
 
