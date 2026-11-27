@@ -278,3 +278,10 @@ def test_portfolio_pairs_removal_and_range_grading(site, tmp_path, monkeypatch):
     days = pd.date_range("2026-01-01", periods=2, freq="B", tz="Asia/Kolkata")
     row = WebData(ctx, tmp_path, tmp_path, tmp_path).forward("NSE:INFY", pd.DataFrame({"event_time": days, "close": [100, 110], "quality_flag": "PASS"}))
     assert row[0]["inside_range"] is False
+
+
+def test_sector_lists_its_stocks(site, monkeypatch):
+    _, client = site
+    body = client.get("/api/sector/IT").json()
+    assert [r["symbol"] for r in body["rows"]] == ["INFY"] and body["correlation"] is None
+    assert client.get("/api/sector/Nope").status_code == 404
