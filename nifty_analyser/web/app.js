@@ -120,6 +120,12 @@ const mood = (m) => m ? [h("h2", {}, "Market mood"), h("details", { class: "card
   chart([{ values: m.history.map((x) => x[1]) }], m.history.map((x) => x[0]), (v) => v.toFixed(1)),
   h("p", { class: "dim" }, "VIX reflects how much the options market expects the Nifty to swing. It says nothing about direction."))] : [];
 
+// "jump" ranks by forecast volatility relative to the stock's own usual level.
+const sorters = (key) => ({ prob: (a, b) => b[key].prob_above_usual - a[key].prob_above_usual,
+  calm: (a, b) => a[key].prob_above_usual - b[key].prob_above_usual,
+  jump: (a, b) => b[key].forecast_vol_annualised / b[key].usual_vol_annualised - a[key].forecast_vol_annualised / a[key].usual_vol_annualised,
+  vol: (a, b) => b[key].forecast_vol_annualised - a[key].forecast_vol_annualised, name: (a, b) => a.symbol.localeCompare(b.symbol) });
+
 async function today() {
   const data = await get("/api/overview");
   const list = h("div", { class: "list" });
@@ -129,8 +135,7 @@ async function today() {
     const key = `h${state.horizon}`;
     const q = state.query.trim().toLowerCase();
     const rows = data.rows.filter((r) => r[key] && `${r.symbol} ${r.sector || ""}`.toLowerCase().includes(q) && (state.only === "all" || watch.has(r.id)));
-    rows.sort({ prob: (a, b) => b[key].prob_above_usual - a[key].prob_above_usual,
-      vol: (a, b) => b[key].forecast_vol_annualised - a[key].forecast_vol_annualised, name: (a, b) => a.symbol.localeCompare(b.symbol) }[state.sort]);
+    rows.sort(sorters(key)[state.sort] || sorters(key).prob);
     list.replaceChildren(h("div", { class: "row head" }, h("span", {}, "Stock"), h("span", {}, "Chance of above-usual volatility"),
       h("span", {}, "Volatility (yearly)"), h("span", {}, "9-in-10 price move")),
       ...rows.map((r) => h("a", { class: "row", href: `#/stock/${encodeURIComponent(r.id)}` },
@@ -157,7 +162,7 @@ async function today() {
   const seg = h("div", { class: "segmented", role: "group", "aria-label": "Horizon" }, ["5", "20"].map((n) =>
     h("button", { "data-h": n, onclick: () => { state.horizon = n; draw(); } }, `${n} days`)));
   const sort = h("select", { "aria-label": "Sort by", onchange: (e) => { state.sort = e.target.value; draw(); } },
-    [["prob", "Highest chance"], ["vol", "Most volatile"], ["name", "Name"]].map(([v, t]) => h("option", { value: v, selected: state.sort === v }, t)));
+    [["prob", "Highest chance"], ["calm", "Lowest chance"], ["jump", "Furthest above own usual"], ["vol", "Most volatile"], ["name", "Name"]].map(([v, t]) => h("option", { value: v, selected: state.sort === v }, t)));
   const search = h("input", { type: "search", placeholder: "Search stock or sector", value: state.query, "aria-label": "Search",
     oninput: (e) => { state.query = e.target.value; draw(); } });
   const high = data.rows.filter((r) => r.h5 && r.h5.prob_above_usual >= 0.6).length;

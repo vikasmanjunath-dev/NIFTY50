@@ -330,3 +330,14 @@ def test_test_forecast_csv_rows_line_up_by_date():
     script = f"{function}\nconsole.log(JSON.stringify(recordRows({{'5': {{dates: ['d1', 'd2'], forecast: [1, 2], actual: [3, 4]}}}})))"
     out = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=True).stdout
     assert json.loads(out)[1:] == [[5, "d1", 1, 3], [5, "d2", 2, 4]]
+
+
+@pytest.mark.skipif(not shutil.which("node"), reason="node not installed")
+def test_today_sort_orders():
+    source = (WEB_DIR / "app.js").read_text()
+    function = source[source.index("const sorters"):source.index("async function today")]
+    rows = [{"symbol": s, "h5": {"prob_above_usual": p, "forecast_vol_annualised": v, "usual_vol_annualised": u}}
+            for s, p, v, u in (("A", 0.4, 0.5, 0.5), ("B", 0.7, 0.3, 0.2), ("C", 0.5, 0.2, 0.2))]
+    script = f"{function}\nconst r = {json.dumps(rows)};\nconsole.log(JSON.stringify(['prob','calm','jump','vol'].map((k) => [...r].sort(sorters('h5')[k]).map((x) => x.symbol).join(''))))"
+    out = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=True).stdout
+    assert json.loads(out) == ["BCA", "ACB", "BAC", "ABC"]
