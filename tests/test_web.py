@@ -301,3 +301,14 @@ def test_system_lists_recent_activity_without_payloads(site):
         ctx.audit.append(f"k{i}", {"secret": "x"})
     recent = client.get("/api/system").json()["recent"]
     assert [r["kind"] for r in recent][:2] == ["k11", "k10"] and len(recent) == 10 and set(recent[0]) == {"time", "kind"}
+
+
+@pytest.mark.skipif(not shutil.which("node"), reason="node not installed")
+def test_meetings_are_grouped_by_date_and_past_ones_dropped():
+    source = (WEB_DIR / "app.js").read_text()
+    function = source[source.index("function byDate"):source.index("async function meetings")]
+    items = [{"date": "2026-01-03", "symbol": "B"}, {"date": "2026-01-01", "symbol": "OLD"}, {"date": "2026-01-02", "symbol": "Z"},
+             {"date": "2026-01-03", "symbol": "A"}]
+    script = f"{function}\nconsole.log(JSON.stringify(byDate({json.dumps(items)}, '2026-01-02').map(([d, l]) => [d, l.map((u) => u.symbol)])))"
+    out = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=True).stdout
+    assert json.loads(out) == [["2026-01-02", ["Z"]], ["2026-01-03", ["A", "B"]]]

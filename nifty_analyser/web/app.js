@@ -162,7 +162,7 @@ async function today() {
     oninput: (e) => { state.query = e.target.value; draw(); } });
   const high = data.rows.filter((r) => r.h5 && r.h5.prob_above_usual >= 0.6).length;
   const parts = [...header("Today", data.data_date ? `Market data to ${data.data_date}` : "Waiting for data"),
-    h("p", {}, h("a", { href: "#/guide" }, "What do these numbers mean?"), " · ", h("a", { href: "#/summary" }, "My printable summary")), notice(data.status)];
+    h("p", {}, h("a", { href: "#/guide" }, "What do these numbers mean?"), " · ", h("a", { href: "#/summary" }, "My printable summary"), " · ", h("a", { href: "#/meetings" }, "Meetings calendar")), notice(data.status)];
   // Watched stocks worth a look: a high chance of a busy spell, or a meeting already announced.
   const watchlist = () => {
     const hits = data.rows.filter((r) => watch.has(r.id)).map((r) => ({ r, chance: r.h5?.prob_above_usual, meeting: data.upcoming.find((u) => u.id === r.id) }))
@@ -538,14 +538,32 @@ async function system() {
       : card("No forecast has matured yet. Scores appear once each forecast's horizon has passed.")];
 }
 
-const routes = { today, portfolio, filings, ask, guide, compare, summary, sector, model, system, stock };
+// Meetings from today onward, grouped by date (a hosted snapshot can be a few days old).
+function byDate(items, from) {
+  const days = new Map();
+  for (const u of [...items].sort((a, b) => a.date.localeCompare(b.date) || a.symbol.localeCompare(b.symbol)))
+    if (u.date >= from) days.set(u.date, [...(days.get(u.date) || []), u]);
+  return [...days];
+}
+
+async function meetings() {
+  const data = await get("/api/overview");
+  const days = byDate(data.upcoming, new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }));
+  return [h("a", { href: "#/today" }, "‹ Today"), ...header("Meetings", "Announced board meetings, next 30 days"), notice(data.status),
+    ...(days.length ? days.flatMap(([date, list]) => [h("h2", {}, new Date(`${date}T00:00:00`).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })),
+      h("div", { class: "tiles" }, list.map((u) => h("a", { class: "card", href: `#/stock/${encodeURIComponent(u.id)}` }, h("strong", {}, u.symbol),
+        h("div", { class: "dim" }, u.results ? "Results" : "Board meeting"))))]) : [card("No announced meetings.")]),
+    h("footer", {}, "Only meetings the companies have already announced.")];
+}
+
+const routes = { meetings, today, portfolio, filings, ask, guide, compare, summary, sector, model, system, stock };
 let visit = 0;
 async function route() {
   const [, name = "today", arg] = location.hash.split("/");
   const page = routes[name] || today;
   const mine = ++visit;
   for (const a of document.querySelectorAll("nav a")) {
-    const on = a.hash === `#/${["stock", "guide", "compare", "summary", "sector"].includes(name) ? "today" : name}`;
+    const on = a.hash === `#/${["stock", "meetings", "guide", "compare", "summary", "sector"].includes(name) ? "today" : name}`;
     on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current");
   }
   let content;
