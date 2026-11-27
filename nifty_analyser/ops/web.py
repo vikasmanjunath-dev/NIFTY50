@@ -76,7 +76,9 @@ class WebData:
                 inst = get_instrument(iid)
                 rows.setdefault(iid, {"id": iid, "symbol": inst.symbol, "sector": getattr(inst, "sector", None)})[f"h{horizon}"] = f
         return {"status": status, "data_date": max((b["data_date"] for b in blocks.values()), default=None),
-                "rows": list(rows.values()), "upcoming": self.upcoming(set(rows)), "market": self.market(), "changes": self.changes(blocks), "disclaimer": DISCLAIMER}
+                "rows": list(rows.values()),
+                "age_days": (self.ctx.now_fn().date() - date.fromisoformat(max(b["data_date"] for b in blocks.values()))).days if blocks else None,
+                "upcoming": self.upcoming(set(rows)), "market": self.market(), "changes": self.changes(blocks), "disclaimer": DISCLAIMER}
 
     def changes(self, blocks: dict, top: int = 6) -> dict:
         """Largest moves in each chance since the previous recorded forecast date (from the forward ledger)."""
@@ -381,7 +383,8 @@ class WebData:
             path = self.processed / f"{name}.jsonl"
             ledgers[name] = sum(1 for line in path.read_text().splitlines() if line.strip()) if path.exists() else 0
         return {"health": health, "model_version": self.ctx.version, "audit_ok": ok, "audit_entries": len(self.ctx.audit.read()),
-                "ledger_entries": ledgers, "forecast_status": self.forecasts()[0], "scorecard": self.scorecard(), "sources": self.freshness()}
+                "ledger_entries": ledgers, "forecast_status": self.forecasts()[0], "scorecard": self.scorecard(), "recent": [{"time": e["ts"][:19], "kind": e["kind"]} for e in self.ctx.audit.read()[-10:]][::-1],
+                "sources": self.freshness()}
 
 
 LOCAL_HOSTS = ["127.0.0.1", "localhost", "[::1]"]

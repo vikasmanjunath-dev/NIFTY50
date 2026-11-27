@@ -44,9 +44,9 @@ def site(tmp_path):
 def test_overview_serves_then_withholds_when_stale_or_halted(site):
     ctx, client = site
     body = client.get("/api/overview").json()
-    assert body["status"] == "OK" and body["rows"][0]["symbol"] == "INFY" and body["rows"][0]["h5"]["prob_above_usual"] == 0.7
+    assert body["age_days"] == 1 and body["status"] == "OK" and body["rows"][0]["symbol"] == "INFY" and body["rows"][0]["h5"]["prob_above_usual"] == 0.7
     ctx.now = pd.Timestamp("2026-02-01", tz="Asia/Kolkata")
-    assert client.get("/api/overview").json() == {**body, "status": "STALE", "data_date": None, "rows": []}
+    assert client.get("/api/overview").json() == {**body, "status": "STALE", "data_date": None, "rows": [], "age_days": None}
     ctx.killswitch.trip("test", "t")
     assert client.get("/api/overview").json()["status"] == "HALTED"
 
@@ -293,3 +293,11 @@ def test_security_headers_and_no_inline_handlers(site):
         h = client.get(path).headers
         assert "script-src 'self'" in h["content-security-policy"] and h["x-content-type-options"] == "nosniff"
     assert " onclick=" not in client.get("/").text
+
+
+def test_system_lists_recent_activity_without_payloads(site):
+    ctx, client = site
+    for i in range(12):
+        ctx.audit.append(f"k{i}", {"secret": "x"})
+    recent = client.get("/api/system").json()["recent"]
+    assert [r["kind"] for r in recent][:2] == ["k11", "k10"] and len(recent) == 10 and set(recent[0]) == {"time", "kind"}

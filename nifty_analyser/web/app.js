@@ -177,6 +177,9 @@ async function today() {
       if (items.length) news.replaceChildren(h("h2", {}, "Latest filings from your watchlist"), filingList(items));
     }).catch(() => { /* the board works without it */ });
   }
+  if (data.age_days >= 3) { // weekends make 1-2 days normal
+    parts.push(h("div", { class: "card notice" }, `These figures use data from ${data.age_days} days ago. `, h("a", { href: "#/system" }, "Refresh on the System page")));
+  }
   if (data.rows.length) {
     parts.push(h("div", { class: "grid" }, stat("Stocks covered", data.rows.length, "Current index members"),
       stat("Likely busier than usual", high, "5-day chance of 60% or more"), stat("Direction signal", "None", "Up or down is not predictable here")),
@@ -417,13 +420,16 @@ async function sector(name) {
 
 async function filings() {
   const results = h("div");
-  let timer, latest = 0, query = "", category = "";
+  let timer, latest = 0, query = "", category = "", limit = 30;
   const categories = await get("/api/filings/categories");
-  const run = async (q) => {
+  const run = async (q, more = false) => {
+    limit = more ? Math.min(100, limit + 35) : 30;
     query = q;
     const mine = ++latest;
-    const items = await get(`/api/filings?q=${encodeURIComponent(q)}&category=${encodeURIComponent(category)}`);
-    if (mine === latest) results.replaceChildren(filingList(items));
+    const items = await get(`/api/filings?limit=${limit}&q=${encodeURIComponent(q)}&category=${encodeURIComponent(category)}`);
+    if (mine === latest) results.replaceChildren(filingList(items), items.length === limit && limit < 100
+      ? h("p", {}, h("button", { type: "button", class: "primary", onclick: () => run(query, true) }, "Show more"))
+      : items.length === 100 ? h("p", { class: "dim" }, "Showing the newest 100. Narrow the search for older ones.") : "");
   };
   await run("");
   return [...header("Filings", "Company announcements to the exchange, newest first"), h("div", { class: "controls" },
@@ -522,6 +528,8 @@ async function system() {
       h("strong", {}, s.source), " ", h("span", { class: `badge ${s.late ? "STALE" : "OK"}` }, s.newest == null ? "missing" : s.late ? "behind" : "current"),
       h("div", { class: "dim" }, s.newest == null ? `Get it with: ${s.refresh_with}` : `newest ${s.newest}, ${s.age_days} day${s.age_days === 1 ? "" : "s"} ago${s.late ? ` · update with: ${s.refresh_with}` : ""}`)))),
     h("h2", {}, "Update"), refreshCard(),
+    h("h2", {}, "Recent activity"), h("div", { class: "list" }, d.recent.length ? d.recent.map((e) => h("div", { class: "filing" },
+      h("strong", {}, e.kind.replaceAll("_", " ")), h("span", { class: "dim" }, ` · ${new Date(`${e.time}Z`).toLocaleString("en-IN")}`))) : h("div", { class: "empty" }, "Nothing logged yet.")),
     h("h2", {}, "Forward records"), h("div", { class: "list" }, Object.entries(d.ledger_entries).map(([k, v]) =>
       h("div", { class: "filing" }, h("strong", {}, k.replaceAll("_", " ")), ` · ${v} entries`))),
     h("p", {}, h("a", { href: "/api/backup", download: "" }, "Download a backup of these records")),
