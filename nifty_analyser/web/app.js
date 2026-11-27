@@ -287,6 +287,9 @@ function parseHoldings(text, bySymbol) {
   return { found, skipped };
 }
 
+// Watched stocks not yet held, each at the same amount; existing holdings are never changed.
+const fromWatchlist = (watched, held, known, amount) => [...watched].filter((id) => known.has(id) && !held.has(id)).map((id) => [id, amount]);
+
 async function portfolio() {
   const data = await get("/api/overview");
   const symbols = new Map(data.rows.map((r) => [r.id, r.symbol]));
@@ -327,6 +330,13 @@ async function portfolio() {
   const seg = h("div", { class: "segmented", role: "group", "aria-label": "Horizon" }, ["5", "20"].map((n) =>
     h("button", { type: "button", "aria-pressed": state.horizon === n, onclick: (e) => { state.horizon = n;
       for (const b of seg.children) b.setAttribute("aria-pressed", b === e.target); analyse(); } }, `${n} days`)));
+  const fill = h("button", { type: "button", onclick: () => {
+    const added = fromWatchlist(watch, holdings, symbols, Number(amount.value) > 0 ? Number(amount.value) : 10000);
+    for (const [id, value] of added) holdings.set(id, value);
+    if (added.length) { saveHoldings(); draw(); }
+    filled.textContent = added.length ? `${added.length} added at ${rupees(added[0][1])} each. Change any amount by adding that stock again.` : "No watched stocks left to add.";
+  } }, "Add my watchlist");
+  const filled = h("p", { class: "dim", role: "status" });
   const box = h("textarea", { rows: "4", "aria-label": "Holdings to import", placeholder: "One per line, e.g.\nINFY, 100000\nTCS, 50000" });
   const report = h("p", { class: "dim", role: "status" });
   const importer = h("details", {}, h("summary", {}, "Paste a list"), box, h("button", { type: "button", class: "primary", onclick: () => {
@@ -336,7 +346,7 @@ async function portfolio() {
     report.textContent = `${found.size} added.${skipped.length ? ` Not understood or not covered: ${skipped.slice(0, 5).join("; ")}` : ""}`;
   } }, "Import"), report);
   draw();
-  return [...header("Portfolio", "How much could your mix of stocks swing? Direction is not predicted."), notice(data.status), form, importer, seg,
+  return [...header("Portfolio", "How much could your mix of stocks swing? Direction is not predicted."), notice(data.status), form, h("p", {}, fill), filled, importer, seg,
     h("h2", {}, "Holdings"), rows, result, h("footer", {}, `${data.disclaimer} Amounts are saved only in this browser.`)];
 }
 
@@ -435,6 +445,8 @@ async function sector(name) {
     h("footer", {}, d.disclaimer)];
 }
 
+const filingRows = (items) => [["symbol", "date", "category", "text", "url"], ...items.map((x) => [x.symbol, x.date, x.category, x.text, x.url || ""])];
+
 async function filings() {
   const results = h("div");
   let timer, latest = 0, query = "", category = "", limit = 30;
@@ -444,7 +456,8 @@ async function filings() {
     query = q;
     const mine = ++latest;
     const items = await get(`/api/filings?limit=${limit}&q=${encodeURIComponent(q)}&category=${encodeURIComponent(category)}`);
-    if (mine === latest) results.replaceChildren(filingList(items), items.length === limit && limit < 100
+    if (mine === latest) results.replaceChildren(items.length ? h("p", {}, h("button", { type: "button", onclick: () => download("filings.csv", filingRows(items)) }, "Download these as CSV")) : "",
+      filingList(items), items.length === limit && limit < 100
       ? h("p", {}, h("button", { type: "button", class: "primary", onclick: () => run(query, true) }, "Show more"))
       : items.length === 100 ? h("p", { class: "dim" }, "Showing the newest 100. Narrow the search for older ones.") : "");
   };

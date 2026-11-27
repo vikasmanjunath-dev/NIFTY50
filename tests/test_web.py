@@ -341,3 +341,13 @@ def test_today_sort_orders():
     script = f"{function}\nconst r = {json.dumps(rows)};\nconsole.log(JSON.stringify(['prob','calm','jump','vol'].map((k) => [...r].sort(sorters('h5')[k]).map((x) => x.symbol).join(''))))"
     out = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=True).stdout
     assert json.loads(out) == ["BCA", "ACB", "BAC", "ABC"]
+
+
+@pytest.mark.skipif(not shutil.which("node"), reason="node not installed")
+def test_filing_rows_and_watchlist_fill():
+    source = (WEB_DIR / "app.js").read_text()
+    lines = "\n".join(x for x in source.splitlines() if x.startswith(("const filingRows", "const fromWatchlist")))
+    script = (f"{lines}\nconsole.log(JSON.stringify([filingRows([{{symbol:'A',date:'d',category:'c',text:'t',url:null}}])[1], "
+              "fromWatchlist(new Set(['a','b','z']), new Map([['a',5]]), new Map([['a'],['b']]), 100)]))")
+    out = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=True).stdout
+    assert json.loads(out) == [["A", "d", "c", "t", ""], [["b", 100]]]
