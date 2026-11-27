@@ -506,3 +506,4 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 3. The 26 Nov 40-name entries remain in `vol_ledger.jsonl` (append-only; backup of the pre-run ledgers in `data/processed/backup/`).
 4. Web: per-stock forecast-vs-actual charts and a reliability table (from backtest files; the live forward record is separate). Bugs found in browser testing: nested sections dropped by one-level flattening; app files now sent with no-cache so updates appear.
 5. Web: upcoming announced meetings on Today; CSV export (formula-injection safe).
+6. Web: biggest changes since the previous recorded forecast (a model update between dates also shows up as change).
