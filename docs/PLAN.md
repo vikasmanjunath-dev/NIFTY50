@@ -67,6 +67,8 @@ The working plan. Item-level history is in [TRACKER.md](../TRACKER.md); model ex
 
 | 37 | Security headers on the web app | only own scripts run; no framing | done |
 
+| 38 | Export portfolio risk as CSV | one click on the Portfolio page | done |
+
 ## Next (in order)
 | # | Item | Why | Needs |
 |---|---|---|---|

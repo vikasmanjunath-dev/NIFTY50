@@ -534,3 +534,4 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 21. Web: loading message and retry button.
 22. Web: sector page and `GET /api/sector/{name}`.
 23. Web: Content-Security-Policy and related headers.
+24. Web: portfolio CSV export (syntax-checked, not clicked in a browser).
