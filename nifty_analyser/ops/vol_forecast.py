@@ -10,6 +10,7 @@ from nifty_analyser.config import DATA_RAW_DIR
 from nifty_analyser.data.index_membership import instrument_ids_as_of, membership_mask
 from nifty_analyser.data.store import load_all_macro_series, load_universe_bars
 from nifty_analyser.features.volatility import build_volatility_frame
+from nifty_analyser.features.volatility_events import add_event_features
 from nifty_analyser.features.volatility_extra import extra_features
 from nifty_analyser.models.volatility import fit_predict_classifiers, fit_predict_regressors
 
@@ -29,12 +30,23 @@ HISTORY_DIR = DATA_RAW_DIR / "history"
 EXTRA_FEATURE_HORIZONS = frozenset({20})
 
 
+# Horizons whose classifier uses announced board-meeting dates (reports/vol_events.json).
+EVENT_FEATURE_HORIZONS = frozenset({5})
+MEETINGS_PATH = DATA_RAW_DIR / "board_meetings.parquet"
+
+
+def load_meetings(path=None) -> pd.DataFrame | None:
+    path = path or MEETINGS_PATH
+    return pd.read_parquet(path) if path.exists() else None
+
+
 def _with_extra(df, bars):
     extra, cols = extra_features(bars)
     return df.merge(extra, on=["instrument_id", "event_time"], how="left"), cols
 
 
-def load_history_training(horizon: int, directory=None, extra: bool = True) -> pd.DataFrame | None:
+def load_history_training(horizon: int, directory=None, extra: bool = True,
+                          meetings: pd.DataFrame | None = None) -> pd.DataFrame | None:
     """Pre-2021 rows (scripts/backfill_history.py) used only for training; None if not downloaded."""
     directory = directory or HISTORY_DIR
     if not (directory / "bars.parquet").exists():
@@ -47,12 +59,15 @@ def load_history_training(horizon: int, directory=None, extra: bool = True) -> p
     df, _ = build_volatility_frame(bars, horizon, vix[vix.quality_flag != "FAIL"])
     if extra and horizon in EXTRA_FEATURE_HORIZONS:
         df, _ = _with_extra(df, bars)
+    if meetings is not None and horizon in EVENT_FEATURE_HORIZONS:
+        df, _ = add_event_features(df, meetings, horizon)
     df = df.dropna(subset=["fwd_rv", "med_rv", "cur_rv", "outcome_time", "har_66"])
     return df[(df.fwd_rv > 0) & (df.cur_rv > 0)].reset_index(drop=True)
 
 
 def latest_forecasts(bars, horizon: int, vix=None, announcements=None, as_of=None,
-                     quantiles: dict | None = None, history: pd.DataFrame | None = None) -> pd.DataFrame:
+                     quantiles: dict | None = None, history: pd.DataFrame | None = None,
+                     meetings: pd.DataFrame | None = None) -> pd.DataFrame:
     if as_of is not None:
         bars = bars[bars.available_time <= as_of]
         vix = None if vix is None else vix[vix.available_time <= as_of]
@@ -62,6 +77,10 @@ def latest_forecasts(bars, horizon: int, vix=None, announcements=None, as_of=Non
     if horizon in EXTRA_FEATURE_HORIZONS:
         df, extra_cols = _with_extra(df, bars)
         class_cols = cols + extra_cols
+    if meetings is not None and horizon in EVENT_FEATURE_HORIZONS:
+        known = meetings if as_of is None else meetings[meetings.available_time <= as_of]
+        df, event_cols = add_event_features(df, known, horizon)
+        class_cols = class_cols + event_cols
     df = df[membership_mask(df).to_numpy() & df.har_66.notna().to_numpy()]
     train = df.dropna(subset=["fwd_rv", "med_rv", "outcome_time"])
     train = train[train.fwd_rv > 0]

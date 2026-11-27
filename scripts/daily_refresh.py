@@ -21,4 +21,8 @@ bk = paper.books(AuditLog(DATA_PROCESSED_DIR / "paper_ledger.jsonl"))
 if not bk or paper.is_due(AuditLog(DATA_PROCESSED_DIR / "paper_ledger.jsonl"), dates[-1], dates):
     print("rebalance due -> rebuilding serving artifacts"); run("build_serving_artifacts.py")
 run("paper_trade.py")
+try:
+    run("backfill_board_meetings.py")                      # newly announced meeting dates
+except subprocess.CalledProcessError as exc:
+    print(f"board-meeting refresh failed, keeping cache: {exc}")
 run("forecast_volatility.py")
