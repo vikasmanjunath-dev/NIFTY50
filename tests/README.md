@@ -47,4 +47,4 @@
 | [test_triple_barrier.py](test_triple_barrier.py) | 5 |
 | [test_vector_index.py](test_vector_index.py) | 8 |
 | [test_volatility.py](test_volatility.py) | 19 |
-| [test_web.py](test_web.py) | 24 |
+| [test_web.py](test_web.py) | 25 |
