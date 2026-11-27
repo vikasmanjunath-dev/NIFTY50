@@ -312,3 +312,12 @@ def test_meetings_are_grouped_by_date_and_past_ones_dropped():
     script = f"{function}\nconsole.log(JSON.stringify(byDate({json.dumps(items)}, '2026-01-02').map(([d, l]) => [d, l.map((u) => u.symbol)])))"
     out = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=True).stdout
     assert json.loads(out) == [["2026-01-02", ["Z"]], ["2026-01-03", ["A", "B"]]]
+
+
+@pytest.mark.skipif(not shutil.which("node"), reason="node not installed")
+def test_shared_watchlist_link_keeps_only_known_stocks_once():
+    source = (WEB_DIR / "app.js").read_text()
+    line = next(x for x in source.splitlines() if x.startswith("const sharedIds"))
+    script = f"{line}\nconsole.log(JSON.stringify(sharedIds('TCS,<img>,TCS,M&M,ZZZ', ['NSE:TCS','NSE:M&M'])))"
+    out = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=True).stdout
+    assert json.loads(out) == ["NSE:TCS", "NSE:M&M"]

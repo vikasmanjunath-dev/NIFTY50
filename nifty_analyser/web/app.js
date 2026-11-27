@@ -393,7 +393,13 @@ function settingsCard() {
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   } }, "Save my list to a file");
-  return h("div", { class: "card noprint" }, h("div", { class: "controls" }, level, save, h("label", {}, "Restore: ", file)), note);
+  const share = h("button", { type: "button", onclick: async () => {
+    if (!watch.size) { note.textContent = "Star some stocks first."; return; }
+    const link = `${location.origin}/#/shared/${encodeURIComponent([...watch].map((id) => id.slice(4)).join(","))}`;
+    try { await navigator.clipboard.writeText(link); note.textContent = "Link copied. It contains your watched stocks, not your holdings."; }
+    catch { note.textContent = link; }
+  } }, "Copy watchlist link");
+  return h("div", { class: "card noprint" }, h("div", { class: "controls" }, level, save, share, h("label", {}, "Restore: ", file)), note);
 }
 
 async function summary() {
@@ -556,14 +562,33 @@ async function meetings() {
     h("footer", {}, "Only meetings the companies have already announced.")];
 }
 
-const routes = { meetings, today, portfolio, filings, ask, guide, compare, summary, sector, model, system, stock };
+// A watchlist sent as a link: only stocks the app knows are shown, and nothing is saved until asked.
+const sharedIds = (arg, known) => [...new Set((arg || "").split(","))].map((x) => `NSE:${x}`).filter((id) => known.includes(id)).slice(0, 50);
+
+async function shared(arg) {
+  const data = await get("/api/overview");
+  const ids = sharedIds(arg, data.rows.map((r) => r.id));
+  const rows = data.rows.filter((r) => ids.includes(r.id));
+  const note = h("p", { class: "dim", role: "status" });
+  const add = h("button", { type: "button", class: "primary", onclick: () => {
+    ids.forEach((id) => watch.add(id));
+    try { localStorage.setItem("watch", JSON.stringify([...watch])); note.textContent = "Added to your watchlist."; }
+    catch { note.textContent = "This browser would not save the list."; }
+  } }, "Add all to my watchlist");
+  return [h("a", { href: "#/today" }, "‹ Today"), ...header("Shared list", "A watchlist someone sent you"), notice(data.status),
+    ...(rows.length ? [h("div", { class: "tiles" }, rows.map((r) => h("a", { class: "card", href: `#/stock/${encodeURIComponent(r.id)}` }, h("strong", {}, r.symbol),
+      h("div", { class: "dim" }, `${pct(r.h5?.prob_above_usual, 0)} chance of a busy week`)))), add, note] : [card("No known stocks in this link.")]),
+    h("footer", {}, data.disclaimer)];
+}
+
+const routes = { shared, meetings, today, portfolio, filings, ask, guide, compare, summary, sector, model, system, stock };
 let visit = 0;
 async function route() {
   const [, name = "today", arg] = location.hash.split("/");
   const page = routes[name] || today;
   const mine = ++visit;
   for (const a of document.querySelectorAll("nav a")) {
-    const on = a.hash === `#/${["stock", "meetings", "guide", "compare", "summary", "sector"].includes(name) ? "today" : name}`;
+    const on = a.hash === `#/${["stock", "shared", "meetings", "guide", "compare", "summary", "sector"].includes(name) ? "today" : name}`;
     on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current");
   }
   let content;
