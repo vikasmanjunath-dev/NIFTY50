@@ -193,6 +193,47 @@ async function filings() {
       oninput: (e) => { clearTimeout(timer); timer = setTimeout(() => run(e.target.value), 250); } })), results];
 }
 
+const outcomes = { OK: "Answer checked against the filings below", ABSTAIN: "The filings found do not answer this",
+  BLOCKED: "The draft answer failed the checks, so it is withheld", DEGRADED: "The language model is unavailable; showing filings only",
+  EMPTY: "No matching filings", REFUSED: "This company is not covered" };
+
+async function ask() {
+  const data = await get("/api/overview");
+  const out = h("div");
+  const who = h("select", { "aria-label": "Company" }, h("option", { value: "" }, "All companies"),
+    [...data.rows].sort((a, b) => a.symbol.localeCompare(b.symbol)).map((r) => h("option", { value: r.id }, r.symbol)));
+  const question = h("input", { type: "search", placeholder: "e.g. What is the latest dividend record date?", "aria-label": "Question",
+    minlength: "2", maxlength: "300", required: true });
+  const button = h("button", { class: "primary" }, "Ask");
+  const form = h("form", { class: "controls ask", onsubmit: async (e) => {
+    e.preventDefault();
+    if (button.disabled || question.value.trim().length < 2) return;
+    button.disabled = true;
+    out.replaceChildren(card("Reading the filings… a local model can take up to a minute."));
+    try {
+      const res = await fetch("/v3/explain", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: question.value.trim(), instrument_id: who.value || null }) });
+      if (res.status === 404 || res.status === 405) {
+        out.replaceChildren(card("Question answering is off. Restart the server with: python3 scripts/serve.py --evidence --explain (needs Ollama)."));
+      } else if (!res.ok) {
+        out.replaceChildren(card(`The server returned ${res.status}.`));
+      } else {
+        const d = await res.json();
+        // Same order as the model saw them (newest first, documents/llm.py), so "[1]" in the answer is source [1] here.
+        const items = [...(d.evidence?.pack?.evidence_items || [])].sort((a, b) => String(b.publication_time).localeCompare(String(a.publication_time)));
+        out.replaceChildren(h("div", { class: "card" }, h("span", { class: `badge ${d.status === "OK" ? "OK" : "STALE"}` }, outcomes[d.status] || d.status),
+          d.answer && h("p", { class: "answer" }, d.answer), d.answer_source === "digest" && h("p", { class: "dim" }, "Summary assembled from the filings, not written by the model.")),
+          items.length ? h("h2", {}, "Sources") : "",
+          items.length ? h("div", { class: "list" }, items.map((x, i) => h("article", { class: "filing" }, h("strong", {}, `[${i + 1}] ${x.instrument_id.split(":")[1]}`), " ",
+            h("span", { class: "badge" }, x.category), " ", h("span", { class: "dim" }, String(x.publication_time).slice(0, 10)), h("p", {}, x.claim_span.slice(0, 400))))) : "");
+      }
+    } catch { out.replaceChildren(card("The server cannot be reached.")); }
+    button.disabled = false;
+  } }, who, question, button);
+  return [...header("Ask", "Questions answered only from company filings, by a model running on this computer"), form, out,
+    h("footer", {}, "Checks confirm the answer is supported by the filings shown; they cannot guarantee it is complete. Read the source before acting.")];
+}
+
 async function model() {
   const d = await get("/api/model");
   const last = d.rounds.at(-1);
@@ -221,7 +262,7 @@ async function system() {
       : card("No forecast has matured yet. Scores appear once each forecast's horizon has passed.")];
 }
 
-const routes = { today, portfolio, filings, model, system, stock };
+const routes = { today, portfolio, filings, ask, model, system, stock };
 let visit = 0;
 async function route() {
   const [, name = "today", arg] = location.hash.split("/");
