@@ -75,6 +75,8 @@ The working plan. Item-level history is in [TRACKER.md](../TRACKER.md); model ex
 
 | 41 | Show more filings, up to 100 | button under the list | done |
 
+| 42 | Command-line report of the forward record | matured and pending stated plainly | done |
+
 ## Next (in order)
 | # | Item | Why | Needs |
 |---|---|---|---|
@@ -86,7 +88,7 @@ The working plan. Item-level history is in [TRACKER.md](../TRACKER.md); model ex
 
 ## Not planned
 - Buy/sell signals: nothing tested predicts direction.
-- Public hosting: the app has no login; it stays on localhost.
+- Hosting the live server publicly: it has no login. Only the read-only snapshot is public.
 - More model searching on the same history: it would mostly fit noise.
 
 ## Working rules

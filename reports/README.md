@@ -77,8 +77,8 @@ Locked results. The script column is matched by file name and may be approximate
 | [vol_chronos_h20.json](vol_chronos_h20.json) | run_vol_chronos.py |
 | [vol_chronos_h5.json](vol_chronos_h5.json) | run_vol_chronos.py |
 | [vol_events.json](vol_events.json) | run_vol_events.py |
-| [vol_forecast_h20.json](vol_forecast_h20.json) | forecast_volatility.py, run_vol_ablation.py, run_vol_auc.py |
-| [vol_forecast_h5.json](vol_forecast_h5.json) | forecast_volatility.py, run_vol_ablation.py, run_vol_auc.py |
+| [vol_forecast_h20.json](vol_forecast_h20.json) | forecast_volatility.py, forward_report.py, run_vol_ablation.py |
+| [vol_forecast_h5.json](vol_forecast_h5.json) | forecast_volatility.py, forward_report.py, run_vol_ablation.py |
 | [vol_forecast_v2_h20.json](vol_forecast_v2_h20.json) | run_vol_ablation.py, run_vol_auc.py, run_vol_auc2.py |
 | [vol_forecast_v2_h5.json](vol_forecast_v2_h5.json) | run_vol_ablation.py, run_vol_auc.py, run_vol_auc2.py |
 | [vol_history.json](vol_history.json) | run_vol_history.py |

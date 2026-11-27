@@ -15,6 +15,17 @@ real bug found and fixed, every honestly-reported result) and **[TRACKER.xlsx](T
 > **0.750** (20-day) on 2021+ out-of-sample rows. A local web app serves it. Start with [docs/PLAN.md](docs/PLAN.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md),
 > [docs/OPERATIONS.md](docs/OPERATIONS.md) and [docs/API.md](docs/API.md). Older sections below record how the project got here; their numbers are historical.
 
+## Live site: Nifty Tremor
+
+**https://nifty-tremor.vercel.app** is a public, read-only snapshot of the web app. Ask, refresh and backup work only locally.
+Update it after a data refresh (forecasts are withheld once they are more than 5 days old):
+
+```bash
+python3 scripts/export_static.py && vercel deploy dist/nifty-tremor --prod --yes
+```
+
+Keep the Vercel project disconnected from Git: a push-triggered build has no site and serves 404.
+
 ## Survivorship-bias-free universe (new, 2026-11-24)
 
 Backtesting only today's Nifty 50 projected backward is a documented bias (Blueprint §3.4). `nifty_analyser/data/index_membership.py`

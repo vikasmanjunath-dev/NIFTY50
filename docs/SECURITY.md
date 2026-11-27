@@ -1,7 +1,9 @@
 # Security and privacy
 
 ## Intended use
-One person, on their own computer. The server listens on `127.0.0.1` and **has no login**. Do not expose it to a network or the internet.
+The server is for one person on their own computer: it listens on `127.0.0.1` and **has no login**; do not expose it to a network.
+Separately, a **public read-only snapshot** is hosted at https://nifty-tremor.vercel.app (`scripts/export_static.py`). Everything in that export is visible to anyone.
+The app's security headers are set by the local server and have not been checked on the hosted copy.
 
 ## Protections in place
 | Risk | Protection |

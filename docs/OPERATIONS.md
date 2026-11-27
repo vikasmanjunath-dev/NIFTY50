@@ -27,6 +27,8 @@ Macro series are refreshed by the daily job. Optional research data: `backfill_g
 
 The System page lists each data source with its newest date. The daily job also adds new company filings (`refresh_announcements.py`) and embeds them if Ollama is running; restart the server for the Ask page to see them. `backfill_announcements.py` rebuilds the whole set.
 
+`python3 scripts/forward_report.py` summarises the forward record and its scores.
+
 ## Kill switch
 `POST /v3/admin/kill` (server started with `STM_ADMIN_TOKEN`). Forecasts are withheld until reset.
 

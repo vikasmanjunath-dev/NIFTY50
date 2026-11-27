@@ -538,3 +538,6 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 25. Web: recent audit activity (time and kind only).
 26. Web: refresh reminder on Today.
 27. Web: load more filings.
+28. Added `scripts/forward_report.py`.
+29. Hosted read-only snapshot: https://nifty-tremor.vercel.app (scripts/export_static.py). Not auto-updated; forecasts withheld after 5 days; Ask, refresh and backup are local only.
+29. Static read-only export for Vercel (owner's work): `scripts/export_static.py`, `static_shim.js`; security notes and plan updated.
