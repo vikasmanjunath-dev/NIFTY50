@@ -42,8 +42,9 @@
 | [test_robustness.py](test_robustness.py) | 14 |
 | [test_spread_estimators.py](test_spread_estimators.py) | 2 |
 | [test_stat_rigor.py](test_stat_rigor.py) | 4 |
+| [test_static_shim.py](test_static_shim.py) | 3 |
 | [test_survivorship.py](test_survivorship.py) | 4 |
 | [test_triple_barrier.py](test_triple_barrier.py) | 5 |
 | [test_vector_index.py](test_vector_index.py) | 8 |
 | [test_volatility.py](test_volatility.py) | 19 |
-| [test_web.py](test_web.py) | 22 |
+| [test_web.py](test_web.py) | 23 |

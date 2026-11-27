@@ -543,3 +543,4 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 29. Static read-only export for Vercel (owner's work): `scripts/export_static.py`, `static_shim.js`; security notes and plan updated.
 30. Checked the static export locally (13 pages, 50 stocks). It included the audit activity list; now omitted. The live site still has the old export until redeployed.
 31. Daily publish: scripts/daily_publish.sh (refresh, export, deploy, live check) run by a Claude app scheduled task; launchd was tried and blocked by macOS. Redeployed with data to 2026-11-27; hosted copy now omits owner activity. Node tests cover the browser-side portfolio and staleness code.
+32. Web: meetings calendar page, grouped by date; checked with injected data (current data has no announced meetings).
