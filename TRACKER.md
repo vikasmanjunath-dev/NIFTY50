@@ -486,3 +486,7 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 ### 2026-11-27 — Volatility: AUC round 6 (intraday data)
 1. Streamed approved minute data into daily summaries (59 symbols, 2022+); cross-checked against daily bars.
 2. Not adopted: 5-day 0.700→0.701 on the confirmation half (CI -0.007..+0.010); 20-day worse in selection. AUC stays 0.684 / 0.750.
+
+### 2026-11-27 — Volatility: AUC round 7 (board-meeting dates)
+1. Fetched approved NSE board-meeting intimations; 5-day AUC 0.6843→0.6910 passed the rule and is live (ledger tag `v5-history-events`); 20-day 0.7502→0.7485, not adopted.
+2. `daily_refresh.py` now refreshes the meeting dates (not yet run end to end).

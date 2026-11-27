@@ -62,7 +62,19 @@ Source: Hugging Face `xxparthparekhxx/indian-stock-market-minute-data` (MIT, fro
 The dataset refreshes about monthly, so it could not feed a daily live forecast even if it had helped.
 Standing result unchanged: **5-day 0.684, 20-day 0.750**.
 
+## Round 7 (done, 5-day adopted): announced board-meeting dates
+NSE `corporate-board-meetings` (approved; 5,513 intimations, 59 symbols, 2009-12 to 2026-11, 80 KB). A meeting counts only after its publication timestamp.
+Chosen on 2010-2020, confirmed once on 2021+ (`reports/vol_events.json`):
+
+| | chosen | 2021+ AUC live → chosen | 95% interval of gain | Outcome |
+|---|---|---|---|---|
+| 5-day | events, blend | 0.6843 → **0.6910** | +0.004 to +0.011 | **adopted** |
+| 20-day | events, larger trees | 0.7502 → 0.7485 | -0.011 to +0.007 | rejected |
+
+**Current best: 5-day 0.691, 20-day 0.750.** On 2010-2020 the event features helped at 20 days too, but the pre-chosen candidate did not confirm.
+
 ## Backlog (in order)
 | Idea | Needs |
 |---|---|
 | Score the forward ledger | months of new data (`scripts/daily_refresh.py`) |
+| F&O implied volatility (NSE daily bhavcopy, about 1-1.5 GB) | owner approval |
