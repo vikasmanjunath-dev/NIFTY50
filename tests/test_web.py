@@ -159,3 +159,9 @@ def test_changes_compare_with_the_previous_recorded_date(site, tmp_path):
         ledger.append("vol_forecast", {"date": day, "horizon_days": 5, "forecasts": [{"instrument_id": "NSE:INFY", "prob": prob}]})
     change = client.get("/api/overview").json()["changes"]["5"]
     assert change["since"] == "2026-01-08" and change["rows"] == [{"id": "NSE:INFY", "symbol": "INFY", "now": 0.7, "before": 0.5}]
+
+
+def test_filings_filter_by_category(site):
+    _, client = site
+    assert sorted(client.get("/api/filings/categories").json()) == ["Dividend", "Updates"]
+    assert [h["symbol"] for h in client.get("/api/filings", params={"category": "Updates"}).json()] == ["TCS"]
