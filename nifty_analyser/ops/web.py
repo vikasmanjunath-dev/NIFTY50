@@ -59,7 +59,19 @@ class WebData:
                 inst = get_instrument(iid)
                 rows.setdefault(iid, {"id": iid, "symbol": inst.symbol, "sector": getattr(inst, "sector", None)})[f"h{horizon}"] = f
         return {"status": status, "data_date": max((b["data_date"] for b in blocks.values()), default=None),
-                "rows": list(rows.values()), "disclaimer": DISCLAIMER}
+                "rows": list(rows.values()), "upcoming": self.upcoming(set(rows)), "disclaimer": DISCLAIMER}
+
+    def upcoming(self, ids: set, days: int = 30) -> list[dict]:
+        """Announced meetings from today onward, for the stocks shown; only intimations already published."""
+        m = self._parquet("board_meetings.parquet")
+        if m is None or not ids:
+            return []
+        now = self.ctx.now_fn()
+        today = now.normalize()
+        m = m[m.instrument_id.isin(ids) & (m.available_time <= now) & (m.meeting_date >= today) & (m.meeting_date <= today + pd.Timedelta(days=days))]
+        m = m.sort_values(["meeting_date", "is_results"], ascending=[True, False]).drop_duplicates(["instrument_id", "meeting_date"])
+        return [{"id": r.instrument_id, "symbol": get_instrument(r.instrument_id).symbol, "date": str(r.meeting_date.date()),
+                 "results": bool(r.is_results)} for r in m.itertuples()]
 
     def _backtest(self, horizon: str):
         path = self.processed / f"vol_oos_h{horizon}.parquet"

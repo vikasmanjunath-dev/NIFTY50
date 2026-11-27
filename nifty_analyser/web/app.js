@@ -75,6 +75,16 @@ const legend = (a, b) => h("div", { class: "legend" }, h("span", {}, h("i", { st
 const meter = (p) => h("span", { class: "meter" }, h("i", {}, h("b", { class: p >= 0.6 ? "high" : "", style: `width:${p * 100}%` })), pct(p, 0));
 const range = (f) => (f && f.move_low_90 != null ? `${pct(f.move_low_90)} to +${pct(f.move_high_90)}` : "–");
 
+// Spreadsheet apps run cells that start with =, +, - or @ as formulas; prefix text cells so they stay text.
+const csvCell = (v) => { const s = String(v ?? ""); return `"${(typeof v === "string" && /^[=+\-@]/.test(s) ? "'" + s : s).replaceAll('"', '""')}"`; };
+function download(name, rows) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([rows.map((r) => r.map(csvCell).join(",")).join("\n")], { type: "text/csv" }));
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
 async function today() {
   const data = await get("/api/overview");
   const list = h("div", { class: "list" });
@@ -115,7 +125,13 @@ async function today() {
   if (data.rows.length) {
     parts.push(h("div", { class: "grid" }, stat("Stocks covered", data.rows.length, "Current index members"),
       stat("Likely busier than usual", high, "5-day chance of 60% or more"), stat("Direction signal", "None", "Up or down is not predictable here")),
-      h("h2", {}, "By sector"), sectors, h("div", { class: "controls" }, seg, which, search, sort), count, list);
+      data.upcoming.length ? [h("h2", {}, "Announced meetings, next 30 days"), h("div", { class: "tiles" }, data.upcoming.map((u) =>
+        h("a", { class: "card", href: `#/stock/${encodeURIComponent(u.id)}` }, h("strong", {}, u.symbol),
+          h("div", { class: "dim" }, `${u.date}${u.results ? " · Results" : ""}`))))] : [],
+      h("h2", {}, "By sector"), sectors, h("div", { class: "controls" }, seg, which, search, sort, h("button", { type: "button", class: "primary", onclick: () => download(`volatility-${data.data_date}.csv`,
+        [["symbol", "sector", "horizon_days", "prob_above_usual", "forecast_vol", "usual_vol", "move_low_90", "move_high_90", "data_date"],
+          ...data.rows.flatMap((r) => ["5", "20"].filter((n) => r[`h${n}`]).map((n) => { const f = r[`h${n}`]; return [r.symbol, r.sector, Number(n),
+            f.prob_above_usual, f.forecast_vol_annualised, f.usual_vol_annualised, f.move_low_90, f.move_high_90, data.data_date]; }))]) }, "Export CSV")), count, list);
     draw();
   }
   parts.push(h("footer", {}, data.disclaimer));
