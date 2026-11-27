@@ -1,5 +1,5 @@
 // Caches only the app shell. /api is never cached: an old forecast must not look current.
-const CACHE = "nifty-shell-v27";
+const CACHE = "nifty-shell-v28";
 const SHELL = ["/", "/static/app.js", "/static/app.css", "/static/icon.svg", "/static/manifest.webmanifest"];
 self.addEventListener("install", (e) => e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())));
 self.addEventListener("activate", (e) => e.waitUntil(caches.keys().then((keys) =>
