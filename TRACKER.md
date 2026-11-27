@@ -497,3 +497,4 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 3. Bug found in browser testing: chart axis labels rendered as text (shallow flatten); fixed.
 4. Added Portfolio page and `GET /api/portfolio`: forecast volatilities with past-year correlations (bell-curve swing figures are approximate and not separately validated).
 5. Portfolio swing backtest: bell-curve "1-in-10" held 83% (5d) / 88% (20d) of the time; now uses the measured multiplier. Added offline app shell (service worker; API never cached).
+6. Added the Ask page over `/v3/explain`; answers are shown only with their sources and the guardrail outcome. Bug found in browser testing: sources were numbered in retrieval order while the model cites newest-first; fixed.
