@@ -933,7 +933,8 @@ Round 8 tested option-implied volatility from NSE F&O files (`scripts/backfill_o
 ## Web app
 `python3 scripts/serve.py` then open http://127.0.0.1:8310/. Apple-style, no build step, no external scripts; light and dark, desktop and phone, installable to the home screen.
 Pages: Today (volatility board, sectors, watchlist), Portfolio (risk of your own mix; amounts stay in the browser), stock detail (price, forecasts, board meetings, filings), Filings search, Model (progress and what was rejected), System
-(health, audit, forward scorecard). Code: `nifty_analyser/web/`, `ops/web.py`. No login: keep it on localhost.
+(health, audit, forward scorecard). Code: `nifty_analyser/web/`, `ops/web.py`. The app shell works offline (data never cached). Portfolio swing figures are calibrated by `scripts/run_portfolio_backtest.py`
+(`reports/portfolio_backtest.json`): the bell-curve 1-in-10 figure held only 83% (5-day) / 88% (20-day), so the measured multiplier is used. No login: keep it on localhost.
 
 ## Keeping these docs current
 

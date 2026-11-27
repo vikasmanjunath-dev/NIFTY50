@@ -496,3 +496,4 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 2. Web app added (`nifty_analyser/web/`, `ops/web.py`): Today, stock, Filings, Model, System; served by `scripts/serve.py` on localhost; no authentication.
 3. Bug found in browser testing: chart axis labels rendered as text (shallow flatten); fixed.
 4. Added Portfolio page and `GET /api/portfolio`: forecast volatilities with past-year correlations (bell-curve swing figures are approximate and not separately validated).
+5. Portfolio swing backtest: bell-curve "1-in-10" held 83% (5d) / 88% (20d) of the time; now uses the measured multiplier. Added offline app shell (service worker; API never cached).
