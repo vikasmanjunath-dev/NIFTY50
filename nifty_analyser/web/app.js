@@ -4,6 +4,17 @@ const state = { horizon: "5", query: "", sort: "prob", only: "all" };
 
 // The watchlist is a per-browser convenience; storage can be unavailable (private windows).
 const watch = new Set((() => { try { return JSON.parse(localStorage.getItem("watch")) || []; } catch { return []; } })());
+let alertAt = (() => { try { return Number(localStorage.getItem("alertAt")) || 0.7; } catch { return 0.7; } })();
+
+// A restored file is untrusted input: keep only well-formed ids and positive amounts.
+function readSaved(text) {
+  const data = JSON.parse(text), ok = (id) => typeof id === "string" && /^NSE:[A-Z0-9&-]+$/.test(id);
+  return {
+    watch: (Array.isArray(data.watch) ? data.watch : []).filter(ok),
+    holdings: (Array.isArray(data.holdings) ? data.holdings : []).filter((x) => Array.isArray(x) && ok(x[0]) && Number.isFinite(x[1]) && x[1] > 0).map((x) => [x[0], x[1]]),
+  };
+}
+
 function toggleWatch(id) {
   watch.has(id) ? watch.delete(id) : watch.add(id);
   try { localStorage.setItem("watch", JSON.stringify([...watch])); } catch { /* keep it for this visit only */ }
@@ -16,6 +27,15 @@ function star(id, after) {
   paint();
   return b;
 }
+// Board choices persist; anything unexpected in storage is ignored.
+try {
+  const saved = JSON.parse(localStorage.getItem("view")) || {};
+  if (["5", "20"].includes(saved.horizon)) state.horizon = saved.horizon;
+  if (["prob", "vol", "name"].includes(saved.sort)) state.sort = saved.sort;
+  if (["all", "watch"].includes(saved.only)) state.only = saved.only;
+} catch { /* defaults */ }
+const remember = () => { try { localStorage.setItem("view", JSON.stringify({ horizon: state.horizon, sort: state.sort, only: state.only })); } catch { /* this visit only */ } };
+
 const pct = (v, d = 1) => (v == null ? "–" : `${(v * 100).toFixed(d)}%`);
 
 function h(tag, attrs = {}, ...children) {
@@ -51,7 +71,9 @@ function chart(series, labels, format) {
   const y = (v) => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
   const readout = h("div", { class: "readout" });
   const cursor = h("line", { class: "cursor", y1: T, y2: H - B, x1: -9, x2: -9 });
+  let at = labels.length - 1;
   const show = (i) => {
+    at = i;
     cursor.setAttribute("x1", x(i)); cursor.setAttribute("x2", x(i));
     readout.textContent = `${labels[i]} · ${series.map((s) => `${s.name ? s.name + " " : ""}${format(s.values[i])}`).join(" · ")}`;
   };
@@ -65,7 +87,15 @@ function chart(series, labels, format) {
     const i = Math.round((((e.clientX - box.left) / box.width) * W - L) / (W - L - R) * (labels.length - 1));
     show(Math.max(0, Math.min(labels.length - 1, i)));
   });
+  svg.setAttribute("tabindex", "0"); // arrow keys step through points; Home and End jump
+  svg.addEventListener("keydown", (e) => {
+    const to = { ArrowLeft: at - 1, ArrowRight: at + 1, Home: 0, End: labels.length - 1 }[e.key];
+    if (to === undefined) return;
+    e.preventDefault();
+    show(Math.max(0, Math.min(labels.length - 1, to)));
+  });
   show(labels.length - 1);
+  readout.setAttribute("role", "status");
   return h("div", {}, readout, svg);
 }
 
@@ -85,11 +115,17 @@ function download(name, rows) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
+const mood = (m) => m ? [h("h2", {}, "Market mood"), h("details", { class: "card" },
+  h("summary", {}, `India VIX ${m.vix} on ${m.date}: higher than ${pct(m.rank, 0)} of days in the past year`),
+  chart([{ values: m.history.map((x) => x[1]) }], m.history.map((x) => x[0]), (v) => v.toFixed(1)),
+  h("p", { class: "dim" }, "VIX reflects how much the options market expects the Nifty to swing. It says nothing about direction."))] : [];
+
 async function today() {
   const data = await get("/api/overview");
   const list = h("div", { class: "list" });
   const count = h("p", { class: "dim" });
   const draw = () => {
+    remember();
     const key = `h${state.horizon}`;
     const q = state.query.trim().toLowerCase();
     const rows = data.rows.filter((r) => r[key] && `${r.symbol} ${r.sector || ""}`.toLowerCase().includes(q) && (state.only === "all" || watch.has(r.id)));
@@ -126,14 +162,14 @@ async function today() {
     oninput: (e) => { state.query = e.target.value; draw(); } });
   const high = data.rows.filter((r) => r.h5 && r.h5.prob_above_usual >= 0.6).length;
   const parts = [...header("Today", data.data_date ? `Market data to ${data.data_date}` : "Waiting for data"),
-    h("p", {}, h("a", { href: "#/guide" }, "What do these numbers mean?")), notice(data.status)];
+    h("p", {}, h("a", { href: "#/guide" }, "What do these numbers mean?"), " · ", h("a", { href: "#/summary" }, "My printable summary")), notice(data.status)];
   // Watched stocks worth a look: a high chance of a busy spell, or a meeting already announced.
   const watchlist = () => {
     const hits = data.rows.filter((r) => watch.has(r.id)).map((r) => ({ r, chance: r.h5?.prob_above_usual, meeting: data.upcoming.find((u) => u.id === r.id) }))
-      .filter((x) => x.chance >= 0.7 || x.meeting);
+      .filter((x) => x.chance >= alertAt || x.meeting);
     return hits.length ? [h("h2", {}, "On your watchlist"), h("div", { class: "tiles" }, hits.map(({ r, chance, meeting }) =>
       h("a", { class: "card", href: `#/stock/${encodeURIComponent(r.id)}` }, h("strong", {}, r.symbol),
-        h("div", { class: "dim" }, [chance >= 0.7 ? `${pct(chance, 0)} chance of a busy week` : "", meeting ? `meeting ${meeting.date}` : ""].filter(Boolean).join(" · ")))))] : [];
+        h("div", { class: "dim" }, [chance >= alertAt ? `${pct(chance, 0)} chance of a busy week` : "", meeting ? `meeting ${meeting.date}` : ""].filter(Boolean).join(" · ")))))] : [];
   };
   const news = h("div");
   if (watch.size) { // loaded after the page so it never delays the board
@@ -147,7 +183,7 @@ async function today() {
       data.upcoming.length ? [h("h2", {}, "Announced meetings, next 30 days"), h("div", { class: "tiles" }, data.upcoming.map((u) =>
         h("a", { class: "card", href: `#/stock/${encodeURIComponent(u.id)}` }, h("strong", {}, u.symbol),
           h("div", { class: "dim" }, `${u.date}${u.results ? " · Results" : ""}`))))] : [],
-      watchlist(), news, moved, h("h2", {}, "By sector"), sectors, h("div", { class: "controls" }, seg, which, search, sort, h("button", { type: "button", class: "primary", onclick: () => download(`volatility-${data.data_date}.csv`,
+      mood(data.market), watchlist(), news, moved, h("h2", {}, "By sector"), sectors, h("div", { class: "controls" }, seg, which, search, sort, h("button", { type: "button", class: "primary", onclick: () => download(`volatility-${data.data_date}.csv`,
         [["symbol", "sector", "horizon_days", "prob_above_usual", "forecast_vol", "usual_vol", "move_low_90", "move_high_90", "data_date"],
           ...data.rows.flatMap((r) => ["5", "20"].filter((n) => r[`h${n}`]).map((n) => { const f = r[`h${n}`]; return [r.symbol, r.sector, Number(n),
             f.prob_above_usual, f.forecast_vol_annualised, f.usual_vol_annualised, f.move_low_90, f.move_high_90, data.data_date]; }))]) }, "Export CSV")), count, list);
@@ -157,13 +193,45 @@ async function today() {
   return parts;
 }
 
+function priceCard(prices) {
+  const spans = [["1M", 22], ["6M", 126], ["1Y", 260]];
+  const holder = h("div");
+  const seg = h("div", { class: "segmented", role: "group", "aria-label": "Price range" });
+  const show = (n) => {
+    const part = prices.slice(-n);
+    holder.replaceChildren(chart([{ values: part.map((p) => p[1]) }], part.map((p) => p[0]), (v) => `₹${Math.round(v).toLocaleString("en-IN")}`));
+    for (const b of seg.children) b.setAttribute("aria-pressed", Number(b.dataset.n) === n);
+  };
+  seg.append(...spans.map(([label, n]) => h("button", { type: "button", "data-n": n, onclick: () => show(n) }, label)));
+  show(260);
+  return card(seg, holder);
+}
+
+// Cmd-K / Ctrl-K: jump to a stock from anywhere.
+async function switcher() {
+  if (document.querySelector("dialog[open]")) return;
+  const rows = (await get("/api/overview")).rows.slice().sort((a, b) => a.symbol.localeCompare(b.symbol));
+  const input = h("input", { type: "search", placeholder: "Stock symbol", "aria-label": "Stock symbol", autocomplete: "off" });
+  const list = h("div", { class: "list" });
+  const matches = () => rows.filter((r) => r.symbol.toLowerCase().startsWith(input.value.trim().toLowerCase())).slice(0, 8);
+  const draw = () => list.replaceChildren(...matches().map((r) => h("a", { class: "filing", href: `#/stock/${encodeURIComponent(r.id)}`, onclick: () => box.close() }, r.symbol)));
+  const box = h("dialog", { "aria-label": "Go to stock" }, h("form", { onsubmit: (e) => { e.preventDefault(); const first = matches()[0];
+    if (first) location.hash = `#/stock/${encodeURIComponent(first.id)}`; box.close(); } }, input), list);
+  input.addEventListener("input", draw);
+  box.addEventListener("close", () => box.remove());
+  document.body.append(box);
+  draw();
+  box.showModal();
+  input.focus();
+}
+
 async function stock(id) {
   const d = await get(`/api/stock/${encodeURIComponent(id)}`);
   const f = Object.entries(d.forecasts).sort(([a], [b]) => a - b);
   return [h("a", { href: "#/today" }, "‹ Today"), h("div", { class: "title" }, h("h1", {}, d.symbol), star(d.id)), h("p", { class: "sub" }, d.sector || "", " · ", h("a", { href: `#/compare/${encodeURIComponent(d.id)}` }, "Compare with another")), notice(d.status),
     h("div", { class: "grid" }, f.map(([n, v]) => stat(`Next ${n} days`, pct(v.prob_above_usual, 0),
-      `chance of above-usual volatility · ${pct(v.forecast_vol_annualised)} forecast vs ${pct(v.usual_vol_annualised)} usual · 9-in-10 move ${range(v)}`))),
-    h("h2", {}, "Price, past year"), card(chart([{ values: d.prices.map((p) => p[1]) }], d.prices.map((p) => p[0]), (v) => `₹${Math.round(v).toLocaleString("en-IN")}`)),
+      `chance of above-usual volatility · ${pct(v.forecast_vol_annualised)} forecast vs ${pct(v.usual_vol_annualised)} usual · 9-in-10 move ${range(v)}${d.peers[n] ? ` · other ${d.sector} stocks average ${pct(d.peers[n].sector_average, 0)}` : ""}`))),
+    h("h2", {}, "Price"), priceCard(d.prices),
     Object.entries(d.record).map(([n, r]) => [h("h2", {}, `${n}-day volatility: forecast against what happened`),
       card(legend("Forecast", "Actual"), chart([{ name: "forecast", values: r.forecast }, { name: "actual", values: r.actual }], r.dates, (v) => pct(v, 0)),
         h("p", { class: "dim" }, "Past test forecasts, each made without seeing its outcome. Not the live record."))]),
@@ -172,6 +240,12 @@ async function stock(id) {
         ? h("span", { class: "badge" }, `pending, ${x.days_left} trading days left`)
         : h("span", { class: `badge ${x.above_usual === x.prob > 0.5 ? "OK" : "STALE"}` }, x.above_usual ? "was above usual" : "stayed usual or calmer")))
       : h("div", { class: "empty" }, "None saved yet.")),
+    d.unusual && [h("h2", {}, "How unusual is now?"), card(h("p", {}, `Volatility over the last 20 days was ${pct(d.unusual.now)} a year, higher than ${pct(d.unusual.rank, 0)} of the ${d.unusual.windows} twenty-day windows on record.`),
+      chart([{ values: d.unusual.history.map((x) => x[1]) }], d.unusual.history.map((x) => x[0]), (v) => pct(v, 0)))],
+    d.results_moves && [h("h2", {}, "Around past results"), h("div", { class: "grid" },
+      stat("Typical 2-day move at results", `±${pct(d.results_moves.typical_results)}`, `last ${d.results_moves.events.length} results meetings`),
+      stat("Typical 2-day move otherwise", `±${pct(d.results_moves.typical_any)}`, "past year")),
+      h("div", { class: "list" }, d.results_moves.events.map((x) => h("div", { class: "filing" }, h("strong", {}, x.date), ` · ${x.move > 0 ? "+" : ""}${pct(x.move)}`)))],
     h("h2", {}, "Announced board meetings"), h("div", { class: "list" }, d.meetings.length ? d.meetings.map((m) =>
       h("div", { class: "filing" }, h("strong", {}, m.date), " ", m.results && h("span", { class: "badge" }, "Results"))) : h("div", { class: "empty" }, "None on record.")),
     h("h2", {}, "Latest filings"), filingList(d.filings), h("footer", {}, d.disclaimer)];
@@ -185,6 +259,18 @@ const filingList = (items) => h("div", { class: "list" }, items.length ? items.m
 const holdings = new Map((() => { try { return JSON.parse(localStorage.getItem("holdings")) || []; } catch { return []; } })());
 const saveHoldings = () => { try { localStorage.setItem("holdings", JSON.stringify([...holdings])); } catch { /* this visit only */ } };
 const rupees = (v) => `₹${Math.round(v).toLocaleString("en-IN")}`;
+
+// Lines like "INFY, 1,00,000" or "TCS 50000"; `bySymbol` maps SYMBOL -> id. Lines it cannot read are returned, not guessed.
+function parseHoldings(text, bySymbol) {
+  const found = new Map(), skipped = [];
+  for (const line of text.split("\n").map((l) => l.trim()).filter(Boolean)) {
+    const m = line.match(/^([A-Za-z0-9&-]+)[\s,:;]+₹?\s*([\d,]+(?:\.\d+)?)$/);
+    const id = m && bySymbol.get(m[1].toUpperCase()), amount = m && Number(m[2].replaceAll(",", ""));
+    if (id && amount > 0) found.set(id, (found.get(id) || 0) + amount);
+    else skipped.push(line);
+  }
+  return { found, skipped };
+}
 
 async function portfolio() {
   const data = await get("/api/overview");
@@ -220,8 +306,16 @@ async function portfolio() {
   const seg = h("div", { class: "segmented", role: "group", "aria-label": "Horizon" }, ["5", "20"].map((n) =>
     h("button", { type: "button", "aria-pressed": state.horizon === n, onclick: (e) => { state.horizon = n;
       for (const b of seg.children) b.setAttribute("aria-pressed", b === e.target); analyse(); } }, `${n} days`)));
+  const box = h("textarea", { rows: "4", "aria-label": "Holdings to import", placeholder: "One per line, e.g.\nINFY, 100000\nTCS, 50000" });
+  const report = h("p", { class: "dim", role: "status" });
+  const importer = h("details", {}, h("summary", {}, "Paste a list"), box, h("button", { type: "button", class: "primary", onclick: () => {
+    const { found, skipped } = parseHoldings(box.value, new Map([...symbols].map(([id, s]) => [s, id])));
+    for (const [id, amount] of found) holdings.set(id, amount); // replaces that stock's amount
+    if (found.size) { saveHoldings(); draw(); }
+    report.textContent = `${found.size} added.${skipped.length ? ` Not understood or not covered: ${skipped.slice(0, 5).join("; ")}` : ""}`;
+  } }, "Import"), report);
   draw();
-  return [...header("Portfolio", "How much could your mix of stocks swing? Direction is not predicted."), notice(data.status), form, seg,
+  return [...header("Portfolio", "How much could your mix of stocks swing? Direction is not predicted."), notice(data.status), form, importer, seg,
     h("h2", {}, "Holdings"), rows, result, h("footer", {}, `${data.disclaimer} Amounts are saved only in this browser.`)];
 }
 
@@ -264,6 +358,43 @@ async function compare(pair) {
       rows.map(([label, a, b]) => h("div", { class: "row three" }, h("span", {}, label), h("strong", {}, a), h("strong", {}, b)))),
     dates.length > 1 ? [h("h2", {}, "Price, past year (both start at 100)"), card(legend(stocks[0].symbol, stocks[1].symbol), chart(series, dates, (v) => v.toFixed(0)))] : [],
     h("footer", {}, data.disclaimer)];
+}
+
+// One printable page: the stocks you watch or hold, with the numbers that matter.
+function settingsCard() {
+  const note = h("p", { class: "dim", role: "status" }, "Your watchlist and holdings are kept only in this browser.");
+  const level = h("select", { "aria-label": "Watchlist alert level", onchange: (e) => { alertAt = Number(e.target.value);
+    try { localStorage.setItem("alertAt", alertAt); } catch { /* this visit only */ } } },
+    [0.6, 0.7, 0.8].map((v) => h("option", { value: v, selected: v === alertAt }, `Highlight at ${v * 100}% or more`)));
+  const file = h("input", { type: "file", accept: "application/json", "aria-label": "Restore from file", onchange: async (e) => {
+    try {
+      const saved = readSaved(await e.target.files[0].text());
+      saved.watch.forEach((id) => watch.add(id)); // merge: restoring never removes what is already here
+      saved.holdings.forEach(([id, amount]) => holdings.set(id, amount));
+      localStorage.setItem("watch", JSON.stringify([...watch]));
+      saveHoldings();
+      note.textContent = `Restored ${saved.watch.length} watched and ${saved.holdings.length} holdings. Reload to see them.`;
+    } catch { note.textContent = "That file could not be read."; }
+  } });
+  const save = h("button", { type: "button", class: "primary", onclick: () => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify({ watch: [...watch], holdings: [...holdings] })], { type: "application/json" }));
+    a.download = "nifty-my-list.json";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  } }, "Save my list to a file");
+  return h("div", { class: "card noprint" }, h("div", { class: "controls" }, level, save, h("label", {}, "Restore: ", file)), note);
+}
+
+async function summary() {
+  const data = await get("/api/overview");
+  const mine = data.rows.filter((r) => watch.has(r.id) || holdings.has(r.id)).sort((a, b) => (b.h5?.prob_above_usual ?? 0) - (a.h5?.prob_above_usual ?? 0));
+  const meeting = (id) => data.upcoming.find((u) => u.id === id)?.date || "–";
+  const body = mine.length ? h("table", {}, h("thead", {}, h("tr", {}, ["Stock", "5-day chance", "20-day chance", "5-day 9-in-10 move", "Next meeting"].map((c) => h("th", {}, c)))),
+    h("tbody", {}, mine.map((r) => h("tr", {}, [r.symbol, pct(r.h5?.prob_above_usual, 0), pct(r.h20?.prob_above_usual, 0), range(r.h5), meeting(r.id)].map((c) => h("td", {}, c))))))
+    : card("Star a stock on Today, or add holdings in Portfolio, to see them here.");
+  return [h("a", { href: "#/today", class: "noprint" }, "‹ Today"), ...header("My summary", data.data_date ? `Market data to ${data.data_date}` : ""), notice(data.status),
+    mine.length ? h("button", { type: "button", class: "primary noprint", onclick: () => print() }, "Print or save as PDF") : "", card(body), h("h2", { class: "noprint" }, "Settings and backup"), settingsCard(), h("footer", {}, data.disclaimer)];
 }
 
 async function filings() {
@@ -381,14 +512,14 @@ async function system() {
       : card("No forecast has matured yet. Scores appear once each forecast's horizon has passed.")];
 }
 
-const routes = { today, portfolio, filings, ask, guide, compare, model, system, stock };
+const routes = { today, portfolio, filings, ask, guide, compare, summary, model, system, stock };
 let visit = 0;
 async function route() {
   const [, name = "today", arg] = location.hash.split("/");
   const page = routes[name] || today;
   const mine = ++visit;
   for (const a of document.querySelectorAll("nav a")) {
-    const on = a.hash === `#/${["stock", "guide", "compare"].includes(name) ? "today" : name}`;
+    const on = a.hash === `#/${["stock", "guide", "compare", "summary"].includes(name) ? "today" : name}`;
     on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current");
   }
   let content;
@@ -402,8 +533,15 @@ async function route() {
   if (visit > 1) view.focus({ preventScroll: true }); // screen readers and keyboards move to the new page
 }
 addEventListener("hashchange", route);
+// A tab left open (or the home-screen app resumed) should not keep showing old numbers.
+let hiddenAt = null;
+addEventListener("visibilitychange", () => {
+  if (document.hidden) hiddenAt = Date.now();
+  else if (hiddenAt && Date.now() - hiddenAt > 10 * 60 * 1000 && !view.querySelector("input:not([type=search]), textarea")) route();
+});
 navigator.serviceWorker?.register("/sw.js").catch(() => { /* the app works without it */ });
 addEventListener("keydown", (e) => { // "/" focuses search, as on Apple's web apps
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); switcher().catch(() => {}); return; }
   const box = view.querySelector("input[type=search]");
   if (e.key === "/" && box && document.activeElement !== box) { e.preventDefault(); box.focus(); }
 });

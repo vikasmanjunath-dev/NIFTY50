@@ -43,6 +43,21 @@ class WebData:
             self._cache[name] = (stamp, pd.read_parquet(path))
         return self._cache[name][1]
 
+    def _bars(self, iid: str) -> pd.DataFrame:
+        stamp = cache_path(iid).stat().st_mtime if cache_path(iid).exists() else None
+        if self._cache.get(("bars", iid), (None,))[0] != stamp or stamp is None:
+            self._cache[("bars", iid)] = (stamp, load_cached(iid))
+        return self._cache[("bars", iid)][1]
+
+    def _ledger(self) -> list[dict]:
+        path = self.processed / "vol_ledger.jsonl"
+        if not path.exists():
+            return []
+        stamp = (path.stat().st_mtime_ns, path.stat().st_size)
+        if self._cache.get("ledger", (None,))[0] != stamp:
+            self._cache["ledger"] = (stamp, AuditLog(path).read())
+        return self._cache["ledger"][1]
+
     def forecasts(self):
         """(status, {horizon: block}); blocks are empty unless status is OK."""
         latest = _json(self.processed / "volatility_latest.json")
@@ -61,14 +76,11 @@ class WebData:
                 inst = get_instrument(iid)
                 rows.setdefault(iid, {"id": iid, "symbol": inst.symbol, "sector": getattr(inst, "sector", None)})[f"h{horizon}"] = f
         return {"status": status, "data_date": max((b["data_date"] for b in blocks.values()), default=None),
-                "rows": list(rows.values()), "upcoming": self.upcoming(set(rows)), "changes": self.changes(blocks), "disclaimer": DISCLAIMER}
+                "rows": list(rows.values()), "upcoming": self.upcoming(set(rows)), "market": self.market(), "changes": self.changes(blocks), "disclaimer": DISCLAIMER}
 
     def changes(self, blocks: dict, top: int = 6) -> dict:
         """Largest moves in each chance since the previous recorded forecast date (from the forward ledger)."""
-        path = self.processed / "vol_ledger.jsonl"
-        if not blocks or not path.exists():
-            return {}
-        entries = [e["payload"] for e in AuditLog(path).read() if e["kind"] == "vol_forecast"]
+        entries = [e["payload"] for e in self._ledger() if e["kind"] == "vol_forecast"]
         out = {}
         for horizon, block in blocks.items():
             older = [p for p in entries if str(p["horizon_days"]) == horizon and p["date"] < block["data_date"]]
@@ -126,13 +138,13 @@ class WebData:
 
     def forward(self, iid: str, bars: pd.DataFrame) -> list[dict]:
         """Every forecast saved for this stock before its outcome, graded once the horizon has fully passed."""
-        path = self.processed / "vol_ledger.jsonl"
-        if not path.exists():
+        entries = self._ledger()
+        if not entries:
             return []
         close = bars[bars.quality_flag != "FAIL"].sort_values("event_time")
         days, prices = close.event_time.dt.strftime("%Y-%m-%d").to_numpy(), close.close.to_numpy(float)
         out = []
-        for e in AuditLog(path).read():
+        for e in entries:
             if e["kind"] != "vol_forecast":
                 continue
             p = e["payload"]
@@ -146,6 +158,61 @@ class WebData:
                 above = bool(np.sqrt((np.diff(np.log(prices[i: i + h + 1])) ** 2).sum()) > f["med_rv"])
             out.append({"date": p["date"], "horizon": h, "prob": f["prob"], "above_usual": above, "days_left": max(0, i + h - len(prices) + 1)})
         return out[::-1][:20]
+
+    def peers(self, iid: str, blocks: dict) -> dict:
+        """Average chance across the other stocks of the same sector, per horizon."""
+        sector = get_instrument(iid).sector
+        out = {}
+        for horizon, block in blocks.items():
+            others = [f["prob_above_usual"] for i, f in block["forecasts"].items() if i != iid and get_instrument(i).sector == sector]
+            if others:
+                out[horizon] = {"sector_average": round(float(np.mean(others)), 4), "stocks": len(others)}
+        return out
+
+    def results_moves(self, iid: str, bars: pd.DataFrame, last: int = 8) -> dict | None:
+        """Absolute price change from the close before each past results meeting to the close after it (two sessions, because
+        results often arrive after the close), beside the typical two-session change."""
+        m = self._parquet("board_meetings.parquet")
+        if m is None:
+            return None
+        close = bars[bars.quality_flag != "FAIL"].sort_values("event_time")
+        days, prices = close.event_time.dt.strftime("%Y-%m-%d").to_numpy(), close.close.to_numpy(float)
+        if len(prices) < 60:
+            return None
+        events = []
+        for day in sorted(m[(m.instrument_id == iid) & m.is_results].meeting_date.dt.strftime("%Y-%m-%d").unique(), reverse=True):
+            i = int(np.searchsorted(days, day))  # first session on or after the meeting
+            if 0 < i < len(prices) - 1:
+                events.append({"date": day, "move": round(float(prices[i + 1] / prices[i - 1] - 1), 4)})
+            if len(events) == last:
+                break
+        if not events:
+            return None
+        usual = np.abs(prices[2:] / prices[:-2] - 1)[-250:]
+        return {"events": events, "typical_results": round(float(np.median([abs(e["move"]) for e in events])), 4),
+                "typical_any": round(float(np.median(usual)), 4)}
+
+    def market(self) -> dict | None:
+        """India VIX now, its rank within the past year, and the year's path. Measured history, not a forecast."""
+        vix = self._parquet("macro_india_vix.parquet")
+        if vix is None:
+            return None
+        v = vix[vix.available_time <= self.ctx.now_fn()].dropna(subset=["close"]).sort_values("event_time").tail(250)
+        if len(v) < 60:
+            return None
+        now = float(v.close.iloc[-1])
+        return {"vix": round(now, 2), "date": str(v.event_time.iloc[-1])[:10], "rank": round(float((v.close <= now).mean()), 3),
+                "history": [[str(t)[:10], round(float(c), 2)] for t, c in zip(v.event_time, v.close)]}
+
+    def unusual(self, bars: pd.DataFrame) -> dict | None:
+        """Yearly volatility over the last 20 days, ranked against every 20-day window of the past five years."""
+        close = bars[bars.quality_flag != "FAIL"].sort_values("event_time")
+        series = (np.log(close.set_index("event_time").close).diff().rolling(20).std() * np.sqrt(252)).dropna().tail(1250)
+        if len(series) < 250:
+            return None
+        recent = series.tail(250)
+        return {"now": round(float(series.iloc[-1]), 4), "rank": round(float((series <= series.iloc[-1]).mean()), 3), "windows": int(len(series)),
+                "history": [[str(t)[:10], round(float(x), 4)] for t, x in recent.items()]}
 
     def backup(self):
         """Zip of the forward ledgers (they cannot be recreated) with each hash chain's status."""
@@ -168,7 +235,8 @@ class WebData:
         out = {"id": iid, "symbol": inst.symbol, "sector": getattr(inst, "sector", None), "status": status,
                "prices": [[str(t.date()), round(float(c), 2)] for t, c in zip(bars.event_time, bars.close)],
                "forecasts": {h: {**b["forecasts"][iid], "data_date": b["data_date"]} for h, b in blocks.items() if iid in b["forecasts"]},
-               "meetings": [], "record": self.track_record(iid), "forward": self.forward(iid, load_cached(iid)), "filings": self.filings(instrument=iid, limit=8), "disclaimer": DISCLAIMER}
+               "meetings": [], "record": self.track_record(iid), "forward": self.forward(iid, self._bars(iid)), "results_moves": self.results_moves(iid, self._bars(iid)), "unusual": self.unusual(self._bars(iid)),
+               "peers": self.peers(iid, blocks), "filings": self.filings(instrument=iid, limit=8), "disclaimer": DISCLAIMER}
         meetings = self._parquet("board_meetings.parquet")
         if meetings is not None:
             m = meetings[meetings.instrument_id == iid].sort_values("meeting_date").drop_duplicates("meeting_date").tail(5)
