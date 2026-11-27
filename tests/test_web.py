@@ -149,3 +149,13 @@ def test_upcoming_meetings_show_only_published_future_dates(site, tmp_path):
                   "available_time": ist("2026-01-05", "2025-12-20", "2026-01-12", "2026-01-05"), "is_results": True}).to_parquet(tmp_path / "board_meetings.parquet")
     # "now" is 10 Jan: the past meeting, the not-yet-published one and the one beyond 30 days are all excluded
     assert [u["date"] for u in client.get("/api/overview").json()["upcoming"]] == ["2026-01-20"]
+
+
+def test_changes_compare_with_the_previous_recorded_date(site, tmp_path):
+    _, client = site
+    assert client.get("/api/overview").json()["changes"] == {}
+    ledger = AuditLog(tmp_path / "vol_ledger.jsonl")
+    for day, prob in (("2026-01-07", 0.2), ("2026-01-08", 0.5), ("2026-01-09", 0.9)):  # the same-day entry must be ignored
+        ledger.append("vol_forecast", {"date": day, "horizon_days": 5, "forecasts": [{"instrument_id": "NSE:INFY", "prob": prob}]})
+    change = client.get("/api/overview").json()["changes"]["5"]
+    assert change["since"] == "2026-01-08" and change["rows"] == [{"id": "NSE:INFY", "symbol": "INFY", "now": 0.7, "before": 0.5}]
