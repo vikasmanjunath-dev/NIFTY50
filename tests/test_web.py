@@ -61,3 +61,21 @@ def test_pages_static_files_and_system(site):
     assert client.get("/api/system").json()["audit_ok"] and client.get("/api/model").json()["rounds"]
     assert client.get("/api/stock/NSE:NOPE").status_code == 404
     assert "innerHTML =" not in (WEB_DIR / "app.js").read_text()
+
+
+def test_portfolio_risk_and_input_validation(site, monkeypatch):
+    import numpy as np
+
+    from nifty_analyser.ops import web
+
+    ctx, client = site
+    t = pd.date_range("2025-01-01", periods=300, freq="B")
+    close = 100 * np.exp(np.cumsum(np.random.default_rng(0).normal(0, 0.01, 300)))
+    monkeypatch.setattr(web, "load_cached", lambda i: pd.DataFrame({"event_time": t, "close": close, "quality_flag": "PASS"}))
+    body = client.get("/api/portfolio", params={"holdings": "NSE:INFY:1000,NSE:INFY:3000"}).json()
+    assert body["total"] == 4000 and body["volatility"] == pytest.approx(0.2) and body["parts"][0]["risk_share"] == pytest.approx(1.0)
+    assert body["typical_move"] == pytest.approx(0.2 * (5 / 252) ** 0.5 * 4000)
+    for bad in ("NSE:INFY:-5", "NSE:INFY:nan", "garbage", "NSE:ZZZ:10"):
+        assert client.get("/api/portfolio", params={"holdings": bad}).status_code == 422
+    ctx.killswitch.trip("test", "t")
+    assert client.get("/api/portfolio", params={"holdings": "NSE:INFY:1"}).json() == {"status": "HALTED"}
