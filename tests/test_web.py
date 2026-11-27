@@ -85,3 +85,12 @@ def test_portfolio_risk_and_input_validation(site, monkeypatch, tmp_path):
     assert again["large_move"] == pytest.approx(2 * again["typical_move"]) and again["large_move_held"] == 0.89
     ctx.killswitch.trip("test", "t")
     assert client.get("/api/portfolio", params={"holdings": "NSE:INFY:1"}).json() == {"status": "HALTED"}
+
+
+def test_ask_page_numbers_sources_like_the_prompt_does():
+    import inspect
+
+    from nifty_analyser.documents import llm
+
+    assert "sorted(pack.evidence_items, key=lambda e: e.publication_time, reverse=True)" in inspect.getsource(llm)
+    assert "String(b.publication_time).localeCompare(String(a.publication_time))" in (WEB_DIR / "app.js").read_text()
