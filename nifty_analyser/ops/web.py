@@ -181,8 +181,8 @@ class WebData:
             return []
         if category:
             docs = docs[docs.category == category]
-        if instrument:
-            docs = docs[docs.instrument_id == instrument]
+        if instrument:  # one id, or several separated by commas
+            docs = docs[docs.instrument_id.isin(instrument.split(",")[:60])]
         for word in q.split()[:6]:
             hit = docs.text.str.contains(word, case=False, regex=False, na=False) | docs.category.str.contains(word, case=False, regex=False, na=False)
             docs = docs[hit | docs.instrument_id.str.contains(word, case=False, regex=False)]
@@ -262,7 +262,7 @@ class WebData:
     SOURCES = (("Prices", "NSE_NIFTY50_INDEX.parquet", "event_time", 4, "daily refresh"),
                ("India VIX", "macro_india_vix.parquet", "event_time", 5, "daily refresh"),
                ("Board meetings", "board_meetings.parquet", "available_time", 45, "daily refresh"),
-               ("Company filings", "announcements_nifty50.parquet", "available_time", 7, "python3 scripts/backfill_announcements.py"))
+               ("Company filings", "announcements_nifty50.parquet", "available_time", 7, "daily refresh"))
 
     def freshness(self) -> list[dict]:
         today = self.ctx.now_fn().date()

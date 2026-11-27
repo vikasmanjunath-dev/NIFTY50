@@ -135,13 +135,19 @@ async function today() {
       h("a", { class: "card", href: `#/stock/${encodeURIComponent(r.id)}` }, h("strong", {}, r.symbol),
         h("div", { class: "dim" }, [chance >= 0.7 ? `${pct(chance, 0)} chance of a busy week` : "", meeting ? `meeting ${meeting.date}` : ""].filter(Boolean).join(" · ")))))] : [];
   };
+  const news = h("div");
+  if (watch.size) { // loaded after the page so it never delays the board
+    get(`/api/filings?limit=6&instrument=${encodeURIComponent([...watch].join(","))}`).then((items) => {
+      if (items.length) news.replaceChildren(h("h2", {}, "Latest filings from your watchlist"), filingList(items));
+    }).catch(() => { /* the board works without it */ });
+  }
   if (data.rows.length) {
     parts.push(h("div", { class: "grid" }, stat("Stocks covered", data.rows.length, "Current index members"),
       stat("Likely busier than usual", high, "5-day chance of 60% or more"), stat("Direction signal", "None", "Up or down is not predictable here")),
       data.upcoming.length ? [h("h2", {}, "Announced meetings, next 30 days"), h("div", { class: "tiles" }, data.upcoming.map((u) =>
         h("a", { class: "card", href: `#/stock/${encodeURIComponent(u.id)}` }, h("strong", {}, u.symbol),
           h("div", { class: "dim" }, `${u.date}${u.results ? " · Results" : ""}`))))] : [],
-      watchlist(), moved, h("h2", {}, "By sector"), sectors, h("div", { class: "controls" }, seg, which, search, sort, h("button", { type: "button", class: "primary", onclick: () => download(`volatility-${data.data_date}.csv`,
+      watchlist(), news, moved, h("h2", {}, "By sector"), sectors, h("div", { class: "controls" }, seg, which, search, sort, h("button", { type: "button", class: "primary", onclick: () => download(`volatility-${data.data_date}.csv`,
         [["symbol", "sector", "horizon_days", "prob_above_usual", "forecast_vol", "usual_vol", "move_low_90", "move_high_90", "data_date"],
           ...data.rows.flatMap((r) => ["5", "20"].filter((n) => r[`h${n}`]).map((n) => { const f = r[`h${n}`]; return [r.symbol, r.sector, Number(n),
             f.prob_above_usual, f.forecast_vol_annualised, f.usual_vol_annualised, f.move_low_90, f.move_high_90, data.data_date]; }))]) }, "Export CSV")), count, list);
@@ -391,6 +397,9 @@ async function route() {
   if (mine !== visit) return;
   view.replaceChildren(...content.flat(Infinity).filter(Boolean));
   window.scrollTo(0, 0);
+  const title = view.querySelector("h1")?.textContent;
+  document.title = title ? `${title} · Nifty Analyser` : "Nifty Analyser";
+  if (visit > 1) view.focus({ preventScroll: true }); // screen readers and keyboards move to the new page
 }
 addEventListener("hashchange", route);
 navigator.serviceWorker?.register("/sw.js").catch(() => { /* the app works without it */ });

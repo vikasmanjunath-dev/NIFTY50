@@ -196,3 +196,10 @@ def test_freshness_flags_missing_and_lagging_sources(site, tmp_path):
     assert (rows["Prices"]["age_days"], rows["Prices"]["late"]) == (1, False)
     assert rows["India VIX"]["late"] and rows["Board meetings"]["newest"] is None and rows["Board meetings"]["late"]
     assert rows["Company filings"]["newest"] == "2026-01-02" and rows["Company filings"]["late"]
+
+
+def test_filings_for_several_instruments(site):
+    _, client = site
+    both = client.get("/api/filings", params={"instrument": "NSE:INFY,NSE:TCS"}).json()
+    assert [h["symbol"] for h in both] == ["TCS", "INFY"]
+    assert [h["symbol"] for h in client.get("/api/filings", params={"instrument": "NSE:INFY"}).json()] == ["INFY"]
