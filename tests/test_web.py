@@ -180,7 +180,7 @@ def test_saved_forecasts_are_pending_then_graded_and_backed_up(site, tmp_path):
     days = pd.date_range("2026-01-01", periods=8, freq="B", tz="Asia/Kolkata")
     bars = pd.DataFrame({"event_time": days, "close": [100, 110, 100, 110, 100, 110, 100, 110], "quality_flag": "PASS"})
     new, old = WebData(ctx, tmp_path, tmp_path, tmp_path).forward("NSE:INFY", bars)
-    assert old == {"date": "2026-01-01", "horizon": 5, "prob": 0.8, "above_usual": True, "days_left": 0}
+    assert old == {"date": "2026-01-01", "horizon": 5, "prob": 0.8, "above_usual": True, "inside_range": None, "days_left": 0}
     assert new["above_usual"] is None and new["days_left"] == 3
     response = client.get("/api/backup")
     z = zipfile.ZipFile(io.BytesIO(response.content))
@@ -256,3 +256,25 @@ def test_market_mood_and_unusualness_rank_only_the_past(site, tmp_path):
     u = data.unusual(pd.DataFrame({"event_time": t, "close": close, "quality_flag": "PASS"}))
     assert u["rank"] > 0.95 and u["windows"] == 380
     assert data.unusual(pd.DataFrame({"event_time": t[:100], "close": close[:100], "quality_flag": "PASS"})) is None
+
+
+def test_portfolio_pairs_removal_and_range_grading(site, tmp_path, monkeypatch):
+    import numpy as np
+
+    from nifty_analyser.ops import web
+
+    ctx, client = site
+    f = {"prob_above_usual": 0.5, "forecast_vol_annualised": 0.2, "usual_vol_annualised": 0.2}
+    (tmp_path / "volatility_latest.json").write_text(json.dumps({"5": {"data_date": "2026-01-09", "forecasts": {"NSE:INFY": f, "NSE:TCS": f}}}))
+    t = pd.date_range("2025-01-01", periods=300, freq="B")
+    close = 100 * np.exp(np.cumsum(np.random.default_rng(0).normal(0, 0.01, 300)))
+    monkeypatch.setattr(web, "load_cached", lambda i: pd.DataFrame({"event_time": t, "close": close, "quality_flag": "PASS"}))
+    body = client.get("/api/portfolio", params={"holdings": "NSE:INFY:1,NSE:TCS:1"}).json()  # identical price paths
+    assert body["linked"] == [{"a": "INFY", "b": "TCS", "correlation": 1.0}] and [p["without"] for p in body["parts"]] == [pytest.approx(0.2)] * 2
+    assert client.get("/api/portfolio", params={"holdings": "NSE:INFY:1"}).json()["parts"][0]["without"] is None
+    ledger = AuditLog(tmp_path / "vol_ledger.jsonl")
+    ledger.append("vol_forecast", {"date": "2026-01-01", "horizon_days": 1,
+                                   "forecasts": [{"instrument_id": "NSE:INFY", "prob": 0.5, "med_rv": 1.0, "low_90": -0.05, "high_90": 0.05}]})
+    days = pd.date_range("2026-01-01", periods=2, freq="B", tz="Asia/Kolkata")
+    row = WebData(ctx, tmp_path, tmp_path, tmp_path).forward("NSE:INFY", pd.DataFrame({"event_time": days, "close": [100, 110], "quality_flag": "PASS"}))
+    assert row[0]["inside_range"] is False
