@@ -125,14 +125,23 @@ async function today() {
   const search = h("input", { type: "search", placeholder: "Search stock or sector", value: state.query, "aria-label": "Search",
     oninput: (e) => { state.query = e.target.value; draw(); } });
   const high = data.rows.filter((r) => r.h5 && r.h5.prob_above_usual >= 0.6).length;
-  const parts = [...header("Today", data.data_date ? `Market data to ${data.data_date}` : "Waiting for data"), notice(data.status)];
+  const parts = [...header("Today", data.data_date ? `Market data to ${data.data_date}` : "Waiting for data"),
+    h("p", {}, h("a", { href: "#/guide" }, "What do these numbers mean?")), notice(data.status)];
+  // Watched stocks worth a look: a high chance of a busy spell, or a meeting already announced.
+  const watchlist = () => {
+    const hits = data.rows.filter((r) => watch.has(r.id)).map((r) => ({ r, chance: r.h5?.prob_above_usual, meeting: data.upcoming.find((u) => u.id === r.id) }))
+      .filter((x) => x.chance >= 0.7 || x.meeting);
+    return hits.length ? [h("h2", {}, "On your watchlist"), h("div", { class: "tiles" }, hits.map(({ r, chance, meeting }) =>
+      h("a", { class: "card", href: `#/stock/${encodeURIComponent(r.id)}` }, h("strong", {}, r.symbol),
+        h("div", { class: "dim" }, [chance >= 0.7 ? `${pct(chance, 0)} chance of a busy week` : "", meeting ? `meeting ${meeting.date}` : ""].filter(Boolean).join(" · ")))))] : [];
+  };
   if (data.rows.length) {
     parts.push(h("div", { class: "grid" }, stat("Stocks covered", data.rows.length, "Current index members"),
       stat("Likely busier than usual", high, "5-day chance of 60% or more"), stat("Direction signal", "None", "Up or down is not predictable here")),
       data.upcoming.length ? [h("h2", {}, "Announced meetings, next 30 days"), h("div", { class: "tiles" }, data.upcoming.map((u) =>
         h("a", { class: "card", href: `#/stock/${encodeURIComponent(u.id)}` }, h("strong", {}, u.symbol),
           h("div", { class: "dim" }, `${u.date}${u.results ? " · Results" : ""}`))))] : [],
-      moved, h("h2", {}, "By sector"), sectors, h("div", { class: "controls" }, seg, which, search, sort, h("button", { type: "button", class: "primary", onclick: () => download(`volatility-${data.data_date}.csv`,
+      watchlist(), moved, h("h2", {}, "By sector"), sectors, h("div", { class: "controls" }, seg, which, search, sort, h("button", { type: "button", class: "primary", onclick: () => download(`volatility-${data.data_date}.csv`,
         [["symbol", "sector", "horizon_days", "prob_above_usual", "forecast_vol", "usual_vol", "move_low_90", "move_high_90", "data_date"],
           ...data.rows.flatMap((r) => ["5", "20"].filter((n) => r[`h${n}`]).map((n) => { const f = r[`h${n}`]; return [r.symbol, r.sector, Number(n),
             f.prob_above_usual, f.forecast_vol_annualised, f.usual_vol_annualised, f.move_low_90, f.move_high_90, data.data_date]; }))]) }, "Export CSV")), count, list);
@@ -145,7 +154,7 @@ async function today() {
 async function stock(id) {
   const d = await get(`/api/stock/${encodeURIComponent(id)}`);
   const f = Object.entries(d.forecasts).sort(([a], [b]) => a - b);
-  return [h("a", { href: "#/today" }, "‹ Today"), h("div", { class: "title" }, h("h1", {}, d.symbol), star(d.id)), h("p", { class: "sub" }, d.sector || ""), notice(d.status),
+  return [h("a", { href: "#/today" }, "‹ Today"), h("div", { class: "title" }, h("h1", {}, d.symbol), star(d.id)), h("p", { class: "sub" }, d.sector || "", " · ", h("a", { href: `#/compare/${encodeURIComponent(d.id)}` }, "Compare with another")), notice(d.status),
     h("div", { class: "grid" }, f.map(([n, v]) => stat(`Next ${n} days`, pct(v.prob_above_usual, 0),
       `chance of above-usual volatility · ${pct(v.forecast_vol_annualised)} forecast vs ${pct(v.usual_vol_annualised)} usual · 9-in-10 move ${range(v)}`))),
     h("h2", {}, "Price, past year"), card(chart([{ values: d.prices.map((p) => p[1]) }], d.prices.map((p) => p[0]), (v) => `₹${Math.round(v).toLocaleString("en-IN")}`)),
@@ -205,18 +214,63 @@ async function portfolio() {
     h("h2", {}, "Holdings"), rows, result, h("footer", {}, `${data.disclaimer} Amounts are saved only in this browser.`)];
 }
 
+const GUIDE = [
+  ["Volatility", "How much a price swings, whichever way. A high figure means bigger moves are likely, not that the price will fall."],
+  ["Chance of above-usual volatility", "The chance that the next 5 or 20 trading days swing more than this stock normally does, judged against its own past year."],
+  ["Volatility (yearly)", "The expected size of swings, scaled to one year so that different periods can be compared."],
+  ["9-in-10 price move", "A range meant to contain the price change about 9 times in 10. In testing it held a little less often, and shocks can go far beyond it."],
+  ["Up or down", "Not predicted. Every method tried did no better than a coin flip."],
+  ["Accuracy score (AUC)", "If you pick one busy period and one calm period at random, how often the model ranked the busy one higher. 0.5 is guessing."],
+  ["Past tests and the forward record", "Past tests reuse history that has been examined many times. The forward record only grades forecasts saved before the outcome, so trust it more."],
+  ["Missing or withheld numbers", "Forecasts are hidden when the data is out of date or the kill switch is on."],
+];
+
+async function guide() {
+  return [h("a", { href: "#/today" }, "‹ Today"), ...header("Guide", "What the numbers mean, and what they do not"),
+    h("div", { class: "list" }, GUIDE.map(([term, text]) => h("div", { class: "filing" }, h("strong", {}, term), h("p", {}, text)))),
+    h("footer", {}, "Research output, not investment advice.")];
+}
+
+async function compare(pair) {
+  const data = await get("/api/overview");
+  const ids = data.rows.map((r) => r.id);
+  const [first, second] = (pair || "").split(",");
+  const chosen = [ids.includes(first) ? first : ids[0], ids.includes(second) && second !== first ? second : ids.find((i) => i !== (first || ids[0]))];
+  const back = h("a", { href: "#/today" }, "‹ Today");
+  if (ids.length < 2) return [back, ...header("Compare", "Two stocks side by side"), notice(data.status) || card("Not enough forecasts to compare.")];
+  const picker = (i) => h("select", { "aria-label": i ? "Second stock" : "First stock", onchange: (e) => {
+    const next = [...chosen]; next[i] = e.target.value; location.hash = `#/compare/${encodeURIComponent(next.join(","))}`; } },
+    [...data.rows].sort((a, b) => a.symbol.localeCompare(b.symbol)).map((r) => h("option", { value: r.id, selected: r.id === chosen[i] }, r.symbol)));
+  const stocks = await Promise.all(chosen.map((id) => get(`/api/stock/${encodeURIComponent(id)}`)));
+  // line the two price histories up by date and start both at 100
+  const maps = stocks.map((s) => new Map(s.prices));
+  const dates = stocks[0].prices.map((p) => p[0]).filter((d) => maps[1].has(d));
+  const series = stocks.map((s, i) => ({ name: s.symbol, values: dates.map((d) => (100 * maps[i].get(d)) / maps[i].get(dates[0])) }));
+  const rows = ["5", "20"].flatMap((n) => [["chance of above-usual volatility", "prob_above_usual"], ["forecast volatility (yearly)", "forecast_vol_annualised"],
+    ["usual volatility (yearly)", "usual_vol_annualised"]].map(([label, key]) => [`${n}-day ${label}`, ...stocks.map((s) => pct(s.forecasts[n]?.[key]))]));
+  return [back, ...header("Compare", "Two stocks side by side"), h("div", { class: "controls" }, picker(0), picker(1)),
+    h("div", { class: "list" }, h("div", { class: "row head three" }, h("span", {}, ""), stocks.map((s) => h("span", {}, s.symbol))),
+      rows.map(([label, a, b]) => h("div", { class: "row three" }, h("span", {}, label), h("strong", {}, a), h("strong", {}, b)))),
+    dates.length > 1 ? [h("h2", {}, "Price, past year (both start at 100)"), card(legend(stocks[0].symbol, stocks[1].symbol), chart(series, dates, (v) => v.toFixed(0)))] : [],
+    h("footer", {}, data.disclaimer)];
+}
+
 async function filings() {
   const results = h("div");
-  let timer, latest = 0;
+  let timer, latest = 0, query = "", category = "";
+  const categories = await get("/api/filings/categories");
   const run = async (q) => {
+    query = q;
     const mine = ++latest;
-    const items = await get(`/api/filings?q=${encodeURIComponent(q)}`);
+    const items = await get(`/api/filings?q=${encodeURIComponent(q)}&category=${encodeURIComponent(category)}`);
     if (mine === latest) results.replaceChildren(filingList(items));
   };
   await run("");
   return [...header("Filings", "Company announcements to the exchange, newest first"), h("div", { class: "controls" },
     h("input", { type: "search", placeholder: "e.g. INFY dividend", "aria-label": "Search filings",
-      oninput: (e) => { clearTimeout(timer); timer = setTimeout(() => run(e.target.value), 250); } })), results];
+      oninput: (e) => { clearTimeout(timer); timer = setTimeout(() => run(e.target.value), 250); } }),
+    h("select", { "aria-label": "Category", onchange: (e) => { category = e.target.value; run(query); } },
+      h("option", { value: "" }, "All categories"), categories.map((c) => h("option", { value: c }, c)))), results];
 }
 
 const outcomes = { OK: "Answer checked against the filings below", ABSTAIN: "The filings found do not answer this",
@@ -312,14 +366,14 @@ async function system() {
       : card("No forecast has matured yet. Scores appear once each forecast's horizon has passed.")];
 }
 
-const routes = { today, portfolio, filings, ask, model, system, stock };
+const routes = { today, portfolio, filings, ask, guide, compare, model, system, stock };
 let visit = 0;
 async function route() {
   const [, name = "today", arg] = location.hash.split("/");
   const page = routes[name] || today;
   const mine = ++visit;
   for (const a of document.querySelectorAll("nav a")) {
-    const on = a.hash === `#/${name === "stock" ? "today" : name}`;
+    const on = a.hash === `#/${["stock", "guide", "compare"].includes(name) ? "today" : name}`;
     on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current");
   }
   let content;

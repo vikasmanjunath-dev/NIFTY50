@@ -139,10 +139,12 @@ class WebData:
             out["meetings"] = [{"date": str(r.meeting_date.date()), "results": bool(r.is_results)} for r in m.itertuples()][::-1]
         return out
 
-    def filings(self, q: str = "", instrument: str | None = None, limit: int = 30):
+    def filings(self, q: str = "", instrument: str | None = None, limit: int = 30, category: str = ""):
         docs = self._parquet("announcements_nifty50.parquet")
         if docs is None:
             return []
+        if category:
+            docs = docs[docs.category == category]
         if instrument:
             docs = docs[docs.instrument_id == instrument]
         for word in q.split()[:6]:
@@ -152,6 +154,10 @@ class WebData:
         return [{"symbol": r.instrument_id.split(":")[-1], "date": str(r.available_time)[:10], "category": r.category,
                  "text": str(r.text)[:400], "url": r.attachment_url if str(r.attachment_url).startswith("https://") else None}
                 for r in docs.itertuples()]
+
+    def categories(self, top: int = 25) -> list[str]:
+        docs = self._parquet("announcements_nifty50.parquet")
+        return [] if docs is None else docs.category.value_counts().head(top).index.tolist()
 
     def model(self):
         rounds = [{"label": "Persistence rule", "h5": 0.598, "h20": 0.669}, {"label": "First blend", "h5": 0.671, "h20": 0.702},
@@ -249,6 +255,7 @@ def attach_web(app: FastAPI, ctx, data: WebData | None = None, refresher: Refres
     app.get("/api/overview")(data.overview)
     app.get("/api/stock/{iid}")(data.stock)
     app.get("/api/filings")(data.filings)
+    app.get("/api/filings/categories")(data.categories)
     app.get("/api/portfolio")(data.portfolio)
     app.get("/api/model")(data.model)
     app.get("/api/system")(data.system)
