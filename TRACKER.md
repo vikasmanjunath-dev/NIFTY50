@@ -490,3 +490,8 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 ### 2026-11-27 — Volatility: AUC round 7 (board-meeting dates)
 1. Fetched approved NSE board-meeting intimations; 5-day AUC 0.6843→0.6910 passed the rule and is live (ledger tag `v5-history-events`); 20-day 0.7502→0.7485, not adopted.
 2. `daily_refresh.py` now refreshes the meeting dates (not yet run end to end).
+
+### 2026-11-27 — Volatility AUC round 8 (option-implied) and web app
+1. Option features not adopted (worse on the selection half; +0.003 to +0.004 on the confirmation half). AUC stays 0.691 / 0.750.
+2. Web app added (`nifty_analyser/web/`, `ops/web.py`): Today, stock, Filings, Model, System; served by `scripts/serve.py` on localhost; no authentication.
+3. Bug found in browser testing: chart axis labels rendered as text (shallow flatten); fixed.

@@ -73,8 +73,19 @@ Chosen on 2010-2020, confirmed once on 2021+ (`reports/vol_events.json`):
 
 **Current best: 5-day 0.691, 20-day 0.750.** On 2010-2020 the event features helped at 20 days too, but the pre-chosen candidate did not confirm.
 
+## Round 8 (done, nothing adopted): option-implied volatility
+NSE daily F&O bhavcopy (approved; 1.3 GB streamed, 3.2 MB kept; 2021-01 to 2026-11, 60 symbols, one day missing: 2021-03-30). No pre-2021 option data,
+so rows from 2022 were scored: chosen on the first half, confirmed on the second (`reports/vol_options.json`).
+
+| | first half: live / with options | second half: live / with options | Outcome |
+|---|---|---|---|
+| 5-day | 0.692 / 0.659 | 0.690 / 0.694 | not chosen, no change |
+| 20-day | 0.752 / 0.726 | 0.736 / 0.739 | not chosen, no change |
+
+Option features did worse in the first half (little option history to learn from) and slightly better in the second. Worth one retest after another year of data.
+
 ## Backlog (in order)
 | Idea | Needs |
 |---|---|
 | Score the forward ledger | months of new data (`scripts/daily_refresh.py`) |
-| F&O implied volatility (NSE daily bhavcopy, about 1-1.5 GB) | owner approval |
+| Retest option features | about a year more data |
