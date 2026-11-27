@@ -59,7 +59,25 @@ class WebData:
                 inst = get_instrument(iid)
                 rows.setdefault(iid, {"id": iid, "symbol": inst.symbol, "sector": getattr(inst, "sector", None)})[f"h{horizon}"] = f
         return {"status": status, "data_date": max((b["data_date"] for b in blocks.values()), default=None),
-                "rows": list(rows.values()), "upcoming": self.upcoming(set(rows)), "disclaimer": DISCLAIMER}
+                "rows": list(rows.values()), "upcoming": self.upcoming(set(rows)), "changes": self.changes(blocks), "disclaimer": DISCLAIMER}
+
+    def changes(self, blocks: dict, top: int = 6) -> dict:
+        """Largest moves in each chance since the previous recorded forecast date (from the forward ledger)."""
+        path = self.processed / "vol_ledger.jsonl"
+        if not blocks or not path.exists():
+            return {}
+        entries = [e["payload"] for e in AuditLog(path).read() if e["kind"] == "vol_forecast"]
+        out = {}
+        for horizon, block in blocks.items():
+            older = [p for p in entries if str(p["horizon_days"]) == horizon and p["date"] < block["data_date"]]
+            if not older:
+                continue
+            previous = max(older, key=lambda p: p["date"])
+            before = {f["instrument_id"]: f["prob"] for f in previous["forecasts"]}
+            moves = [{"id": i, "symbol": get_instrument(i).symbol, "now": f["prob_above_usual"], "before": before[i]}
+                     for i, f in block["forecasts"].items() if i in before and abs(f["prob_above_usual"] - before[i]) >= 0.02]
+            out[horizon] = {"since": previous["date"], "rows": sorted(moves, key=lambda m: -abs(m["now"] - m["before"]))[:top]}
+        return out
 
     def upcoming(self, ids: set, days: int = 30) -> list[dict]:
         """Announced meetings from today onward, for the stocks shown; only intimations already published."""

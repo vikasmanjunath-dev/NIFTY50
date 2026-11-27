@@ -103,6 +103,10 @@ async function today() {
       ...(rows.length ? [] : [h("div", { class: "empty" }, state.only === "watch" ? "Tap ☆ beside a stock to add it to your watchlist." : "No matching stocks.")]));
     count.textContent = `${rows.length} stocks · next ${state.horizon} trading days`;
     for (const b of seg.children) b.setAttribute("aria-pressed", b.dataset.h === state.horizon);
+    const c = data.changes[state.horizon];
+    moved.replaceChildren(...(c && c.rows.length ? [h("h2", {}, `Biggest changes since ${c.since}`), h("div", { class: "tiles" }, c.rows.map((m) =>
+      h("a", { class: "card", href: `#/stock/${encodeURIComponent(m.id)}` }, h("strong", {}, m.symbol),
+        h("div", { class: "dim" }, `${m.now > m.before ? "▲" : "▼"} ${pct(m.before, 0)} → ${pct(m.now, 0)}`))))] : []));
     for (const b of which.children) b.setAttribute("aria-pressed", b.dataset.w === state.only);
     const groups = new Map();
     for (const r of data.rows) if (r[key]) groups.set(r.sector, [...(groups.get(r.sector) || []), r[key].prob_above_usual]);
@@ -111,7 +115,7 @@ async function today() {
         onclick: () => { state.query = state.query === name ? "" : name; search.value = state.query; draw(); } },
         h("strong", {}, name || "Other"), h("span", {}, `${pct(mean, 0)} · ${n}`))));
   };
-  const sectors = h("div", { class: "tiles" });
+  const sectors = h("div", { class: "tiles" }), moved = h("div");
   const which = h("div", { class: "segmented", role: "group", "aria-label": "Show" }, [["all", "All"], ["watch", "Watchlist"]].map(([v, t]) =>
     h("button", { "data-w": v, type: "button", onclick: () => { state.only = v; draw(); } }, t)));
   const seg = h("div", { class: "segmented", role: "group", "aria-label": "Horizon" }, ["5", "20"].map((n) =>
@@ -128,7 +132,7 @@ async function today() {
       data.upcoming.length ? [h("h2", {}, "Announced meetings, next 30 days"), h("div", { class: "tiles" }, data.upcoming.map((u) =>
         h("a", { class: "card", href: `#/stock/${encodeURIComponent(u.id)}` }, h("strong", {}, u.symbol),
           h("div", { class: "dim" }, `${u.date}${u.results ? " · Results" : ""}`))))] : [],
-      h("h2", {}, "By sector"), sectors, h("div", { class: "controls" }, seg, which, search, sort, h("button", { type: "button", class: "primary", onclick: () => download(`volatility-${data.data_date}.csv`,
+      moved, h("h2", {}, "By sector"), sectors, h("div", { class: "controls" }, seg, which, search, sort, h("button", { type: "button", class: "primary", onclick: () => download(`volatility-${data.data_date}.csv`,
         [["symbol", "sector", "horizon_days", "prob_above_usual", "forecast_vol", "usual_vol", "move_low_90", "move_high_90", "data_date"],
           ...data.rows.flatMap((r) => ["5", "20"].filter((n) => r[`h${n}`]).map((n) => { const f = r[`h${n}`]; return [r.symbol, r.sector, Number(n),
             f.prob_above_usual, f.forecast_vol_annualised, f.usual_vol_annualised, f.move_low_90, f.move_high_90, data.data_date]; }))]) }, "Export CSV")), count, list);
