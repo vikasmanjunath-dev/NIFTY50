@@ -61,6 +61,37 @@ class WebData:
         return {"status": status, "data_date": max((b["data_date"] for b in blocks.values()), default=None),
                 "rows": list(rows.values()), "disclaimer": DISCLAIMER}
 
+    def _backtest(self, horizon: str):
+        path = self.processed / f"vol_oos_h{horizon}.parquet"
+        return pd.read_parquet(path) if path.exists() else None
+
+    def track_record(self, iid: str) -> dict:
+        """Past walk-forward forecasts of volatility beside what then happened (both yearly), per horizon."""
+        out = {}
+        for h in ("5", "20"):
+            d = self._backtest(h)
+            if d is None:
+                continue
+            d = d[d.instrument_id == iid].sort_values("event_time").tail(250)
+            if len(d) < 30:
+                continue
+            yearly = np.sqrt(252 / int(h))
+            out[h] = {"dates": [str(t)[:10] for t in d.event_time], "forecast": [round(float(v), 4) for v in np.exp(d.r) * yearly],
+                      "actual": [round(float(v), 4) for v in np.exp(d.lv) * yearly]}
+        return out
+
+    def reliability(self) -> dict:
+        """When the model said x%, how often did volatility actually come out above usual?"""
+        out = {}
+        for h in ("5", "20"):
+            d = self._backtest(h)
+            if d is None:
+                continue
+            bins = np.clip((d.p * 5).astype(int), 0, 4)
+            out[h] = [{"said": round(float(g.p.mean()), 3), "happened": round(float(g.y.mean()), 3), "n": int(len(g))}
+                      for _, g in d.groupby(bins) if len(g) >= 100]
+        return out
+
     def stock(self, iid):
         if not cache_path(iid).exists():
             raise HTTPException(404, "unknown instrument")
@@ -71,7 +102,7 @@ class WebData:
         out = {"id": iid, "symbol": inst.symbol, "sector": getattr(inst, "sector", None), "status": status,
                "prices": [[str(t.date()), round(float(c), 2)] for t, c in zip(bars.event_time, bars.close)],
                "forecasts": {h: {**b["forecasts"][iid], "data_date": b["data_date"]} for h, b in blocks.items() if iid in b["forecasts"]},
-               "meetings": [], "filings": self.filings(instrument=iid, limit=8), "disclaimer": DISCLAIMER}
+               "meetings": [], "record": self.track_record(iid), "filings": self.filings(instrument=iid, limit=8), "disclaimer": DISCLAIMER}
         meetings = self._parquet("board_meetings.parquet")
         if meetings is not None:
             m = meetings[meetings.instrument_id == iid].sort_values("meeting_date").drop_duplicates("meeting_date").tail(5)
@@ -97,7 +128,7 @@ class WebData:
                   {"label": "+ 2008–2020 history", "h5": 0.684, "h20": 0.739}, {"label": "+ extra features (20-day)", "h5": 0.684, "h20": 0.750},
                   {"label": "+ meeting dates (5-day)", "h5": 0.691, "h20": 0.750}]
         ranges = {h: (_json(self.reports / f"vol_ranges_h{h}.json") or {}).get("ranges", {}).get("model") for h in ("5", "20")}
-        return {"rounds": rounds, "ranges": ranges, "direction_auc": 0.50,
+        return {"reliability": self.reliability(), "rounds": rounds, "ranges": ranges, "direction_auc": 0.50,
                 "rejected": ["Delivery %, announcement counts, FII flows", "Chronos foundation model", "Overnight US market",
                              "Intraday realised volatility", "Option-implied volatility (retest later)", "Deeper trees, ensembles, recalibration"]}
 
@@ -193,5 +224,13 @@ def attach_web(app: FastAPI, ctx, data: WebData | None = None, refresher: Refres
     app.get("/api/system")(data.system)
     app.get("/", include_in_schema=False)(lambda: FileResponse(WEB_DIR / "index.html"))
     app.get("/sw.js", include_in_schema=False)(lambda: FileResponse(WEB_DIR / "sw.js", media_type="text/javascript"))
+    @app.middleware("http")
+    async def revalidate(request, call_next):
+        # Without this, browsers reuse old scripts after an update; ETags keep the re-check cheap.
+        response = await call_next(request)
+        if not request.url.path.startswith("/v3"):
+            response.headers["Cache-Control"] = "no-cache"
+        return response
+
     app.mount("/static", StaticFiles(directory=WEB_DIR), name="static")
     return app

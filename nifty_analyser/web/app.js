@@ -69,6 +69,9 @@ function chart(series, labels, format) {
   return h("div", {}, readout, svg);
 }
 
+const legend = (a, b) => h("div", { class: "legend" }, h("span", {}, h("i", { style: "background:var(--accent)" }), a),
+  h("span", {}, h("i", { style: "background:var(--orange)" }), b));
+
 const meter = (p) => h("span", { class: "meter" }, h("i", {}, h("b", { class: p >= 0.6 ? "high" : "", style: `width:${p * 100}%` })), pct(p, 0));
 const range = (f) => (f && f.move_low_90 != null ? `${pct(f.move_low_90)} to +${pct(f.move_high_90)}` : "–");
 
@@ -126,6 +129,9 @@ async function stock(id) {
     h("div", { class: "grid" }, f.map(([n, v]) => stat(`Next ${n} days`, pct(v.prob_above_usual, 0),
       `chance of above-usual volatility · ${pct(v.forecast_vol_annualised)} forecast vs ${pct(v.usual_vol_annualised)} usual · 9-in-10 move ${range(v)}`))),
     h("h2", {}, "Price, past year"), card(chart([{ values: d.prices.map((p) => p[1]) }], d.prices.map((p) => p[0]), (v) => `₹${Math.round(v).toLocaleString("en-IN")}`)),
+    Object.entries(d.record).map(([n, r]) => [h("h2", {}, `${n}-day volatility: forecast against what happened`),
+      card(legend("Forecast", "Actual"), chart([{ name: "forecast", values: r.forecast }, { name: "actual", values: r.actual }], r.dates, (v) => pct(v, 0)),
+        h("p", { class: "dim" }, "Past test forecasts, each made without seeing its outcome. Not the live record."))]),
     h("h2", {}, "Announced board meetings"), h("div", { class: "list" }, d.meetings.length ? d.meetings.map((m) =>
       h("div", { class: "filing" }, h("strong", {}, m.date), " ", m.results && h("span", { class: "badge" }, "Results"))) : h("div", { class: "empty" }, "None on record.")),
     h("h2", {}, "Latest filings"), filingList(d.filings), h("footer", {}, d.disclaimer)];
@@ -240,9 +246,11 @@ async function model() {
   return [...header("Model", "How well it works, and what was tried"),
     h("div", { class: "grid" }, stat("5-day accuracy score (AUC)", last.h5.toFixed(3), "0.5 is a coin flip, 1.0 is perfect"),
       stat("20-day accuracy score (AUC)", last.h20.toFixed(3), "Past data, examined many times"), stat("Up or down", d.direction_auc.toFixed(2), "No better than chance")),
-    h("h2", {}, "Progress"), card(h("div", { class: "legend" }, h("span", {}, h("i", { style: "background:var(--accent)" }), "5-day"),
-      h("span", {}, h("i", { style: "background:var(--orange)" }), "20-day")),
+    h("h2", {}, "Progress"), card(legend("5-day", "20-day"),
       chart([{ name: "5-day", values: d.rounds.map((r) => r.h5) }, { name: "20-day", values: d.rounds.map((r) => r.h20) }], d.rounds.map((r) => r.label), (v) => v.toFixed(3))),
+    Object.entries(d.reliability).map(([n, rows]) => [h("h2", {}, `${n}-day: when it said this, how often it happened`),
+      h("div", { class: "list" }, h("div", { class: "row head" }, h("span", {}, "Model said"), h("span", {}, "Actually happened"), h("span", {}, "Cases")),
+        rows.map((r) => h("div", { class: "row" }, h("strong", {}, pct(r.said, 0)), meter(r.happened), h("span", { class: "dim" }, r.n.toLocaleString("en-IN")))))]),
     h("h2", {}, "Price-range reliability"), h("div", { class: "grid" }, Object.entries(d.ranges).filter(([, v]) => v).map(([n, v]) =>
       stat(`${n}-day ranges held`, pct(v.coverage_90), "target 90%"))),
     h("h2", {}, "Tried and rejected"), h("div", { class: "list" }, d.rejected.map((t) => h("div", { class: "filing" }, t))),
@@ -298,7 +306,7 @@ async function route() {
   try { content = await page(arg && decodeURIComponent(arg)); }
   catch (err) { content = [card(h("strong", {}, "Could not load this page. "), navigator.onLine === false || err instanceof TypeError ? "The server cannot be reached. Start it with python3 scripts/serve.py." : err.message)]; }
   if (mine !== visit) return;
-  view.replaceChildren(...content.flat().filter(Boolean));
+  view.replaceChildren(...content.flat(Infinity).filter(Boolean));
   window.scrollTo(0, 0);
 }
 addEventListener("hashchange", route);
