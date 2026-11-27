@@ -185,3 +185,14 @@ def test_saved_forecasts_are_pending_then_graded_and_backed_up(site, tmp_path):
     assert "attachment" in response.headers["content-disposition"]
     assert z.read("vol_ledger.jsonl") == (tmp_path / "vol_ledger.jsonl").read_bytes()
     assert json.loads(z.read("chain_status.json")) == {"vol_ledger.jsonl": True}
+
+
+def test_freshness_flags_missing_and_lagging_sources(site, tmp_path):
+    ctx, _ = site  # "now" is 10 Jan 2026
+    ist = lambda d: pd.to_datetime([d]).tz_localize("Asia/Kolkata")
+    pd.DataFrame({"event_time": ist("2026-01-09")}).to_parquet(tmp_path / "NSE_NIFTY50_INDEX.parquet")
+    pd.DataFrame({"event_time": ist("2025-12-01")}).to_parquet(tmp_path / "macro_india_vix.parquet")
+    rows = {r["source"]: r for r in WebData(ctx, tmp_path, tmp_path, tmp_path).freshness()}
+    assert (rows["Prices"]["age_days"], rows["Prices"]["late"]) == (1, False)
+    assert rows["India VIX"]["late"] and rows["Board meetings"]["newest"] is None and rows["Board meetings"]["late"]
+    assert rows["Company filings"]["newest"] == "2026-01-02" and rows["Company filings"]["late"]
