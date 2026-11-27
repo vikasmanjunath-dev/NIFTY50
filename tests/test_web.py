@@ -1,4 +1,6 @@
 import json
+import sys
+import time
 
 import pandas as pd
 import pytest
@@ -7,6 +9,7 @@ from fastapi.testclient import TestClient
 from nifty_analyser.ops.api import create_app
 from nifty_analyser.ops.audit import AuditLog
 from nifty_analyser.ops.kill_switch import Health, KillSwitch
+from nifty_analyser.ops.refresh import Refresher
 from nifty_analyser.ops.web import WEB_DIR, WebData, attach_web
 
 
@@ -32,7 +35,8 @@ def site(tmp_path):
                   "category": ["Dividend", "Updates"], "text": ["<script>x</script> dividend declared", "other news"],
                   "attachment_url": ["javascript:alert(1)", "https://example.com/a.pdf"]}).to_parquet(tmp_path / "announcements_nifty50.parquet")
     ctx = Ctx(tmp_path)
-    return ctx, TestClient(attach_web(create_app(ctx), ctx, WebData(ctx, tmp_path, tmp_path, tmp_path)))
+    return ctx, TestClient(attach_web(create_app(ctx), ctx, WebData(ctx, tmp_path, tmp_path, tmp_path), Refresher([sys.executable, "-c", "print('ok')"])),
+                           base_url="http://127.0.0.1")
 
 
 def test_overview_serves_then_withholds_when_stale_or_halted(site):
@@ -94,3 +98,29 @@ def test_ask_page_numbers_sources_like_the_prompt_does():
 
     assert "sorted(pack.evidence_items, key=lambda e: e.publication_time, reverse=True)" in inspect.getsource(llm)
     assert "String(b.publication_time).localeCompare(String(a.publication_time))" in (WEB_DIR / "app.js").read_text()
+
+
+def test_refresh_only_from_the_app_itself_and_foreign_hosts_are_rejected(site):
+    ctx, client = site
+    mine = {"X-Requested-With": "nifty-web"}
+    assert client.post("/api/refresh").status_code == 403
+    assert client.post("/api/refresh", headers={**mine, "Origin": "https://evil.example"}).status_code == 403
+    assert client.get("/api/overview", headers={"Host": "evil.example"}).status_code == 400
+    assert client.post("/api/refresh", headers={**mine, "Origin": "http://127.0.0.1"}).status_code == 200
+    for _ in range(100):
+        state = client.get("/api/refresh").json()
+        if not state["running"]:
+            break
+        time.sleep(0.05)
+    assert state == {"running": False, "ok": True, "message": "ok"}
+    assert ctx.audit.read()[-1]["kind"] == "refresh"
+
+
+def test_refresher_runs_one_at_a_time_and_reports_failure():
+    r = Refresher([sys.executable, "-c", "import time,sys; time.sleep(0.3); sys.exit('boom')"])
+    assert r.start() and not r.start()
+    for _ in range(100):
+        if not r.state["running"]:
+            break
+        time.sleep(0.05)
+    assert r.state["ok"] is False and r.state["message"] == "boom"
