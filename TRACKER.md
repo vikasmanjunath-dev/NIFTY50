@@ -546,3 +546,4 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 32. Web: meetings calendar page, grouped by date; checked with injected data (current data has no announced meetings).
 33. Web: shareable watchlist link and page description tags; shared page checked in a browser (the copy-link button not clicked).
 34. Web: download a stock's prices and past test forecasts as CSV (checked in a browser).
+35. Web: sort Today by lowest chance or furthest above the stock's own usual volatility.
