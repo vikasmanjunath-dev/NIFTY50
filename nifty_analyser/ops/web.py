@@ -258,6 +258,25 @@ class WebData:
                 "parts": sorted(({"id": i, "symbol": get_instrument(i).symbol, "weight": float(weight[k]), "risk_share": float(share[k]),
                                   "volatility": float(vol[k])} for k, i in enumerate(ids)), key=lambda p: -p["risk_share"])}
 
+    # label, file under data/raw, date column, days of lag before it is flagged, how it is refreshed
+    SOURCES = (("Prices", "NSE_NIFTY50_INDEX.parquet", "event_time", 4, "daily refresh"),
+               ("India VIX", "macro_india_vix.parquet", "event_time", 5, "daily refresh"),
+               ("Board meetings", "board_meetings.parquet", "available_time", 45, "daily refresh"),
+               ("Company filings", "announcements_nifty50.parquet", "available_time", 7, "python3 scripts/backfill_announcements.py"))
+
+    def freshness(self) -> list[dict]:
+        today = self.ctx.now_fn().date()
+        out = []
+        for label, name, column, limit, how in self.SOURCES:
+            frame = self._parquet(name)
+            if frame is None or frame.empty:
+                out.append({"source": label, "newest": None, "age_days": None, "late": True, "refresh_with": how})
+                continue
+            newest = pd.to_datetime(frame[column], utc=True).max().tz_convert("Asia/Kolkata").date()
+            out.append({"source": label, "newest": str(newest), "age_days": (today - newest).days,
+                        "late": (today - newest).days > limit, "refresh_with": how})
+        return out
+
     def system(self):
         health = self.ctx.killswitch.effective(self.ctx.health_fn()).to_dict()
         ok, _ = self.ctx.audit.verify()
@@ -266,7 +285,7 @@ class WebData:
             path = self.processed / f"{name}.jsonl"
             ledgers[name] = sum(1 for line in path.read_text().splitlines() if line.strip()) if path.exists() else 0
         return {"health": health, "model_version": self.ctx.version, "audit_ok": ok, "audit_entries": len(self.ctx.audit.read()),
-                "ledger_entries": ledgers, "forecast_status": self.forecasts()[0], "scorecard": self.scorecard()}
+                "ledger_entries": ledgers, "forecast_status": self.forecasts()[0], "scorecard": self.scorecard(), "sources": self.freshness()}
 
 
 LOCAL_HOSTS = ["127.0.0.1", "localhost", "[::1]"]

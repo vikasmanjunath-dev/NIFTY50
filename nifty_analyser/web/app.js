@@ -363,6 +363,9 @@ async function system() {
     h("div", { class: "grid" }, h("div", { class: "card stat" }, h("small", {}, "Serving state"), h("b", {}, h("span", { class: `badge ${d.health.state}` }, d.health.state)),
       h("small", {}, (d.health.reasons || []).join("; ") || "No active alerts")),
       stat("Forecasts", d.forecast_status, ""), stat("Audit log", d.audit_ok ? "Intact" : "BROKEN", `${d.audit_entries} entries`)),
+    h("h2", {}, "Data sources"), h("div", { class: "list" }, d.sources.map((s) => h("div", { class: "filing" },
+      h("strong", {}, s.source), " ", h("span", { class: `badge ${s.late ? "STALE" : "OK"}` }, s.newest == null ? "missing" : s.late ? "behind" : "current"),
+      h("div", { class: "dim" }, s.newest == null ? `Get it with: ${s.refresh_with}` : `newest ${s.newest}, ${s.age_days} day${s.age_days === 1 ? "" : "s"} ago${s.late ? ` · update with: ${s.refresh_with}` : ""}`)))),
     h("h2", {}, "Update"), refreshCard(),
     h("h2", {}, "Forward records"), h("div", { class: "list" }, Object.entries(d.ledger_entries).map(([k, v]) =>
       h("div", { class: "filing" }, h("strong", {}, k.replaceAll("_", " ")), ` · ${v} entries`))),
