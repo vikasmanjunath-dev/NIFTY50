@@ -62,11 +62,14 @@ def test_pages_static_files_and_system(site):
     assert "Nifty Analyser" in client.get("/").text
     for name in ("app.js", "app.css", "manifest.webmanifest", "icon.svg", "icon-180.png"):
         assert client.get(f"/static/{name}").status_code == 200
+    for path in ("/", "/static/app.js", "/api/overview"):
+        assert client.get(path).headers["cache-control"] == "no-cache"
     worker = client.get("/sw.js")
     assert worker.headers["content-type"].startswith("text/javascript") and "/api/" not in worker.text.split("const SHELL")[1].split(";")[0]
     assert client.get("/api/system").json()["audit_ok"] and client.get("/api/model").json()["rounds"]
     assert client.get("/api/stock/NSE:NOPE").status_code == 404
-    assert "innerHTML =" not in (WEB_DIR / "app.js").read_text()
+    script = (WEB_DIR / "app.js").read_text()
+    assert "innerHTML =" not in script and ".flat()" not in script  # shallow flattening silently drops nested sections
 
 
 def test_portfolio_risk_and_input_validation(site, monkeypatch, tmp_path):
@@ -124,3 +127,16 @@ def test_refresher_runs_one_at_a_time_and_reports_failure():
             break
         time.sleep(0.05)
     assert r.state["ok"] is False and r.state["message"] == "boom"
+
+
+def test_track_record_and_reliability(site, tmp_path):
+    _, client = site
+    assert client.get("/api/model").json()["reliability"] == {}
+    n = 400
+    pd.DataFrame({"instrument_id": "NSE:INFY", "event_time": pd.date_range("2025-01-01", periods=n), "y": [1, 0, 1, 1] * (n // 4),
+                  "lv": -3.5, "p": 0.75, "r": -3.5}).to_parquet(tmp_path / "vol_oos_h5.parquet")
+    assert client.get("/api/model").json()["reliability"]["5"] == [{"said": 0.75, "happened": 0.75, "n": n}]
+    from nifty_analyser.ops.web import WebData
+
+    record = WebData(None, tmp_path, tmp_path, tmp_path).track_record("NSE:INFY")["5"]
+    assert len(record["dates"]) == 250 and record["forecast"] == record["actual"]
