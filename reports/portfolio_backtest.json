@@ -1,0 +1,24 @@
+{
+ "5": {
+  "calibrated_multiplier_from_first_half": 1.917,
+  "second_half_within_calibrated": 0.8779,
+  "second_half_within_bell_curve": 0.8221,
+  "dates": 228,
+  "mixes": 9120,
+  "within_typical": 0.6047,
+  "within_1_in_10": 0.8316,
+  "worst_date_within_1_in_10": 0.075,
+  "multiplier_for_90pct": 1.979
+ },
+ "20": {
+  "calibrated_multiplier_from_first_half": 1.792,
+  "second_half_within_calibrated": 0.9098,
+  "second_half_within_bell_curve": 0.8857,
+  "dates": 56,
+  "mixes": 2240,
+  "within_typical": 0.6674,
+  "within_1_in_10": 0.8826,
+  "worst_date_within_1_in_10": 0.1,
+  "multiplier_for_90pct": 1.758
+ }
+}
