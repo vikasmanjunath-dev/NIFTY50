@@ -58,12 +58,14 @@ def test_pages_static_files_and_system(site):
     assert "Nifty Analyser" in client.get("/").text
     for name in ("app.js", "app.css", "manifest.webmanifest", "icon.svg", "icon-180.png"):
         assert client.get(f"/static/{name}").status_code == 200
+    worker = client.get("/sw.js")
+    assert worker.headers["content-type"].startswith("text/javascript") and "/api/" not in worker.text.split("const SHELL")[1].split(";")[0]
     assert client.get("/api/system").json()["audit_ok"] and client.get("/api/model").json()["rounds"]
     assert client.get("/api/stock/NSE:NOPE").status_code == 404
     assert "innerHTML =" not in (WEB_DIR / "app.js").read_text()
 
 
-def test_portfolio_risk_and_input_validation(site, monkeypatch):
+def test_portfolio_risk_and_input_validation(site, monkeypatch, tmp_path):
     import numpy as np
 
     from nifty_analyser.ops import web
@@ -77,5 +79,9 @@ def test_portfolio_risk_and_input_validation(site, monkeypatch):
     assert body["typical_move"] == pytest.approx(0.2 * (5 / 252) ** 0.5 * 4000)
     for bad in ("NSE:INFY:-5", "NSE:INFY:nan", "garbage", "NSE:ZZZ:10"):
         assert client.get("/api/portfolio", params={"holdings": bad}).status_code == 422
+    assert body["large_move"] == pytest.approx(1.645 / 1.0 * body["typical_move"]) and body["large_move_held"] is None
+    (tmp_path / "portfolio_backtest.json").write_text(json.dumps({"5": {"multiplier_for_90pct": 2.0, "second_half_within_calibrated": 0.89}}))
+    again = client.get("/api/portfolio", params={"holdings": "NSE:INFY:4000"}).json()
+    assert again["large_move"] == pytest.approx(2 * again["typical_move"]) and again["large_move_held"] == 0.89
     ctx.killswitch.trip("test", "t")
     assert client.get("/api/portfolio", params={"holdings": "NSE:INFY:1"}).json() == {"status": "HALTED"}
