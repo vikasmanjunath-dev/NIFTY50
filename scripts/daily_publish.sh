@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Refresh data, export the static snapshot, deploy it. Run daily by the Claude app scheduled task "nifty-tremor-daily-publish".
+# Refresh data, export the static snapshot, deploy it. Run daily by the desktop app scheduled task "nifty-tremor-daily-publish".
 set -eo pipefail
 cd "${0:A:h}/.."
 echo "== $(date)"

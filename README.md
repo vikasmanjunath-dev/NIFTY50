@@ -24,7 +24,7 @@ Update it after a data refresh (forecasts are withheld once they are more than 5
 python3 scripts/export_static.py && vercel deploy dist/nifty-tremor --prod --yes
 ```
 
-The Claude app task `nifty-tremor-daily-publish` runs `scripts/daily_publish.sh` daily at about 19:00 while the app is open
+The desktop app task `nifty-tremor-daily-publish` runs `scripts/daily_publish.sh` daily at about 19:00 while the app is open
 (a launchd job cannot read `~/Desktop` on macOS).
 
 Keep the Vercel project disconnected from Git: a push-triggered build has no site and serves 404.
