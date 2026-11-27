@@ -20,6 +20,8 @@ Add `--evidence --explain` for the Ask page (needs Ollama).
 
 Macro series are refreshed by the daily job. Optional research data: `backfill_global.py`, `backfill_intraday.py`, `backfill_options.py`.
 
+The System page lists each data source with its newest date. Company filings are **not** part of the daily job; run `backfill_announcements.py` for them.
+
 ## Kill switch
 `POST /v3/admin/kill` (server started with `STM_ADMIN_TOKEN`). Forecasts are withheld until reset.
 

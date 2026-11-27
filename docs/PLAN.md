@@ -21,6 +21,8 @@ The working plan. Item-level history is in [TRACKER.md](../TRACKER.md); model ex
 | 9 | Per-stock forward record on stock pages | each saved forecast shows pending or its graded outcome | done |
 | 10 | One-click download of the forward records | a zip of the ledgers with their chain status | done |
 
+| 11 | Data freshness per source on the System page | each input shows its newest date and whether it lags | done |
+
 ## Next (in order)
 | # | Item | Why | Needs |
 |---|---|---|---|
