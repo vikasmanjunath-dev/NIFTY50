@@ -155,7 +155,7 @@ async function portfolio() {
     result.replaceChildren(h("div", { class: "grid" },
       stat("Expected volatility (yearly)", pct(d.volatility), `usual for this mix: ${pct(d.usual_volatility)}`),
       stat(`Typical ${d.horizon}-day swing`, `±${rupees(d.typical_move)}`, `on ${rupees(d.total)}`),
-      stat("Rough 1-in-10 swing", `±${rupees(d.large_move)}`, "assumes a bell curve; real extremes can be larger"),
+      stat("Rough 1-in-10 swing", `±${rupees(d.large_move)}`, d.large_move_held ? `held ${pct(d.large_move_held, 0)} of the time in a later-period check; extremes can be far larger` : "assumes a bell curve; real extremes can be larger"),
       stat("Diversification saves", pct(d.undiversified - d.volatility), "volatility, versus moving in lockstep")),
       h("h2", {}, "Where the risk comes from"), h("div", { class: "list" }, d.parts.map((p) => h("div", { class: "row" },
         h("strong", {}, p.symbol), meter(Math.max(0, Math.min(1, p.risk_share))), h("span", {}, `${pct(p.weight, 0)} of money`),
@@ -233,12 +233,13 @@ async function route() {
   }
   let content;
   try { content = await page(arg && decodeURIComponent(arg)); }
-  catch (err) { content = [card(h("strong", {}, "Could not load this page. "), err.message)]; }
+  catch (err) { content = [card(h("strong", {}, "Could not load this page. "), navigator.onLine === false || err instanceof TypeError ? "The server cannot be reached. Start it with python3 scripts/serve.py." : err.message)]; }
   if (mine !== visit) return;
   view.replaceChildren(...content.flat().filter(Boolean));
   window.scrollTo(0, 0);
 }
 addEventListener("hashchange", route);
+navigator.serviceWorker?.register("/sw.js").catch(() => { /* the app works without it */ });
 addEventListener("keydown", (e) => { // "/" focuses search, as on Apple's web apps
   const box = view.querySelector("input[type=search]");
   if (e.key === "/" && box && document.activeElement !== box) { e.preventDefault(); box.focus(); }

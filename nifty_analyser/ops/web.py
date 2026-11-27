@@ -145,9 +145,11 @@ class WebData:
         variance = float(weight @ cov @ weight)
         share = weight * (cov @ weight) / variance
         period = np.sqrt(variance * horizon / 252)
+        test = (_json(self.reports / "portfolio_backtest.json") or {}).get(str(horizon), {})
+        multiplier = test.get("multiplier_for_90pct", 1.645)   # measured on past data; the bell curve's 1.645 is too small
         return {"status": "OK", "horizon": horizon, "data_date": block["data_date"], "total": total,
                 "volatility": float(np.sqrt(variance)), "usual_volatility": float(np.sqrt(weight @ (np.outer(usual, usual) * corr) @ weight)),
-                "undiversified": float(weight @ vol), "typical_move": float(period * total), "large_move": float(1.645 * period * total),
+                "undiversified": float(weight @ vol), "typical_move": float(period * total), "large_move": float(multiplier * period * total), "large_move_held": test.get("second_half_within_calibrated"),
                 "parts": sorted(({"id": i, "symbol": get_instrument(i).symbol, "weight": float(weight[k]), "risk_share": float(share[k]),
                                   "volatility": float(vol[k])} for k, i in enumerate(ids)), key=lambda p: -p["risk_share"])}
 
@@ -171,5 +173,6 @@ def attach_web(app: FastAPI, ctx, data: WebData | None = None) -> FastAPI:
     app.get("/api/model")(data.model)
     app.get("/api/system")(data.system)
     app.get("/", include_in_schema=False)(lambda: FileResponse(WEB_DIR / "index.html"))
+    app.get("/sw.js", include_in_schema=False)(lambda: FileResponse(WEB_DIR / "sw.js", media_type="text/javascript"))
     app.mount("/static", StaticFiles(directory=WEB_DIR), name="static")
     return app
