@@ -516,3 +516,6 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 3. Web: watchlist highlights on Today; filing category filter.
 4. Web: per-stock live record (pending or graded) and a ledger backup download (`GET /api/backup`).
 5. Web: data-source freshness panel. Company filings are not refreshed by the daily job.
+6. Daily refresh now adds new filings (first run: 92 new, 58,537 total; 51 new texts embedded). Pre-run copy in `data/processed/backup/`.
+7. Web: latest filings for watched stocks on Today.
+8. Web: per-page titles, skip link, focus moves on navigation (not tested with a screen reader).

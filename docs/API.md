@@ -9,7 +9,7 @@ Local server only; there is no login.
 | `GET /sw.js` | offline app shell |
 | `GET /api/overview` | forecasts, upcoming meetings, changes |
 | `GET /api/stock/{iid}` | prices, forecasts, track record, meetings, filings |
-| `GET /api/filings` | search filings (`q`, `category`, `instrument`, `limit`) |
+| `GET /api/filings` | search filings (`q`, `category`, `instrument` one or comma-separated, `limit`) |
 | `GET /api/filings/categories` | most common filing categories |
 | `GET /api/portfolio` | risk of a mix (`holdings=NSE:INFY:50000,...`, `horizon`) |
 | `GET /api/backup` | zip of the forward ledgers |

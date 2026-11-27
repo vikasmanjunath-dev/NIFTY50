@@ -23,6 +23,12 @@ The working plan. Item-level history is in [TRACKER.md](../TRACKER.md); model ex
 
 | 11 | Data freshness per source on the System page | each input shows its newest date and whether it lags | done |
 
+| 12 | New company filings in the daily refresh | only unseen filings appended; search index updated | done |
+
+| 13 | Recent filings for watched stocks on Today | newest filings across the watchlist, linked | done |
+
+| 14 | Page titles, skip link, focus on navigation | keyboard and screen-reader users land on the new page | done |
+
 ## Next (in order)
 | # | Item | Why | Needs |
 |---|---|---|---|

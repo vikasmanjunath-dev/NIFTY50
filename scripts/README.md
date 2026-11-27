@@ -97,3 +97,9 @@ Run from the project root with `python3 scripts/<name>`.
 | [run_vol_intraday.py](run_vol_intraday.py) | Round 6 (docs/AUC_PLAN.md): intraday realised-volatility features. |
 | [run_vol_options.py](run_vol_options.py) | Round 8 (docs/AUC_PLAN.md): option-implied volatility. |
 | [run_vol_ranges.py](run_vol_ranges.py) | Calibrated expected-move ranges and whether the volatility forecast helps a portfolio. |
+
+## Other
+
+| Script | What it does |
+|---|---|
+| [refresh_announcements.py](refresh_announcements.py) | Add company filings published since the newest one on disk (NSE, whole-exchange feed filtered to the pool), and embed them into the search index if it exists and the local embedder is running. |
