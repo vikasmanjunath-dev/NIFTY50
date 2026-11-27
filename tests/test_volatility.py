@@ -268,3 +268,25 @@ def test_meeting_features_reach_only_the_adopted_horizon(monkeypatch, horizon, a
     vf.latest_forecasts(b, horizon)
     vf.latest_forecasts(b, horizon, meetings=meetings)
     assert widths[1] - widths[0] == added
+
+
+def test_option_summary_recovers_implied_volatility_from_both_file_formats():
+    from nifty_analyser.features.volatility_options import option_features, parse, summarise
+
+    day = pd.Timestamp("2024-01-01")
+    premium = 0.7979 * 100 * 0.3 * np.sqrt(30 / 365) / 2  # call = put for a 30% straddle on a forward of 100
+    rows = [("FUTSTK", "AAA", "31-Jan-2024", 0, "XX", 100, 100, 10, 5)]
+    rows += [("OPTSTK", "AAA", "31-Jan-2024", k, t, premium, premium, 10, 5) for k in (95, 100, 105) for t in ("CE", "PE")]
+    old = pd.DataFrame(rows, columns=["INSTRUMENT", "SYMBOL", "EXPIRY_DT", "STRIKE_PR", "OPTION_TYP", "CLOSE", "SETTLE_PR", "CONTRACTS", "OPEN_INT"])
+    new = old.rename(columns={"INSTRUMENT": "FinInstrmTp", "SYMBOL": "TckrSymb", "EXPIRY_DT": "XpryDt", "STRIKE_PR": "StrkPric", "OPTION_TYP": "OptnTp",
+                              "CLOSE": "ClsPric", "SETTLE_PR": "SttlmPric", "CONTRACTS": "TtlTradgVol", "OPEN_INT": "OpnIntrst"})
+    new["XpryDt"] = "2024-01-31"
+    new["FinInstrmTp"] = new.FinInstrmTp.map({"FUTSTK": "STF", "OPTSTK": "STO"})
+    for frame in (old, new):
+        out = summarise(parse(frame), day, {"AAA"})
+        assert out.iv_near.iloc[0] == pytest.approx(0.3, rel=1e-6) and out.pcr_oi.iloc[0] == pytest.approx(0.0)
+    history = pd.concat([out.assign(date=f"2024-01-{d:02d}", iv_near=0.2 + d / 100) for d in range(1, 29)], ignore_index=True)
+    full, cols = option_features(history.assign(iv_next=history.iv_near))
+    part, _ = option_features(history.iloc[:20].assign(iv_next=history.iv_near.iloc[:20]))
+    assert "iv_rel" not in set(cols) - set(full.columns)
+    pd.testing.assert_frame_equal(full.iloc[:20][["iv_log", "iv_chg_5"]], part[["iv_log", "iv_chg_5"]])
