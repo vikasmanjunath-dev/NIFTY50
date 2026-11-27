@@ -532,3 +532,4 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 19. Web: keyboard control for charts (not tested with a screen reader).
 20. Web: portfolio linked pairs and removal what-if; range grading on saved forecasts.
 21. Web: loading message and retry button.
+22. Web: sector page and `GET /api/sector/{name}`.

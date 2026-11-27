@@ -63,6 +63,8 @@ The working plan. Item-level history is in [TRACKER.md](../TRACKER.md); model ex
 
 | 35 | Loading message and retry on failed pages | slow or failed pages say so | done |
 
+| 36 | Sector page: its stocks, average chance, how closely they move together | linked from each stock page | done |
+
 ## Next (in order)
 | # | Item | Why | Needs |
 |---|---|---|---|
