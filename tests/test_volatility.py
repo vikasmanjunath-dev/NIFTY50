@@ -236,3 +236,35 @@ def test_intraday_summaries_and_features_are_point_in_time():
     part, _ = intraday_features(summary[summary.date <= cut])
     pd.testing.assert_frame_equal(full[full.date <= cut].reset_index(drop=True), part.reset_index(drop=True))
     assert set(full.instrument_id) == {"NSE:AAA"} and "index_rv_5" in cols
+
+
+def test_board_meetings_are_invisible_until_published():
+    from nifty_analyser.features.volatility_events import add_event_features, normalise
+
+    ist = lambda s: pd.Timestamp(s, tz="Asia/Kolkata")
+    meetings = normalise([{"bm_date": "20-Jan-2023", "bm_timestamp": "10-Jan-2023 19:00:00", "bm_purpose": "Financial Results"},
+                          {"bm_date": "bad", "bm_timestamp": "10-Jan-2023 19:00:00"},
+                          {"bm_date": "02-Jan-2023", "bm_timestamp": "01-Jan-2023 10:00:00", "bm_purpose": "Dividend"}], "NSE:AAA")
+    assert len(meetings) == 2 and meetings.is_results.tolist() == [True, False]
+    rows = pd.DataFrame({"instrument_id": "NSE:AAA", "available_time": [ist("2023-01-10 15:30"), ist("2023-01-11 15:30"), ist("2023-01-25 15:30")]})
+    out, cols = add_event_features(rows, meetings, 20)
+    assert out.ev_days_to_results.tolist() == [100.0, 9.0, 100.0]  # the intimation came after the 10th's close
+    assert out.ev_results_in_horizon.tolist() == [0.0, 1.0, 0.0] and out.ev_days_since_results.iloc[2] == 5
+    assert out[cols].shape == (3, 5)
+
+
+@pytest.mark.parametrize("horizon,added", [(5, 5), (20, 0)])
+def test_meeting_features_reach_only_the_adopted_horizon(monkeypatch, horizon, added):
+    from nifty_analyser.ops import vol_forecast as vf
+
+    widths = []
+    monkeypatch.setattr(vf, "instrument_ids_as_of", lambda d: {"NSE:AAA", "NSE:BBB"})
+    monkeypatch.setattr(vf, "membership_mask", lambda df: pd.Series(True, index=df.index))
+    monkeypatch.setattr(vf, "fit_predict_classifiers", lambda X, y, V: (widths.append(X.shape[1]), {"blend": np.full(len(V), 0.5)})[1])
+    monkeypatch.setattr(vf, "fit_predict_regressors", lambda X, y, V: {"blend": np.zeros(len(V))})
+    b = bars()
+    meetings = pd.DataFrame({"instrument_id": ["NSE:AAA"], "meeting_date": [b.event_time.iloc[300]],
+                             "available_time": [b.available_time.iloc[290]], "is_results": [True]})
+    vf.latest_forecasts(b, horizon)
+    vf.latest_forecasts(b, horizon, meetings=meetings)
+    assert widths[1] - widths[0] == added
