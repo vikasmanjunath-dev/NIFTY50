@@ -25,4 +25,8 @@ try:
     run("backfill_board_meetings.py")                      # newly announced meeting dates
 except subprocess.CalledProcessError as exc:
     print(f"board-meeting refresh failed, keeping cache: {exc}")
+try:
+    run("refresh_announcements.py")                        # new company filings
+except subprocess.CalledProcessError as exc:
+    print(f"filings refresh failed, keeping cache: {exc}")
 run("forecast_volatility.py")

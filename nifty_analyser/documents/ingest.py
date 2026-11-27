@@ -252,3 +252,15 @@ def ingest_announcements_universe(
     if not all_rows:
         return pd.DataFrame(columns=DOCUMENT_COLUMNS)
     return pd.DataFrame(all_rows)[DOCUMENT_COLUMNS].sort_values("event_time").reset_index(drop=True)
+
+
+def merge_new_documents(old: pd.DataFrame, new: pd.DataFrame) -> tuple[pd.DataFrame, int]:
+    """Append unseen documents. What was already recorded stays exactly as first seen."""
+    fresh = new[~new["doc_id"].isin(set(old["doc_id"]))].drop_duplicates("doc_id")
+    if fresh.empty:
+        return old, 0
+    fresh = fresh.reindex(columns=old.columns)
+    for column in ("event_time", "available_time"):
+        if isinstance(old[column].dtype, pd.DatetimeTZDtype):
+            fresh[column] = pd.to_datetime(fresh[column], utc=True).dt.tz_convert(old[column].dt.tz).astype(old[column].dtype)
+    return pd.concat([old, fresh], ignore_index=True), len(fresh)

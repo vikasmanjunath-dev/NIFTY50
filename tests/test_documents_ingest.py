@@ -76,3 +76,17 @@ def test_to_document_row_falls_back_to_desc_when_no_attachment_text():
     row = _to_document_row(_raw_record(attchmntText=None), "NSE:RELIANCE")
     assert row["text"] == "Updates"
     assert row["quality_flag"] == QualityFlag.PASS.value
+
+
+def test_merge_appends_only_unseen_documents_and_keeps_originals():
+    import pandas as pd
+
+    from nifty_analyser.documents.ingest import merge_new_documents
+
+    ist = lambda *d: pd.to_datetime(list(d)).tz_localize("Asia/Kolkata")
+    old = pd.DataFrame({"doc_id": ["a"], "event_time": ist("2026-01-01"), "available_time": ist("2026-01-01"), "text": ["first"]})
+    new = pd.DataFrame({"doc_id": ["a", "b", "b"], "event_time": ist(*["2026-01-02"] * 3), "available_time": ist(*["2026-01-02"] * 3),
+                        "text": ["changed", "second", "second"]})
+    merged, added = merge_new_documents(old, new)
+    assert added == 1 and merged.text.tolist() == ["first", "second"] and merged.available_time.dtype == old.available_time.dtype
+    assert merge_new_documents(merged, new)[1] == 0
