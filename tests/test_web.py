@@ -321,3 +321,12 @@ def test_shared_watchlist_link_keeps_only_known_stocks_once():
     script = f"{line}\nconsole.log(JSON.stringify(sharedIds('TCS,<img>,TCS,M&M,ZZZ', ['NSE:TCS','NSE:M&M'])))"
     out = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=True).stdout
     assert json.loads(out) == ["NSE:TCS", "NSE:M&M"]
+
+
+@pytest.mark.skipif(not shutil.which("node"), reason="node not installed")
+def test_test_forecast_csv_rows_line_up_by_date():
+    source = (WEB_DIR / "app.js").read_text()
+    function = source[source.index("const recordRows"):source.index("async function stock")]
+    script = f"{function}\nconsole.log(JSON.stringify(recordRows({{'5': {{dates: ['d1', 'd2'], forecast: [1, 2], actual: [3, 4]}}}})))"
+    out = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=True).stdout
+    assert json.loads(out)[1:] == [[5, "d1", 1, 3], [5, "d2", 2, 4]]

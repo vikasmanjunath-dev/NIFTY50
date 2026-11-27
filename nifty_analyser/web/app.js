@@ -228,6 +228,10 @@ async function switcher() {
   input.focus();
 }
 
+// One row per past test forecast; volatility figures are yearly.
+const recordRows = (record) => [["horizon_days", "date", "forecast_vol", "actual_vol"],
+  ...Object.entries(record).flatMap(([n, r]) => r.dates.map((d, i) => [Number(n), d, r.forecast[i], r.actual[i]]))];
+
 async function stock(id) {
   const d = await get(`/api/stock/${encodeURIComponent(id)}`);
   const f = Object.entries(d.forecasts).sort(([a], [b]) => a - b);
@@ -235,6 +239,8 @@ async function stock(id) {
     h("div", { class: "grid" }, f.map(([n, v]) => stat(`Next ${n} days`, pct(v.prob_above_usual, 0),
       `chance of above-usual volatility · ${pct(v.forecast_vol_annualised)} forecast vs ${pct(v.usual_vol_annualised)} usual · 9-in-10 move ${range(v)}${d.peers[n] ? ` · other ${d.sector} stocks average ${pct(d.peers[n].sector_average, 0)}` : ""}`))),
     h("h2", {}, "Price"), priceCard(d.prices),
+    h("p", {}, h("button", { type: "button", onclick: () => download(`${d.symbol}-prices.csv`, [["date", "close"], ...d.prices]) }, "Prices as CSV"), " ",
+      Object.keys(d.record).length ? h("button", { type: "button", onclick: () => download(`${d.symbol}-test-forecasts.csv`, recordRows(d.record)) }, "Test forecasts as CSV") : ""),
     Object.entries(d.record).map(([n, r]) => [h("h2", {}, `${n}-day volatility: forecast against what happened`),
       card(legend("Forecast", "Actual"), chart([{ name: "forecast", values: r.forecast }, { name: "actual", values: r.actual }], r.dates, (v) => pct(v, 0)),
         h("p", { class: "dim" }, "Past test forecasts, each made without seeing its outcome. Not the live record."))]),
