@@ -514,3 +514,4 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 1. Added `docs/PLAN.md`, `ARCHITECTURE.md`, `OPERATIONS.md`; generated folder READMEs, report index and `API.md` (`scripts/build_docs.py`, checked by `tests/test_docs.py`).
 2. Refreshed the stale README status banner. Older README sections remain as history.
 3. Web: watchlist highlights on Today; filing category filter.
+4. Web: per-stock live record (pending or graded) and a ledger backup download (`GET /api/backup`).

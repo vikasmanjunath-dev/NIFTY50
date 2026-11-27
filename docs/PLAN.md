@@ -18,10 +18,13 @@ The working plan. Item-level history is in [TRACKER.md](../TRACKER.md); model ex
 | 2 | Watchlist highlights on Today | watched stocks with high chance or an announced meeting are called out | done |
 | 3 | Filter filings by category | Filings page has a category menu | done |
 
+| 9 | Per-stock forward record on stock pages | each saved forecast shows pending or its graded outcome | done |
+| 10 | One-click download of the forward records | a zip of the ledgers with their chain status | done |
+
 ## Next (in order)
 | # | Item | Why | Needs |
 |---|---|---|---|
-| 4 | Grade the forward record and show it per stock | only clean evidence | weeks of daily refreshes |
+| 4 | Enough graded forecasts to judge the live model | only clean evidence | weeks of daily refreshes |
 | 5 | Scheduled daily refresh (launchd) | keeps the record growing unattended | owner installs `scripts/launchd` job |
 | 6 | Back up the forward ledgers off this machine | they cannot be recreated | owner chooses a destination |
 | 7 | Retest option-implied features | little option history today | about a year more data |

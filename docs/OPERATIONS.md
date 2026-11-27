@@ -32,7 +32,7 @@ Macro series are refreshed by the daily job. Optional research data: `backfill_g
 | Ask page says it is off | server started without the flags | restart with `--evidence --explain` |
 
 ## Backups
-Copy `data/processed/*.jsonl` (forward records) off this machine; they cannot be recreated.
+System page → *Download a backup of these records* (a zip with each chain's status), then keep it off this machine; they cannot be recreated.
 
 ## Tests and docs
 `python3 -m pytest -q`. After adding or renaming code run `python3 scripts/build_docs.py`.

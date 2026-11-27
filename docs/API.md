@@ -12,6 +12,7 @@ Local server only; there is no login.
 | `GET /api/filings` | search filings (`q`, `category`, `instrument`, `limit`) |
 | `GET /api/filings/categories` | most common filing categories |
 | `GET /api/portfolio` | risk of a mix (`holdings=NSE:INFY:50000,...`, `horizon`) |
+| `GET /api/backup` | zip of the forward ledgers |
 | `GET /api/model` | progress, reliability, rejected ideas |
 | `GET /api/system` | health, audit, ledgers, forward scorecard |
 | `POST /api/refresh` | start the daily refresh (app only) |
