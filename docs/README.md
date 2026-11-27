@@ -7,6 +7,7 @@
 | [ARCHITECTURE.md](ARCHITECTURE.md) | how it fits together |
 | [OPERATIONS.md](OPERATIONS.md) | running it day to day |
 | [API.md](API.md) | routes |
+| [SECURITY.md](SECURITY.md) | security and privacy |
 | [AUC_PLAN.md](AUC_PLAN.md) | model experiments |
 | [../TRACKER.md](../TRACKER.md) | build log |
 | *.pdf | blueprint and reference documents |

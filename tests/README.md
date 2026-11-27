@@ -34,6 +34,7 @@
 | [test_overnight.py](test_overnight.py) | 2 |
 | [test_paper.py](test_paper.py) | 5 |
 | [test_phase2_layers.py](test_phase2_layers.py) | 20 |
+| [test_requirements.py](test_requirements.py) | 1 |
 | [test_rerank.py](test_rerank.py) | 7 |
 | [test_retrieval.py](test_retrieval.py) | 13 |
 | [test_robustness.py](test_robustness.py) | 14 |
@@ -43,4 +44,4 @@
 | [test_triple_barrier.py](test_triple_barrier.py) | 5 |
 | [test_vector_index.py](test_vector_index.py) | 8 |
 | [test_volatility.py](test_volatility.py) | 19 |
-| [test_web.py](test_web.py) | 14 |
+| [test_web.py](test_web.py) | 18 |

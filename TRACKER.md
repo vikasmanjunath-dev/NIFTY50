@@ -519,3 +519,14 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 6. Daily refresh now adds new filings (first run: 92 new, 58,537 total; 51 new texts embedded). Pre-run copy in `data/processed/backup/`.
 7. Web: latest filings for watched stocks on Today.
 8. Web: per-page titles, skip link, focus moves on navigation (not tested with a screen reader).
+9. Web: paste-to-import holdings.
+10. Web: Cmd-K stock switcher, price range control, reload of stale tabs (the 10-minute reload is not exercised by a test).
+11. Web: past two-session moves around results meetings (descriptive, small samples, not a forecast) and sector averages.
+12. Web: printable summary; ledger and price files cached by modification time.
+13. Web: save/restore of watchlist and holdings (restore merges), adjustable alert level.
+14. Added `scripts/smoke_web.py` and `docs/SECURITY.md`.
+15. Web: board choices persist.
+16. Bug: `requirements.txt` lacked web and serving packages, so a fresh install would fail; completed, optional research packages split out, and a test guards it. A fresh virtual-environment install has not been tried.
+17. Launcher prefers `.venv` and names missing packages (syntax-checked, not run from Finder).
+18. Web: market mood (India VIX) and per-stock volatility rank; descriptive, not forecasts.
+19. Web: keyboard control for charts (not tested with a screen reader).

@@ -29,6 +29,35 @@ The working plan. Item-level history is in [TRACKER.md](../TRACKER.md); model ex
 
 | 14 | Page titles, skip link, focus on navigation | keyboard and screen-reader users land on the new page | done |
 
+| 15 | Paste a list of holdings into Portfolio | readable lines added, others reported | done |
+
+| 16 | Jump to any stock with Cmd-K / Ctrl-K | dialog opens, Enter goes to the stock | done |
+| 17 | Price chart range: 1M, 6M, 1Y | chart redraws for the chosen span | done |
+| 18 | Reload data when returning to a tab left open | page redraws after 10 minutes away | done |
+
+| 19 | How much a stock moved on past results days | compares those days with an ordinary day | done |
+| 20 | Stock's chance beside its sector average | shown on the stock page | done |
+
+| 21 | Printable one-page risk summary | watchlist and holdings on one page, prints cleanly | done |
+| 22 | Keep pages fast | forward grading and filings do not reread files on every request | done |
+
+| 23 | Save and restore watchlist and holdings as a file | browser data can be moved or recovered | done |
+| 24 | Choose the watchlist alert level | 60, 70 or 80% | done |
+
+| 25 | Smoke check of every route on real data | one command, fails loudly | done |
+| 26 | Security and privacy notes | protections and limits written down | done |
+
+| 27 | Remember board horizon, sort and watchlist view | choice survives a reload | done |
+
+| 28 | Complete dependency lists | every import is listed; a test enforces it | done |
+
+| 29 | Launcher uses the project environment and explains missing packages | clear message instead of a crash | done |
+
+| 30 | Market mood: India VIX level, how high it is for the past year, history | shown on Today | done |
+| 31 | How unusual a stock's recent volatility is | percentile of its last 20 days within 5 years, with chart | done |
+
+| 32 | Charts usable from the keyboard | arrow keys move the readout | done |
+
 ## Next (in order)
 | # | Item | Why | Needs |
 |---|---|---|---|

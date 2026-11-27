@@ -1,8 +1,13 @@
 # Operations
 
+## Install
+`pip install -r requirements.txt` (research studies also need `requirements-optional.txt`).
+
 ## Start the app
 Double-click `Nifty Analyser.command`, or `python3 scripts/serve.py` and open http://127.0.0.1:8310/.
 Add `--evidence --explain` for the Ask page (needs Ollama).
+
+Shortcuts: `/` focuses the search box; Cmd-K or Ctrl-K jumps to a stock; a focused chart steps with the arrow keys.
 
 ## Daily (after 15:30 IST, ideally evening)
 `python3 scripts/daily_refresh.py`, or the button on the System page.
@@ -37,4 +42,4 @@ The System page lists each data source with its newest date. The daily job also 
 System page → *Download a backup of these records* (a zip with each chain's status), then keep it off this machine; they cannot be recreated.
 
 ## Tests and docs
-`python3 -m pytest -q`. After adding or renaming code run `python3 scripts/build_docs.py`.
+`python3 -m pytest -q`; `python3 scripts/smoke_web.py` checks every app route against your real data. After adding or renaming code run `python3 scripts/build_docs.py`.
