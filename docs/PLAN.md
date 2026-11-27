@@ -58,6 +58,11 @@ The working plan. Item-level history is in [TRACKER.md](../TRACKER.md); model ex
 
 | 32 | Charts usable from the keyboard | arrow keys move the readout | done |
 
+| 33 | Portfolio: which holdings move together, and risk if one is removed | listed under the risk breakdown | done |
+| 34 | Saved forecasts show whether the price stayed inside its range | graded rows say inside or outside | done |
+
+| 35 | Loading message and retry on failed pages | slow or failed pages say so | done |
+
 ## Next (in order)
 | # | Item | Why | Needs |
 |---|---|---|---|

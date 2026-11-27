@@ -530,3 +530,5 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 17. Launcher prefers `.venv` and names missing packages (syntax-checked, not run from Finder).
 18. Web: market mood (India VIX) and per-stock volatility rank; descriptive, not forecasts.
 19. Web: keyboard control for charts (not tested with a screen reader).
+20. Web: portfolio linked pairs and removal what-if; range grading on saved forecasts.
+21. Web: loading message and retry button.
