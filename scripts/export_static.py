@@ -24,6 +24,11 @@ OUT = ROOT / "dist" / "nifty-tremor"
 NAME = "Nifty Tremor"
 
 
+def public_system(system: dict) -> dict:
+    """The hosted copy is public: leave out what the owner did and when."""
+    return {**system, "recent": [], "audit_entries": 0}
+
+
 def main():
     ctx = build_context()
     ctx = ctx[0] if isinstance(ctx, tuple) else ctx
@@ -45,7 +50,7 @@ def main():
         sys.exit(f"forecast status is {overview['status']}; run scripts/daily_refresh.py first")
     save("overview", overview)
     save("model", get("/api/model"))
-    save("system", get("/api/system"))
+    save("system", public_system(get("/api/system")))
     save("refresh", {"running": False, "ok": None, "message": ""})
     save("filings_categories", get("/api/filings/categories"))
     ids = [r["id"] for r in overview["rows"]]
