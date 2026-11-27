@@ -140,3 +140,12 @@ def test_track_record_and_reliability(site, tmp_path):
 
     record = WebData(None, tmp_path, tmp_path, tmp_path).track_record("NSE:INFY")["5"]
     assert len(record["dates"]) == 250 and record["forecast"] == record["actual"]
+
+
+def test_upcoming_meetings_show_only_published_future_dates(site, tmp_path):
+    _, client = site
+    ist = lambda *d: pd.to_datetime(list(d)).tz_localize("Asia/Kolkata")
+    pd.DataFrame({"instrument_id": "NSE:INFY", "meeting_date": ist("2026-01-20", "2026-01-02", "2026-01-25", "2026-03-30"),
+                  "available_time": ist("2026-01-05", "2025-12-20", "2026-01-12", "2026-01-05"), "is_results": True}).to_parquet(tmp_path / "board_meetings.parquet")
+    # "now" is 10 Jan: the past meeting, the not-yet-published one and the one beyond 30 days are all excluded
+    assert [u["date"] for u in client.get("/api/overview").json()["upcoming"]] == ["2026-01-20"]
