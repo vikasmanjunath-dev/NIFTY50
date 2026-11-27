@@ -216,6 +216,23 @@ class WebData:
         return {"now": round(float(series.iloc[-1]), 4), "rank": round(float((series <= series.iloc[-1]).mean()), 3), "windows": int(len(series)),
                 "history": [[str(t)[:10], round(float(x), 4)] for t, x in recent.items()]}
 
+    def sector(self, name: str):
+        """Stocks of one sector with their forecasts and the average past-year correlation between them."""
+        status, blocks = self.forecasts()
+        view = self.overview()
+        rows = [r for r in view["rows"] if r["sector"] == name]
+        if status == "OK" and not rows:
+            raise HTTPException(404, "unknown sector")
+        togetherness = None
+        if len(rows) > 1:
+            returns = {}
+            for r in rows:
+                bars = self._bars(r["id"])
+                returns[r["id"]] = np.log(bars[bars.quality_flag != "FAIL"].set_index("event_time").close).diff().tail(250)
+            corr = pd.DataFrame(returns).corr().to_numpy()
+            togetherness = round(float(np.nanmean(corr[~np.eye(len(corr), dtype=bool)])), 2)
+        return {"status": status, "sector": name, "rows": rows, "correlation": togetherness, "disclaimer": view["disclaimer"]}
+
     def backup(self):
         """Zip of the forward ledgers (they cannot be recreated) with each hash chain's status."""
         buffer, status = io.BytesIO(), {}
@@ -391,6 +408,7 @@ def attach_web(app: FastAPI, ctx, data: WebData | None = None, refresher: Refres
     app.get("/api/filings")(data.filings)
     app.get("/api/filings/categories")(data.categories)
     app.get("/api/portfolio")(data.portfolio)
+    app.get("/api/sector/{name}")(data.sector)
     app.get("/api/backup")(data.backup)
     app.get("/api/model")(data.model)
     app.get("/api/system")(data.system)

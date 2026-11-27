@@ -228,7 +228,7 @@ async function switcher() {
 async function stock(id) {
   const d = await get(`/api/stock/${encodeURIComponent(id)}`);
   const f = Object.entries(d.forecasts).sort(([a], [b]) => a - b);
-  return [h("a", { href: "#/today" }, "‹ Today"), h("div", { class: "title" }, h("h1", {}, d.symbol), star(d.id)), h("p", { class: "sub" }, d.sector || "", " · ", h("a", { href: `#/compare/${encodeURIComponent(d.id)}` }, "Compare with another")), notice(d.status),
+  return [h("a", { href: "#/today" }, "‹ Today"), h("div", { class: "title" }, h("h1", {}, d.symbol), star(d.id)), h("p", { class: "sub" }, d.sector ? h("a", { href: `#/sector/${encodeURIComponent(d.sector)}` }, d.sector) : "", " · ", h("a", { href: `#/compare/${encodeURIComponent(d.id)}` }, "Compare with another")), notice(d.status),
     h("div", { class: "grid" }, f.map(([n, v]) => stat(`Next ${n} days`, pct(v.prob_above_usual, 0),
       `chance of above-usual volatility · ${pct(v.forecast_vol_annualised)} forecast vs ${pct(v.usual_vol_annualised)} usual · 9-in-10 move ${range(v)}${d.peers[n] ? ` · other ${d.sector} stocks average ${pct(d.peers[n].sector_average, 0)}` : ""}`))),
     h("h2", {}, "Price"), priceCard(d.prices),
@@ -401,6 +401,17 @@ async function summary() {
     mine.length ? h("button", { type: "button", class: "primary noprint", onclick: () => print() }, "Print or save as PDF") : "", card(body), h("h2", { class: "noprint" }, "Settings and backup"), settingsCard(), h("footer", {}, data.disclaimer)];
 }
 
+async function sector(name) {
+  const d = await get(`/api/sector/${encodeURIComponent(name || "")}`);
+  return [h("a", { href: "#/today" }, "‹ Today"), ...header(d.sector, `${d.rows.length} index stocks`), notice(d.status),
+    d.correlation != null && h("div", { class: "grid" }, stat("Move together", d.correlation.toFixed(2), "average correlation over the past year; 1 means in lockstep")),
+    h("h2", {}, "Stocks"), h("div", { class: "list" }, h("div", { class: "row head" }, h("span", {}, "Stock"), h("span", {}, "5-day chance of above-usual volatility"),
+      h("span", {}, "Volatility (yearly)"), h("span", {}, "9-in-10 move")),
+      d.rows.filter((r) => r.h5).sort((a, b) => b.h5.prob_above_usual - a.h5.prob_above_usual).map((r) => h("a", { class: "row", href: `#/stock/${encodeURIComponent(r.id)}` },
+        h("strong", {}, r.symbol), meter(r.h5.prob_above_usual), h("span", {}, pct(r.h5.forecast_vol_annualised)), h("span", { class: "dim" }, range(r.h5))))),
+    h("footer", {}, d.disclaimer)];
+}
+
 async function filings() {
   const results = h("div");
   let timer, latest = 0, query = "", category = "";
@@ -516,14 +527,14 @@ async function system() {
       : card("No forecast has matured yet. Scores appear once each forecast's horizon has passed.")];
 }
 
-const routes = { today, portfolio, filings, ask, guide, compare, summary, model, system, stock };
+const routes = { today, portfolio, filings, ask, guide, compare, summary, sector, model, system, stock };
 let visit = 0;
 async function route() {
   const [, name = "today", arg] = location.hash.split("/");
   const page = routes[name] || today;
   const mine = ++visit;
   for (const a of document.querySelectorAll("nav a")) {
-    const on = a.hash === `#/${["stock", "guide", "compare", "summary"].includes(name) ? "today" : name}`;
+    const on = a.hash === `#/${["stock", "guide", "compare", "summary", "sector"].includes(name) ? "today" : name}`;
     on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current");
   }
   let content;
