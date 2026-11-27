@@ -1,4 +1,6 @@
 import json
+import shutil
+import subprocess
 import sys
 import time
 
@@ -203,3 +205,54 @@ def test_filings_for_several_instruments(site):
     both = client.get("/api/filings", params={"instrument": "NSE:INFY,NSE:TCS"}).json()
     assert [h["symbol"] for h in both] == ["TCS", "INFY"]
     assert [h["symbol"] for h in client.get("/api/filings", params={"instrument": "NSE:INFY"}).json()] == ["INFY"]
+
+
+@pytest.mark.skipif(not shutil.which("node"), reason="node not installed")
+def test_holdings_paste_parser():
+    source = (WEB_DIR / "app.js").read_text()
+    function = source[source.index("function parseHoldings"): source.index("async function portfolio")]
+    script = function + """
+const r = parseHoldings("infy, 1,00,000\\nTCS 500\\nTCS:250\\nNOPE 5\\nINFY -3\\n\\nM&M, ₹ 10.5", new Map([["INFY","a"],["TCS","b"],["M&M","c"]]));
+console.log(JSON.stringify([[...r.found], r.skipped]));"""
+    out = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=True).stdout
+    assert json.loads(out) == [[["a", 100000], ["b", 750], ["c", 10.5]], ["NOPE 5", "INFY -3"]]
+
+
+def test_results_moves_and_sector_peers(site, tmp_path):
+    ctx, _ = site
+    days = pd.date_range("2025-01-01", periods=100, freq="B", tz="Asia/Kolkata")
+    close = [100.0] * 100
+    close[51:] = [110.0] * 49  # jumps the session after the meeting on day 50
+    bars = pd.DataFrame({"event_time": days, "close": close, "quality_flag": "PASS"})
+    data = WebData(ctx, tmp_path, tmp_path, tmp_path)
+    assert data.results_moves("NSE:INFY", bars) is None
+    pd.DataFrame({"instrument_id": "NSE:INFY", "meeting_date": [days[50], days[99]], "is_results": True}).to_parquet(tmp_path / "board_meetings.parquet")
+    out = data.results_moves("NSE:INFY", bars)  # the last-day meeting has no following close yet
+    assert out["events"] == [{"date": str(days[50].date()), "move": 0.1}] and (out["typical_results"], out["typical_any"]) == (0.1, 0.0)
+    blocks = {"5": {"forecasts": {i: {"prob_above_usual": p} for i, p in (("NSE:INFY", 0.9), ("NSE:TCS", 0.4), ("NSE:SBIN", 0.1))}}}
+    assert data.peers("NSE:INFY", blocks) == {"5": {"sector_average": 0.4, "stocks": 1}}
+
+
+@pytest.mark.skipif(not shutil.which("node"), reason="node not installed")
+def test_restored_list_keeps_only_well_formed_entries():
+    source = (WEB_DIR / "app.js").read_text()
+    function = source[source.index("function readSaved"): source.index("function toggleWatch")]
+    script = function + """console.log(JSON.stringify(readSaved(JSON.stringify({watch:["NSE:M&M","<img>",5],
+      holdings:[["NSE:TCS",10],["NSE:TCS",-1],["bad",3],["NSE:INFY","9"],7]}))));"""
+    out = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=True).stdout
+    assert json.loads(out) == {"watch": ["NSE:M&M"], "holdings": [["NSE:TCS", 10]]}
+
+
+def test_market_mood_and_unusualness_rank_only_the_past(site, tmp_path):
+    ctx, _ = site  # "now" is 10 Jan 2026
+    data = WebData(ctx, tmp_path, tmp_path, tmp_path)
+    assert data.market() is None
+    days = pd.date_range("2025-06-01", "2026-03-01", freq="B", tz="Asia/Kolkata")
+    pd.DataFrame({"event_time": days, "available_time": days, "close": range(len(days))}).to_parquet(tmp_path / "macro_india_vix.parquet")
+    m = data.market()
+    assert m["date"] == "2026-01-09" and m["rank"] == 1.0 and m["history"][-1][0] == "2026-01-09"  # later rows are not visible
+    t = pd.date_range("2024-01-01", periods=400, freq="B", tz="Asia/Kolkata")
+    close = [100 + (i % 2) * (5 if i >= 370 else 1) for i in range(400)]
+    u = data.unusual(pd.DataFrame({"event_time": t, "close": close, "quality_flag": "PASS"}))
+    assert u["rank"] > 0.95 and u["windows"] == 380
+    assert data.unusual(pd.DataFrame({"event_time": t[:100], "close": close[:100], "quality_flag": "PASS"})) is None
