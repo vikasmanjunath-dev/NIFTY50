@@ -153,10 +153,12 @@ class WebData:
                 continue
             h = p["horizon_days"]
             i = int(np.searchsorted(days, p["date"]))
-            above = None
+            above = inside = None
             if i + h < len(prices):
+                if "low_90" in f:
+                    inside = bool(f["low_90"] <= prices[i + h] / prices[i] - 1 <= f["high_90"])
                 above = bool(np.sqrt((np.diff(np.log(prices[i: i + h + 1])) ** 2).sum()) > f["med_rv"])
-            out.append({"date": p["date"], "horizon": h, "prob": f["prob"], "above_usual": above, "days_left": max(0, i + h - len(prices) + 1)})
+            out.append({"date": p["date"], "horizon": h, "prob": f["prob"], "above_usual": above, "inside_range": inside, "days_left": max(0, i + h - len(prices) + 1)})
         return out[::-1][:20]
 
     def peers(self, iid: str, blocks: dict) -> dict:
@@ -318,12 +320,21 @@ class WebData:
         variance = float(weight @ cov @ weight)
         share = weight * (cov @ weight) / variance
         period = np.sqrt(variance * horizon / 252)
+        pairs = sorted(((float(corr[a, b]), ids[a], ids[b]) for a in range(len(ids)) for b in range(a + 1, len(ids))), reverse=True)[:3]
+
+        def without(k):  # same money split among the others in their present proportions
+            keep = [j for j in range(len(ids)) if j != k]
+            if not keep:
+                return None
+            v = weight[keep] / weight[keep].sum()
+            return float(np.sqrt(v @ cov[np.ix_(keep, keep)] @ v))
         test = (_json(self.reports / "portfolio_backtest.json") or {}).get(str(horizon), {})
         multiplier = test.get("multiplier_for_90pct", 1.645)   # measured on past data; the bell curve's 1.645 is too small
         return {"status": "OK", "horizon": horizon, "data_date": block["data_date"], "total": total,
                 "volatility": float(np.sqrt(variance)), "usual_volatility": float(np.sqrt(weight @ (np.outer(usual, usual) * corr) @ weight)),
                 "undiversified": float(weight @ vol), "typical_move": float(period * total), "large_move": float(multiplier * period * total), "large_move_held": test.get("second_half_within_calibrated"),
-                "parts": sorted(({"id": i, "symbol": get_instrument(i).symbol, "weight": float(weight[k]), "risk_share": float(share[k]),
+                "linked": [{"a": get_instrument(a).symbol, "b": get_instrument(b).symbol, "correlation": round(c, 2)} for c, a, b in pairs],
+                "parts": sorted(({"without": without(k), "id": i, "symbol": get_instrument(i).symbol, "weight": float(weight[k]), "risk_share": float(share[k]),
                                   "volatility": float(vol[k])} for k, i in enumerate(ids)), key=lambda p: -p["risk_share"])}
 
     # label, file under data/raw, date column, days of lag before it is flagged, how it is refreshed

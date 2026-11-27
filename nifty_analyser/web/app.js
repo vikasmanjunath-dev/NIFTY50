@@ -238,7 +238,8 @@ async function stock(id) {
     h("h2", {}, "Saved forecasts (live record)"), h("div", { class: "list" }, d.forward.length ? d.forward.map((x) => h("div", { class: "filing" },
       h("strong", {}, x.date), ` · ${x.horizon}-day · said ${pct(x.prob, 0)} · `, x.above_usual == null
         ? h("span", { class: "badge" }, `pending, ${x.days_left} trading days left`)
-        : h("span", { class: `badge ${x.above_usual === x.prob > 0.5 ? "OK" : "STALE"}` }, x.above_usual ? "was above usual" : "stayed usual or calmer")))
+        : h("span", { class: `badge ${x.above_usual === x.prob > 0.5 ? "OK" : "STALE"}` }, x.above_usual ? "was above usual" : "stayed usual or calmer"),
+      x.inside_range != null && ` · price ${x.inside_range ? "stayed inside" : "went outside"} its range`))
       : h("div", { class: "empty" }, "None saved yet.")),
     d.unusual && [h("h2", {}, "How unusual is now?"), card(h("p", {}, `Volatility over the last 20 days was ${pct(d.unusual.now)} a year, higher than ${pct(d.unusual.rank, 0)} of the ${d.unusual.windows} twenty-day windows on record.`),
       chart([{ values: d.unusual.history.map((x) => x[1]) }], d.unusual.history.map((x) => x[0]), (v) => pct(v, 0)))],
@@ -291,7 +292,10 @@ async function portfolio() {
       stat("Diversification saves", pct(d.undiversified - d.volatility), "volatility, versus moving in lockstep")),
       h("h2", {}, "Where the risk comes from"), h("div", { class: "list" }, d.parts.map((p) => h("div", { class: "row" },
         h("strong", {}, p.symbol), meter(Math.max(0, Math.min(1, p.risk_share))), h("span", {}, `${pct(p.weight, 0)} of money`),
-        h("span", { class: "dim" }, `${pct(p.volatility)} volatility`)))));
+        h("span", { class: "dim" }, `${pct(p.volatility)} volatility`,
+          p.without != null ? ` · mix without it: ${pct(p.without)}` : "")))),
+      d.linked.length ? [h("h2", {}, "Moves together"), h("div", { class: "list" }, d.linked.map((x) => h("div", { class: "filing" },
+        h("strong", {}, `${x.a} and ${x.b}`), ` · correlation ${x.correlation.toFixed(2)} over the past year`)))] : "");
   };
   const draw = () => {
     rows.replaceChildren(...[...holdings].filter(([id]) => symbols.has(id)).map(([id, amount]) => h("div", { class: "filing holding" },
@@ -523,8 +527,10 @@ async function route() {
     on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current");
   }
   let content;
+  const slow = setTimeout(() => { if (mine === visit) view.replaceChildren(h("p", { class: "empty", role: "status" }, "Loading…")); }, 300);
   try { content = await page(arg && decodeURIComponent(arg)); }
-  catch (err) { content = [card(h("strong", {}, "Could not load this page. "), navigator.onLine === false || err instanceof TypeError ? "The server cannot be reached. Start it with python3 scripts/serve.py." : err.message)]; }
+  catch (err) { content = [card(h("strong", {}, "Could not load this page. "), navigator.onLine === false || err instanceof TypeError ? "The server cannot be reached. Start it with python3 scripts/serve.py." : err.message, h("p", {}, h("button", { type: "button", class: "primary", onclick: () => route() }, "Try again")))]; }
+  clearTimeout(slow);
   if (mine !== visit) return;
   view.replaceChildren(...content.flat(Infinity).filter(Boolean));
   window.scrollTo(0, 0);
