@@ -77,6 +77,8 @@ The working plan. Item-level history is in [TRACKER.md](../TRACKER.md); model ex
 
 | 42 | Command-line report of the forward record | matured and pending stated plainly | done |
 
+| 43 | Hosted snapshot checked page by page; owner activity left out | all pages work in a local copy of the export | done (needs redeploy) |
+
 ## Next (in order)
 | # | Item | Why | Needs |
 |---|---|---|---|

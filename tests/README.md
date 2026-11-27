@@ -20,6 +20,7 @@
 | [test_events_features.py](test_events_features.py) | 7 |
 | [test_evidence.py](test_evidence.py) | 7 |
 | [test_evidence_service.py](test_evidence_service.py) | 13 |
+| [test_export_static.py](test_export_static.py) | 1 |
 | [test_extraction.py](test_extraction.py) | 10 |
 | [test_fii_dii.py](test_fii_dii.py) | 8 |
 | [test_forward_report.py](test_forward_report.py) | 1 |
