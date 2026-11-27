@@ -12,7 +12,7 @@ real bug found and fixed, every honestly-reported result) and **[TRACKER.xlsx](T
 (the same tracker as a structured, filterable spreadsheet).
 
 > **Current state (2026-11-24):** the repository was found reduced to a partial snapshot and has been **rebuilt and
-> re-verified on real data** (see [TRACKER.md](TRACKER.md), Session 7). Present and tested (**359 tests passing**): the base
+> re-verified on real data** (see [TRACKER.md](TRACKER.md), Session 7). Present and tested (**360 tests passing**): the base
 > layer, all Phase 2 layers (macro, regime, cross-sectional, delivery %, fundamentals incl. insurance PDFs, FII/DII,
 > calibration, selective prediction, ensemble, costs, drift), Phase 3 (RAG + LLM + guardrails) and the new point-in-time
 > universe. Phase 4 is built (below). Bug/test counts and the *historical* Phase 1/2
@@ -100,7 +100,7 @@ Part 6's phase plan). Four phases, each with a distinct goal:
 | 3 | RAG + LLM intelligence layer over NSE announcements | ✅ 9/9 items complete |
 | 4 | Operations: `/v3/analyse` API, monitoring dashboard, hash-chained audit log + replay, kill switch | ✅ 4/4 built and verified (`nifty_analyser/ops/`) |
 
-**359/359 tests passing**. See [TRACKER.md](TRACKER.md) for the full
+**360/360 tests passing**. See [TRACKER.md](TRACKER.md) for the full
 itemised checklist, every known simplification, every real bug found and fixed (27 documented
 so far), and the complete, dated work log.
 
@@ -627,7 +627,7 @@ nifty_analyser/
     extraction.py, llm.py, guardrails.py, eval.py
 
 scripts/                  end-to-end pipeline runners & backfill jobs (one per phase)
-tests/                    pytest suite — one file per area, 359 tests, one file per module
+tests/                    pytest suite — one file per area, 360 tests, one file per module
 data/{raw,processed}/     parquet cache (gitignored except .gitkeep)
 reports/                  locked metrics output from each phase's pipeline run (.md + .json)
 *.pdf                     blueprint & reference documents driving the roadmap
@@ -660,7 +660,7 @@ The Phase 1/2 pipelines have no such dependency and run with only the packages i
 ## Running things
 
 ```bash
-# Run the full test suite (359 tests)
+# Run the full test suite (360 tests)
 pytest
 
 # End-to-end phase pipelines (produce reports/ output)
@@ -937,7 +937,7 @@ Double-click `Nifty Analyser.command` in Finder to start and open it (adds the A
 `scripts/daily_refresh.py`; it accepts requests only from the app, and the server rejects foreign `Host` names.
 
 `python3 scripts/serve.py` then open http://127.0.0.1:8310/. Apple-style, no build step, no external scripts; light and dark, desktop and phone, installable to the home screen.
-Pages: Today (volatility board, sectors, watchlist), Portfolio (risk of your own mix; amounts stay in the browser), stock detail (price, forecasts, board meetings, filings), Filings search, Ask (guarded local-model answers with sources; start with `--evidence --explain`), Model (progress and what was rejected), System
+Stock pages show past forecasts against outcomes; Model shows reliability. Pages: Today (volatility board, sectors, watchlist), Portfolio (risk of your own mix; amounts stay in the browser), stock detail (price, forecasts, board meetings, filings), Filings search, Ask (guarded local-model answers with sources; start with `--evidence --explain`), Model (progress and what was rejected), System
 (health, audit, forward scorecard). Code: `nifty_analyser/web/`, `ops/web.py`. The app shell works offline (data never cached). Portfolio swing figures are calibrated by `scripts/run_portfolio_backtest.py`
 (`reports/portfolio_backtest.json`): the bell-curve 1-in-10 figure held only 83% (5-day) / 88% (20-day), so the measured multiplier is used. No login: keep it on localhost.
 

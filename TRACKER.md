@@ -504,3 +504,4 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 1. During market hours Yahoo's unfinished bar would have been stored as final; ingestion now drops rows not yet knowable (found before the run).
 2. Yahoo lacked the 26 Nov bar for 10 members, so forecasts covered 40 names; forecasts now require 95% coverage of that date.
 3. The 26 Nov 40-name entries remain in `vol_ledger.jsonl` (append-only; backup of the pre-run ledgers in `data/processed/backup/`).
+4. Web: per-stock forecast-vs-actual charts and a reliability table (from backtest files; the live forward record is separate). Bugs found in browser testing: nested sections dropped by one-level flattening; app files now sent with no-cache so updates appear.
