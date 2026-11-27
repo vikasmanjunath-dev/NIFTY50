@@ -10,6 +10,7 @@ One person, on their own computer. The server listens on `127.0.0.1` and **has n
 | Another website starting a refresh | requires a custom header and matching origin |
 | Hostile text inside company filings | inserted with `textContent` only; non-HTTPS links dropped; language-model answers pass guardrails |
 | Spreadsheet formula injection from CSV export | text cells beginning with `= + - @` are neutralised |
+| Injected or foreign scripts; framing | Content-Security-Policy, no-sniff, no-referrer on the web app |
 | Edited history | audit log and forecast ledgers are hash-chained |
 | A hostile restore file | only well-formed ids and positive amounts are kept |
 

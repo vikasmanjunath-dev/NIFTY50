@@ -65,6 +65,8 @@ The working plan. Item-level history is in [TRACKER.md](../TRACKER.md); model ex
 
 | 36 | Sector page: its stocks, average chance, how closely they move together | linked from each stock page | done |
 
+| 37 | Security headers on the web app | only own scripts run; no framing | done |
+
 ## Next (in order)
 | # | Item | Why | Needs |
 |---|---|---|---|
