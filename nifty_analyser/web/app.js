@@ -23,6 +23,7 @@ function h(tag, attrs = {}, ...children) {
   const el = svg ? document.createElementNS("http://www.w3.org/2000/svg", tag) : document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
     if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else if (k.startsWith("aria-") && v != null) el.setAttribute(k, v); // "true"/"false" as text
     else if (v !== false && v != null) el.setAttribute(k, v === true ? "" : v);
   }
   el.append(...children.flat(Infinity).filter((c) => c != null && c !== false));
@@ -134,6 +135,50 @@ const filingList = (items) => h("div", { class: "list" }, items.length ? items.m
   h("strong", {}, x.symbol), " ", h("span", { class: "badge" }, x.category), " ", h("span", { class: "dim" }, x.date),
   h("p", {}, x.text), x.url && h("a", { href: x.url, target: "_blank", rel: "noopener noreferrer" }, "Open document"))) : h("div", { class: "empty" }, "No filings found."));
 
+// Holdings stay in this browser; they are sent only to this local server to compute risk.
+const holdings = new Map((() => { try { return JSON.parse(localStorage.getItem("holdings")) || []; } catch { return []; } })());
+const saveHoldings = () => { try { localStorage.setItem("holdings", JSON.stringify([...holdings])); } catch { /* this visit only */ } };
+const rupees = (v) => `₹${Math.round(v).toLocaleString("en-IN")}`;
+
+async function portfolio() {
+  const data = await get("/api/overview");
+  const symbols = new Map(data.rows.map((r) => [r.id, r.symbol]));
+  const rows = h("div", { class: "list" }), result = h("div");
+  let latest = 0;
+  const analyse = async () => {
+    const mine = ++latest;
+    const held = [...holdings].filter(([id]) => symbols.has(id));
+    if (!held.length) return result.replaceChildren(card("Add a stock and the amount you hold to see its risk."));
+    const d = await get(`/api/portfolio?horizon=${state.horizon}&holdings=${encodeURIComponent(held.map(([i, a]) => `${i}:${a}`).join(","))}`);
+    if (mine !== latest) return;
+    if (d.status !== "OK") return result.replaceChildren(notice(d.status) || card("No forecast available."));
+    result.replaceChildren(h("div", { class: "grid" },
+      stat("Expected volatility (yearly)", pct(d.volatility), `usual for this mix: ${pct(d.usual_volatility)}`),
+      stat(`Typical ${d.horizon}-day swing`, `±${rupees(d.typical_move)}`, `on ${rupees(d.total)}`),
+      stat("Rough 1-in-10 swing", `±${rupees(d.large_move)}`, "assumes a bell curve; real extremes can be larger"),
+      stat("Diversification saves", pct(d.undiversified - d.volatility), "volatility, versus moving in lockstep")),
+      h("h2", {}, "Where the risk comes from"), h("div", { class: "list" }, d.parts.map((p) => h("div", { class: "row" },
+        h("strong", {}, p.symbol), meter(Math.max(0, Math.min(1, p.risk_share))), h("span", {}, `${pct(p.weight, 0)} of money`),
+        h("span", { class: "dim" }, `${pct(p.volatility)} volatility`)))));
+  };
+  const draw = () => {
+    rows.replaceChildren(...[...holdings].filter(([id]) => symbols.has(id)).map(([id, amount]) => h("div", { class: "filing holding" },
+      h("strong", {}, symbols.get(id)), h("span", {}, rupees(amount)),
+      h("button", { type: "button", class: "plain", onclick: () => { holdings.delete(id); saveHoldings(); draw(); } }, "Remove"))));
+    analyse().catch((err) => result.replaceChildren(card(err.message)));
+  };
+  const pick = h("select", { "aria-label": "Stock" }, [...symbols].sort((a, b) => a[1].localeCompare(b[1])).map(([id, s]) => h("option", { value: id }, s)));
+  const amount = h("input", { type: "number", min: "1", step: "any", placeholder: "Amount in ₹", "aria-label": "Amount in rupees", required: true });
+  const form = h("form", { class: "controls", onsubmit: (e) => { e.preventDefault(); const v = Number(amount.value);
+    if (v > 0) { holdings.set(pick.value, v); saveHoldings(); amount.value = ""; draw(); } } }, pick, amount, h("button", { class: "primary" }, "Add"));
+  const seg = h("div", { class: "segmented", role: "group", "aria-label": "Horizon" }, ["5", "20"].map((n) =>
+    h("button", { type: "button", "aria-pressed": state.horizon === n, onclick: (e) => { state.horizon = n;
+      for (const b of seg.children) b.setAttribute("aria-pressed", b === e.target); analyse(); } }, `${n} days`)));
+  draw();
+  return [...header("Portfolio", "How much could your mix of stocks swing? Direction is not predicted."), notice(data.status), form, seg,
+    h("h2", {}, "Holdings"), rows, result, h("footer", {}, `${data.disclaimer} Amounts are saved only in this browser.`)];
+}
+
 async function filings() {
   const results = h("div");
   let timer, latest = 0;
@@ -176,7 +221,7 @@ async function system() {
       : card("No forecast has matured yet. Scores appear once each forecast's horizon has passed.")];
 }
 
-const routes = { today, filings, model, system, stock };
+const routes = { today, portfolio, filings, model, system, stock };
 let visit = 0;
 async function route() {
   const [, name = "today", arg] = location.hash.split("/");

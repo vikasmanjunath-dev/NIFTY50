@@ -4,6 +4,7 @@ import json
 from datetime import date
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
@@ -108,6 +109,48 @@ class WebData:
             self._cache["score"] = (stamp, score(AuditLog(path), load_universe_bars()))
         return self._cache["score"][1]
 
+    def portfolio(self, holdings: str, horizon: int = 5):
+        """Risk of a long-only mix: forecast volatility per stock combined with the past year's correlations.
+        `holdings` is "NSE:INFY:50000,NSE:TCS:25000" (amounts in rupees)."""
+        amounts: dict[str, float] = {}
+        try:
+            for part in holdings.split(",")[:60]:
+                iid, amount = part.rsplit(":", 1)
+                value = float(amount)
+                if not (value > 0 and value < 1e12):
+                    raise ValueError
+                amounts[iid] = amounts.get(iid, 0.0) + value
+        except ValueError:
+            raise HTTPException(422, "holdings must look like NSE:INFY:50000,NSE:TCS:25000 with positive amounts") from None
+        status, blocks = self.forecasts()
+        block = blocks.get(str(horizon))
+        if block is None:
+            return {"status": status if status != "OK" else "NO_DATA"}
+        unknown = sorted(set(amounts) - set(block["forecasts"]))
+        if unknown:
+            raise HTTPException(422, f"no forecast for: {', '.join(unknown)}")
+        returns = {}
+        for iid in amounts:
+            bars = load_cached(iid)
+            bars = bars[bars.quality_flag != "FAIL"]
+            returns[iid] = np.log(bars.set_index("event_time").close).diff().tail(250)
+        corr = pd.DataFrame(returns).corr().fillna(0.0).to_numpy(copy=True)
+        np.fill_diagonal(corr, 1.0)
+        ids = list(amounts)
+        total = sum(amounts.values())
+        weight = np.array([amounts[i] for i in ids]) / total
+        vol = np.array([block["forecasts"][i]["forecast_vol_annualised"] for i in ids])
+        usual = np.array([block["forecasts"][i]["usual_vol_annualised"] for i in ids])
+        cov = np.outer(vol, vol) * corr
+        variance = float(weight @ cov @ weight)
+        share = weight * (cov @ weight) / variance
+        period = np.sqrt(variance * horizon / 252)
+        return {"status": "OK", "horizon": horizon, "data_date": block["data_date"], "total": total,
+                "volatility": float(np.sqrt(variance)), "usual_volatility": float(np.sqrt(weight @ (np.outer(usual, usual) * corr) @ weight)),
+                "undiversified": float(weight @ vol), "typical_move": float(period * total), "large_move": float(1.645 * period * total),
+                "parts": sorted(({"id": i, "symbol": get_instrument(i).symbol, "weight": float(weight[k]), "risk_share": float(share[k]),
+                                  "volatility": float(vol[k])} for k, i in enumerate(ids)), key=lambda p: -p["risk_share"])}
+
     def system(self):
         health = self.ctx.killswitch.effective(self.ctx.health_fn()).to_dict()
         ok, _ = self.ctx.audit.verify()
@@ -124,6 +167,7 @@ def attach_web(app: FastAPI, ctx, data: WebData | None = None) -> FastAPI:
     app.get("/api/overview")(data.overview)
     app.get("/api/stock/{iid}")(data.stock)
     app.get("/api/filings")(data.filings)
+    app.get("/api/portfolio")(data.portfolio)
     app.get("/api/model")(data.model)
     app.get("/api/system")(data.system)
     app.get("/", include_in_schema=False)(lambda: FileResponse(WEB_DIR / "index.html"))
