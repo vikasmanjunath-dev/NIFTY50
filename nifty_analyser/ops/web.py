@@ -6,7 +6,8 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -15,6 +16,7 @@ from nifty_analyser.data.ingest import cache_path, load_cached
 from nifty_analyser.data.instrument_master import get_instrument
 from nifty_analyser.data.store import load_universe_bars
 from nifty_analyser.ops.audit import AuditLog
+from nifty_analyser.ops.refresh import Refresher
 from nifty_analyser.ops.vol_forecast import score
 
 WEB_DIR = Path(__file__).resolve().parents[1] / "web"
@@ -164,8 +166,25 @@ class WebData:
                 "ledger_entries": ledgers, "forecast_status": self.forecasts()[0], "scorecard": self.scorecard()}
 
 
-def attach_web(app: FastAPI, ctx, data: WebData | None = None) -> FastAPI:
-    data = data or WebData(ctx)
+LOCAL_HOSTS = ["127.0.0.1", "localhost", "[::1]"]
+
+
+def attach_web(app: FastAPI, ctx, data: WebData | None = None, refresher: Refresher | None = None, hosts=LOCAL_HOSTS) -> FastAPI:
+    data, refresher = data or WebData(ctx), refresher or Refresher()
+    # Rejects requests that reach the server under another site's name (DNS rebinding).
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=list(hosts))
+
+    def refresh(x_requested_with: str | None = Header(None), origin: str | None = Header(None), host: str = Header("")):
+        # A custom header cannot be sent cross-site without a CORS preflight, which this server never grants.
+        if x_requested_with != "nifty-web" or (origin is not None and origin.split("//")[-1] != host):
+            raise HTTPException(403, "refresh can only be started from the app itself")
+        if not refresher.start():
+            raise HTTPException(409, "a refresh is already running")
+        ctx.audit.append("refresh", {"source": "web"})
+        return refresher.state
+
+    app.post("/api/refresh")(refresh)
+    app.get("/api/refresh")(lambda: refresher.state)
     app.get("/api/overview")(data.overview)
     app.get("/api/stock/{iid}")(data.stock)
     app.get("/api/filings")(data.filings)

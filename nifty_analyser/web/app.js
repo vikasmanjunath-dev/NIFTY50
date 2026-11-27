@@ -249,12 +249,34 @@ async function model() {
     h("footer", {}, "The forward record, built from new data only, is the real test.")];
 }
 
+function refreshCard() {
+  const status = h("p", { class: "dim" }, "Fetches the latest prices and filings dates, then rebuilds the forecasts. Takes a few minutes.");
+  const button = h("button", { class: "primary", type: "button" }, "Refresh data now");
+  const follow = async () => {
+    const s = await get("/api/refresh").catch(() => null);
+    if (!button.isConnected) return;
+    if (!s) { status.textContent = "Lost contact with the server."; button.disabled = false; return; }
+    button.disabled = s.running;
+    if (s.running) { status.textContent = "Refreshing…"; setTimeout(follow, 3000); }
+    else if (s.ok != null) status.textContent = s.ok ? "Done. Open Today to see the new forecasts." : `Refresh failed: ${s.message}`;
+  };
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    const res = await fetch("/api/refresh", { method: "POST", headers: { "X-Requested-With": "nifty-web" } }).catch(() => null);
+    if (!res || (!res.ok && res.status !== 409)) { status.textContent = "Could not start the refresh."; button.disabled = false; return; }
+    setTimeout(follow, 500);
+  });
+  setTimeout(follow, 0);
+  return card(button, status);
+}
+
 async function system() {
   const d = await get("/api/system");
   return [...header("System", "Health and records"),
     h("div", { class: "grid" }, h("div", { class: "card stat" }, h("small", {}, "Serving state"), h("b", {}, h("span", { class: `badge ${d.health.state}` }, d.health.state)),
       h("small", {}, (d.health.reasons || []).join("; ") || "No active alerts")),
       stat("Forecasts", d.forecast_status, ""), stat("Audit log", d.audit_ok ? "Intact" : "BROKEN", `${d.audit_entries} entries`)),
+    h("h2", {}, "Update"), refreshCard(),
     h("h2", {}, "Forward records"), h("div", { class: "list" }, Object.entries(d.ledger_entries).map(([k, v]) =>
       h("div", { class: "filing" }, h("strong", {}, k.replaceAll("_", " ")), ` · ${v} entries`))),
     h("h2", {}, "Forward scorecard"), Object.keys(d.scorecard).length ? h("div", { class: "grid" }, Object.entries(d.scorecard).map(([n, s]) =>
