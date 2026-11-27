@@ -14,6 +14,12 @@ def to_ist(timestamp: pd.Timestamp | dt.datetime | str) -> pd.Timestamp:
     return ts.tz_localize(IST) if ts.tzinfo is None else ts.tz_convert(IST)
 
 
+def drop_unfinished(frame: pd.DataFrame, now: pd.Timestamp | None = None) -> pd.DataFrame:
+    """Remove rows not yet knowable, e.g. Yahoo's still-forming bar for a session that has not closed."""
+    now = to_ist(now if now is not None else pd.Timestamp.now(tz=IST))
+    return frame[frame["available_time"] <= now].reset_index(drop=True)
+
+
 def eod_bar_available_time(trading_date: pd.Timestamp | dt.date | str) -> pd.Timestamp:
     """A daily bar is only knowable once NSE's cash market has closed (15:30 IST)."""
     day = pd.Timestamp(trading_date).normalize()

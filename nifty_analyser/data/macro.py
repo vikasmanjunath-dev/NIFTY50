@@ -15,7 +15,7 @@ import pandas as pd
 
 from nifty_analyser.config import DATA_RAW_DIR
 from nifty_analyser.data.schemas import QualityFlag
-from nifty_analyser.data.timestamps import eod_bar_available_time, to_ist
+from nifty_analyser.data.timestamps import eod_bar_available_time, to_ist, drop_unfinished
 
 SOURCE_ID = "yfinance_macro"
 MACRO_SERIES: dict[str, str] = {"india_vix": "^INDIAVIX", "usd_inr": "INR=X", "brent_crude": "BZ=F"}
@@ -62,7 +62,7 @@ def ingest_macro(name: str, start: str = "2021-01-01", max_retries: int = 3) -> 
                 raise ValueError(f"empty response for {name}")
             if isinstance(df.columns, pd.MultiIndex):
                 df.columns = df.columns.get_level_values(0)
-            out = validate_and_tag_macro(df.rename(columns=str.lower), name)
+            out = drop_unfinished(validate_and_tag_macro(df.rename(columns=str.lower), name))
             out.to_parquet(_path(name), index=False)
             return out
         except Exception as exc:  # noqa: BLE001

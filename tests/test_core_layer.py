@@ -189,3 +189,13 @@ def test_no_emitted_feature_matches_the_scale_dependent_pattern():
     from nifty_analyser.monitoring.drift import is_scale_dependent
     cols = feature_columns(build_feature_matrix(_bars(300)))
     assert not [c for c in cols if is_scale_dependent(c)]
+
+
+def test_still_forming_bars_are_dropped_until_the_close():
+    import pandas as pd
+
+    from nifty_analyser.data.timestamps import drop_unfinished, eod_bar_available_time
+
+    frame = pd.DataFrame({"available_time": [eod_bar_available_time("2026-11-26"), eod_bar_available_time("2026-11-27")]})
+    assert len(drop_unfinished(frame, pd.Timestamp("2026-11-27 12:22"))) == 1
+    assert len(drop_unfinished(frame, pd.Timestamp("2026-11-27 15:30"))) == 2
