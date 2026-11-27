@@ -290,3 +290,14 @@ def test_option_summary_recovers_implied_volatility_from_both_file_formats():
     part, _ = option_features(history.iloc[:20].assign(iv_next=history.iv_near.iloc[:20]))
     assert "iv_rel" not in set(cols) - set(full.columns)
     pd.testing.assert_frame_equal(full.iloc[:20][["iv_log", "iv_chg_5"]], part[["iv_log", "iv_chg_5"]])
+
+
+def test_forecast_date_waits_for_nearly_complete_data(monkeypatch):
+    from nifty_analyser.ops import vol_forecast as vf
+
+    monkeypatch.setattr(vf, "instrument_ids_as_of", lambda d: {"NSE:AAA", "NSE:BBB"})
+    b = bars()
+    days = np.sort(b.event_time.unique())
+    late = b[~((b.instrument_id == "NSE:BBB") & (b.event_time == days[-1]))]
+    assert vf.latest_complete_date(late) == pd.Timestamp(days[-2])
+    assert vf.latest_complete_date(b) == pd.Timestamp(days[-1])

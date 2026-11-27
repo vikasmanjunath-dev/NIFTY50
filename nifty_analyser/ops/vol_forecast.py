@@ -65,6 +65,18 @@ def load_history_training(horizon: int, directory=None, extra: bool = True,
     return df[(df.fwd_rv > 0) & (df.cur_rv > 0)].reset_index(drop=True)
 
 
+def latest_complete_date(df: pd.DataFrame, coverage: float = 0.95) -> pd.Timestamp:
+    """Newest date on which nearly all of that day's index members have a bar. A data vendor that is late for some
+    stocks must not shrink the forecast (and the permanent forward record) to whoever arrived first."""
+    for day in sorted(df.event_time.unique(), reverse=True)[:20]:
+        day = pd.Timestamp(day)
+        members = instrument_ids_as_of(day)
+        have = df.loc[df.event_time == day, "instrument_id"]
+        if not members or have.isin(members).sum() >= coverage * len(members):
+            return day
+    raise RuntimeError("no recent date has bars for enough index members; refresh the data")
+
+
 def latest_forecasts(bars, horizon: int, vix=None, announcements=None, as_of=None,
                      quantiles: dict | None = None, history: pd.DataFrame | None = None,
                      meetings: pd.DataFrame | None = None) -> pd.DataFrame:
@@ -87,7 +99,7 @@ def latest_forecasts(bars, horizon: int, vix=None, announcements=None, as_of=Non
     if history is not None:
         old = history if as_of is None else history[history.outcome_time <= as_of]
         train = pd.concat([old.reindex(columns=train.columns), train], ignore_index=True)  # missing features stay NaN
-    last = df.event_time.max()
+    last = latest_complete_date(df)
     live = df[(df.event_time == last) & df.instrument_id.isin(instrument_ids_as_of(last)) & df.med_rv.notna()]
     X, X_live = train[cols].to_numpy(float), live[cols].to_numpy(float)
     prob = fit_predict_classifiers(train[class_cols].to_numpy(float), (train.fwd_rv > train.med_rv).astype(int).to_numpy(),
