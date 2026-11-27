@@ -420,6 +420,12 @@ def attach_web(app: FastAPI, ctx, data: WebData | None = None, refresher: Refres
         response = await call_next(request)
         if not request.url.path.startswith("/v3"):
             response.headers["Cache-Control"] = "no-cache"
+        if request.url.path == "/" or request.url.path.startswith(("/static", "/sw.js", "/api")):
+            # only this server's own scripts may run; the page cannot be framed or leak its address
+            response.headers["Content-Security-Policy"] = ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+                                                           "img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
+            response.headers["X-Content-Type-Options"] = "nosniff"
+            response.headers["Referrer-Policy"] = "no-referrer"
         return response
 
     app.mount("/static", StaticFiles(directory=WEB_DIR), name="static")

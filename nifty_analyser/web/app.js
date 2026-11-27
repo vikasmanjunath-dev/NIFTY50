@@ -550,6 +550,7 @@ async function route() {
   if (visit > 1) view.focus({ preventScroll: true }); // screen readers and keyboards move to the new page
 }
 addEventListener("hashchange", route);
+document.querySelector(".skip").addEventListener("click", (e) => { e.preventDefault(); view.focus(); });
 // A tab left open (or the home-screen app resumed) should not keep showing old numbers.
 let hiddenAt = null;
 addEventListener("visibilitychange", () => {

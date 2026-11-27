@@ -285,3 +285,11 @@ def test_sector_lists_its_stocks(site, monkeypatch):
     body = client.get("/api/sector/IT").json()
     assert [r["symbol"] for r in body["rows"]] == ["INFY"] and body["correlation"] is None
     assert client.get("/api/sector/Nope").status_code == 404
+
+
+def test_security_headers_and_no_inline_handlers(site):
+    _, client = site
+    for path in ("/", "/static/app.js", "/api/overview"):
+        h = client.get(path).headers
+        assert "script-src 'self'" in h["content-security-policy"] and h["x-content-type-options"] == "nosniff"
+    assert " onclick=" not in client.get("/").text
