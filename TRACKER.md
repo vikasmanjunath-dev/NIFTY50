@@ -507,3 +507,10 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 4. Web: per-stock forecast-vs-actual charts and a reliability table (from backtest files; the live forward record is separate). Bugs found in browser testing: nested sections dropped by one-level flattening; app files now sent with no-cache so updates appear.
 5. Web: upcoming announced meetings on Today; CSV export (formula-injection safe).
 6. Web: biggest changes since the previous recorded forecast (a model update between dates also shows up as change).
+7. Web: plain-language guide page.
+8. Web: two-stock compare page.
+
+### 2026-11-27 — Plan, documentation and web features
+1. Added `docs/PLAN.md`, `ARCHITECTURE.md`, `OPERATIONS.md`; generated folder READMEs, report index and `API.md` (`scripts/build_docs.py`, checked by `tests/test_docs.py`).
+2. Refreshed the stale README status banner. Older README sections remain as history.
+3. Web: watchlist highlights on Today; filing category filter.

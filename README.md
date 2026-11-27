@@ -11,18 +11,9 @@ replacement for, **[TRACKER.md](TRACKER.md)** (the line-item build log — every
 real bug found and fixed, every honestly-reported result) and **[TRACKER.xlsx](TRACKER.xlsx)**
 (the same tracker as a structured, filterable spreadsheet).
 
-> **Current state (2026-11-24):** the repository was found reduced to a partial snapshot and has been **rebuilt and
-> re-verified on real data** (see [TRACKER.md](TRACKER.md), Session 7). Present and tested (**362 tests passing**): the base
-> layer, all Phase 2 layers (macro, regime, cross-sectional, delivery %, fundamentals incl. insurance PDFs, FII/DII,
-> calibration, selective prediction, ensemble, costs, drift), Phase 3 (RAG + LLM + guardrails) and the new point-in-time
-> universe. Phase 4 is built (below). Bug/test counts and the *historical* Phase 1/2
-> numbers quoted further down predate the rebuild; the current, re-run results are below and in `reports/`.
->
-> **Current headline result (point-in-time universe, 101 scale-free features):** accuracy 54.2% (= the up-day base rate; balanced
-> accuracy 0.507), ROC-AUC 0.520, IC +0.048 ± 0.082 — **no detectable directional edge** (a faint cross-sectional *ranking* signal exists but does not survive costs — see Results). Cost-stressed Sharpe 0.51 at 20 bps, *below* an
-> equal-weight buy-and-hold of the same universe (0.89). All model inputs are scale-free (no raw price/volume/macro/flow/revenue
-> levels); a paired old-vs-new comparison on identical folds found no measurable loss (AUC -0.004 to -0.008, IC -0.009 to -0.013,
-> within noise and the pre-set margin). Adding fundamentals + FII/DII earlier: paired-ablation IC change -0.0086, sign-flipping.
+> **Current state (2026-11-27).** Direction forecasting shows **no edge** (AUC about 0.50). **Volatility** forecasting works: AUC **0.691** (5-day) and
+> **0.750** (20-day) on 2021+ out-of-sample rows. A local web app serves it. Start with [docs/PLAN.md](docs/PLAN.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md),
+> [docs/OPERATIONS.md](docs/OPERATIONS.md) and [docs/API.md](docs/API.md). Older sections below record how the project got here; their numbers are historical.
 
 ## Survivorship-bias-free universe (new, 2026-11-24)
 
@@ -62,7 +53,7 @@ Run: `python3 scripts/backfill_bars.py && python3 scripts/run_survivorship_compa
 16. [Running things](#running-things)
 17. [Results, honestly reported](#results-honestly-reported)
 18. [Design principles this codebase holds itself to](#design-principles-this-codebase-holds-itself-to)
-19. [What's next — Phase 4](#whats-next--phase-4)
+19. [Phase 4 — operations](#phase-4--operations-nifty_analyserops)
 20. [Keeping these docs current](#keeping-these-docs-current)
 
 ---
@@ -77,7 +68,7 @@ even at the cost of reporting unglamorous, near-zero-edge results — which is e
 has found and reported honestly at every phase so far.
 
 The build follows a phased roadmap from a private research blueprint
-([Nifty50_Complete_Blueprint_From_Scratch_to_Advanced.pdf](Nifty50_Complete_Blueprint_From_Scratch_to_Advanced.pdf),
+([Nifty50_Complete_Blueprint_From_Scratch_to_Advanced.pdf](docs/Nifty50_Complete_Blueprint_From_Scratch_to_Advanced.pdf),
 Part 6's phase plan). Four phases, each with a distinct goal:
 
 | Phase | Goal |
@@ -98,9 +89,10 @@ Part 6's phase plan). Four phases, each with a distinct goal:
 | 1 | Baseline: ingestion, labels, technical features, walk-forward validation | ✅ complete |
 | 2 | Enrichment: fundamentals (incl. insurance PDFs), macro, FII/DII flows, cross-sectional features, calibration, ensemble, regime, costs, drift | ✅ 10/10 items, all data-coverage gaps closed |
 | 3 | RAG + LLM intelligence layer over NSE announcements | ✅ 9/9 items complete |
+| 5 | Volatility forecasting and web app | ✅ live (see sections near the end) |
 | 4 | Operations: `/v3/analyse` API, monitoring dashboard, hash-chained audit log + replay, kill switch | ✅ 4/4 built and verified (`nifty_analyser/ops/`) |
 
-**362/362 tests passing**. See [TRACKER.md](TRACKER.md) for the full
+**All tests pass** (see [tests/README.md](tests/README.md)). See [TRACKER.md](TRACKER.md) for the full
 itemised checklist, every known simplification, every real bug found and fixed (27 documented
 so far), and the complete, dated work log.
 
@@ -627,7 +619,7 @@ nifty_analyser/
     extraction.py, llm.py, guardrails.py, eval.py
 
 scripts/                  end-to-end pipeline runners & backfill jobs (one per phase)
-tests/                    pytest suite — one file per area, 362 tests, one file per module
+tests/                    pytest suite — one file per area, one file per module
 data/{raw,processed}/     parquet cache (gitignored except .gitkeep)
 reports/                  locked metrics output from each phase's pipeline run (.md + .json)
 *.pdf                     blueprint & reference documents driving the roadmap
@@ -660,7 +652,7 @@ The Phase 1/2 pipelines have no such dependency and run with only the packages i
 ## Running things
 
 ```bash
-# Run the full test suite (362 tests)
+# Run the full test suite 
 pytest
 
 # End-to-end phase pipelines (produce reports/ output)
@@ -937,7 +929,7 @@ Double-click `Nifty Analyser.command` in Finder to start and open it (adds the A
 `scripts/daily_refresh.py`; it accepts requests only from the app, and the server rejects foreign `Host` names.
 
 `python3 scripts/serve.py` then open http://127.0.0.1:8310/. Apple-style, no build step, no external scripts; light and dark, desktop and phone, installable to the home screen.
-Stock pages show past forecasts against outcomes; Model shows reliability. Today also shows the biggest changes since the previous forecast, lists announced meetings and exports CSV. Pages: Today (volatility board, sectors, watchlist), Portfolio (risk of your own mix; amounts stay in the browser), stock detail (price, forecasts, board meetings, filings), Filings search, Ask (guarded local-model answers with sources; start with `--evidence --explain`), Model (progress and what was rejected), System
+Stock pages show past forecasts against outcomes; Model shows reliability. A plain-language guide is linked from Today; stock pages link to a two-stock comparison. Today also shows the biggest changes since the previous forecast, lists announced meetings and exports CSV. Pages: Today (volatility board, sectors, watchlist), Portfolio (risk of your own mix; amounts stay in the browser), stock detail (price, forecasts, board meetings, filings), Filings search, Ask (guarded local-model answers with sources; start with `--evidence --explain`), Model (progress and what was rejected), System
 (health, audit, forward scorecard). Code: `nifty_analyser/web/`, `ops/web.py`. The app shell works offline (data never cached). Portfolio swing figures are calibrated by `scripts/run_portfolio_backtest.py`
 (`reports/portfolio_backtest.json`): the bell-curve 1-in-10 figure held only 83% (5-day) / 88% (20-day), so the measured multiplier is used. No login: keep it on localhost.
 
