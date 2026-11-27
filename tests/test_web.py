@@ -165,3 +165,23 @@ def test_filings_filter_by_category(site):
     _, client = site
     assert sorted(client.get("/api/filings/categories").json()) == ["Dividend", "Updates"]
     assert [h["symbol"] for h in client.get("/api/filings", params={"category": "Updates"}).json()] == ["TCS"]
+
+
+def test_saved_forecasts_are_pending_then_graded_and_backed_up(site, tmp_path):
+    import io
+    import zipfile
+
+    ctx, client = site
+    ledger = AuditLog(tmp_path / "vol_ledger.jsonl")
+    for day in ("2026-01-01", "2026-01-08"):
+        ledger.append("vol_forecast", {"date": day, "horizon_days": 5, "forecasts": [{"instrument_id": "NSE:INFY", "prob": 0.8, "med_rv": 0.001}]})
+    days = pd.date_range("2026-01-01", periods=8, freq="B", tz="Asia/Kolkata")
+    bars = pd.DataFrame({"event_time": days, "close": [100, 110, 100, 110, 100, 110, 100, 110], "quality_flag": "PASS"})
+    new, old = WebData(ctx, tmp_path, tmp_path, tmp_path).forward("NSE:INFY", bars)
+    assert old == {"date": "2026-01-01", "horizon": 5, "prob": 0.8, "above_usual": True, "days_left": 0}
+    assert new["above_usual"] is None and new["days_left"] == 3
+    response = client.get("/api/backup")
+    z = zipfile.ZipFile(io.BytesIO(response.content))
+    assert "attachment" in response.headers["content-disposition"]
+    assert z.read("vol_ledger.jsonl") == (tmp_path / "vol_ledger.jsonl").read_bytes()
+    assert json.loads(z.read("chain_status.json")) == {"vol_ledger.jsonl": True}
