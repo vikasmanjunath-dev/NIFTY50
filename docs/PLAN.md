@@ -69,6 +69,12 @@ The working plan. Item-level history is in [TRACKER.md](../TRACKER.md); model ex
 
 | 38 | Export portfolio risk as CSV | one click on the Portfolio page | done |
 
+| 39 | Recent audit activity on System | last ten entries, no request contents | done |
+
+| 40 | Refresh reminder on Today when data is 3+ days old | notice with a link | done |
+
+| 41 | Show more filings, up to 100 | button under the list | done |
+
 ## Next (in order)
 | # | Item | Why | Needs |
 |---|---|---|---|

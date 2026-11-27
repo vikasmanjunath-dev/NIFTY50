@@ -535,3 +535,6 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 22. Web: sector page and `GET /api/sector/{name}`.
 23. Web: Content-Security-Policy and related headers.
 24. Web: portfolio CSV export (syntax-checked, not clicked in a browser).
+25. Web: recent audit activity (time and kind only).
+26. Web: refresh reminder on Today.
+27. Web: load more filings.

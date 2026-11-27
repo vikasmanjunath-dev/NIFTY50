@@ -102,5 +102,6 @@ Run from the project root with `python3 scripts/<name>`.
 
 | Script | What it does |
 |---|---|
+| [export_static.py](export_static.py) | Writes a static, read-only snapshot of the web app to dist/nifty-tremor/ for static hosting (Vercel). |
 | [refresh_announcements.py](refresh_announcements.py) | Add company filings published since the newest one on disk (NSE, whole-exchange feed filtered to the pool), and embed them into the search index if it exists and the local embedder is running. |
 | [smoke_web.py](smoke_web.py) | End-to-end check of the web app against the real local data, without starting a network server. |

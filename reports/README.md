@@ -50,7 +50,7 @@ Locked results. The script column is matched by file name and may be approximate
 | [phase2_enriched_metrics.json](phase2_enriched_metrics.json) | build_serving_artifacts.py, run_phase2_pipeline.py, serve.py |
 | [phase2_enriched_metrics.md](phase2_enriched_metrics.md) | run_phase2_pipeline.py |
 | [phase3_rag_metrics.md](phase3_rag_metrics.md) | run_phase3_pipeline.py |
-| [portfolio_backtest.json](portfolio_backtest.json) | run_portfolio_backtest.py |
+| [portfolio_backtest.json](portfolio_backtest.json) | export_static.py, run_portfolio_backtest.py |
 | [preopen_direction.json](preopen_direction.json) | run_preopen_direction.py |
 | [preopen_stocks_v2.json](preopen_stocks_v2.json) | run_preopen_stocks.py |
 | [pretrained_direction.json](pretrained_direction.json) | run_pretrained_direction.py |
