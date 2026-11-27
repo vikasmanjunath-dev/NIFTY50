@@ -16,7 +16,7 @@ ROUTES = {
     "GET /": "web app", "GET /sw.js": "offline app shell", "GET /api/overview": "forecasts, upcoming meetings, changes",
     "GET /api/stock/{iid}": "prices, forecasts, track record, meetings, filings", "GET /api/filings": "search filings (`q`, `category`, `instrument`, `limit`)",
     "GET /api/filings/categories": "most common filing categories", "GET /api/portfolio": "risk of a mix (`holdings=NSE:INFY:50000,...`, `horizon`)",
-    "GET /api/model": "progress, reliability, rejected ideas", "GET /api/system": "health, audit, ledgers, forward scorecard",
+    "GET /api/backup": "zip of the forward ledgers", "GET /api/model": "progress, reliability, rejected ideas", "GET /api/system": "health, audit, ledgers, forward scorecard",
     "POST /api/refresh": "start the daily refresh (app only)", "GET /api/refresh": "refresh state",
     "POST /v3/analyse": "direction signal or abstention", "POST /v3/evidence": "point-in-time filing evidence (opt-in)",
     "POST /v3/explain": "guarded answer from filings (opt-in)", "POST /v3/classify": "filing event type (opt-in)",

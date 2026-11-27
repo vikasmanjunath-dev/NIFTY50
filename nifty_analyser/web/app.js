@@ -161,6 +161,11 @@ async function stock(id) {
     Object.entries(d.record).map(([n, r]) => [h("h2", {}, `${n}-day volatility: forecast against what happened`),
       card(legend("Forecast", "Actual"), chart([{ name: "forecast", values: r.forecast }, { name: "actual", values: r.actual }], r.dates, (v) => pct(v, 0)),
         h("p", { class: "dim" }, "Past test forecasts, each made without seeing its outcome. Not the live record."))]),
+    h("h2", {}, "Saved forecasts (live record)"), h("div", { class: "list" }, d.forward.length ? d.forward.map((x) => h("div", { class: "filing" },
+      h("strong", {}, x.date), ` · ${x.horizon}-day · said ${pct(x.prob, 0)} · `, x.above_usual == null
+        ? h("span", { class: "badge" }, `pending, ${x.days_left} trading days left`)
+        : h("span", { class: `badge ${x.above_usual === x.prob > 0.5 ? "OK" : "STALE"}` }, x.above_usual ? "was above usual" : "stayed usual or calmer")))
+      : h("div", { class: "empty" }, "None saved yet.")),
     h("h2", {}, "Announced board meetings"), h("div", { class: "list" }, d.meetings.length ? d.meetings.map((m) =>
       h("div", { class: "filing" }, h("strong", {}, m.date), " ", m.results && h("span", { class: "badge" }, "Results"))) : h("div", { class: "empty" }, "None on record.")),
     h("h2", {}, "Latest filings"), filingList(d.filings), h("footer", {}, d.disclaimer)];
@@ -361,6 +366,7 @@ async function system() {
     h("h2", {}, "Update"), refreshCard(),
     h("h2", {}, "Forward records"), h("div", { class: "list" }, Object.entries(d.ledger_entries).map(([k, v]) =>
       h("div", { class: "filing" }, h("strong", {}, k.replaceAll("_", " ")), ` · ${v} entries`))),
+    h("p", {}, h("a", { href: "/api/backup", download: "" }, "Download a backup of these records")),
     h("h2", {}, "Forward scorecard"), Object.keys(d.scorecard).length ? h("div", { class: "grid" }, Object.entries(d.scorecard).map(([n, s]) =>
       stat(`${n}-day, new data only`, s.auc == null ? "–" : s.auc.toFixed(3), `AUC over ${s.n} graded forecasts`)))
       : card("No forecast has matured yet. Scores appear once each forecast's horizon has passed.")];

@@ -1,6 +1,8 @@
 """Read-only JSON for the web app, plus the static files. All data comes from files the pipeline already writes.
 Forecasts are withheld while the kill switch is tripped or when they are stale."""
+import io
 import json
+import zipfile
 from datetime import date
 from pathlib import Path
 
@@ -8,7 +10,7 @@ import numpy as np
 import pandas as pd
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from nifty_analyser.config import DATA_PROCESSED_DIR, DATA_RAW_DIR, REPORTS_DIR
@@ -122,6 +124,40 @@ class WebData:
                       for _, g in d.groupby(bins) if len(g) >= 100]
         return out
 
+    def forward(self, iid: str, bars: pd.DataFrame) -> list[dict]:
+        """Every forecast saved for this stock before its outcome, graded once the horizon has fully passed."""
+        path = self.processed / "vol_ledger.jsonl"
+        if not path.exists():
+            return []
+        close = bars[bars.quality_flag != "FAIL"].sort_values("event_time")
+        days, prices = close.event_time.dt.strftime("%Y-%m-%d").to_numpy(), close.close.to_numpy(float)
+        out = []
+        for e in AuditLog(path).read():
+            if e["kind"] != "vol_forecast":
+                continue
+            p = e["payload"]
+            f = next((f for f in p["forecasts"] if f["instrument_id"] == iid), None)
+            if f is None:
+                continue
+            h = p["horizon_days"]
+            i = int(np.searchsorted(days, p["date"]))
+            above = None
+            if i + h < len(prices):
+                above = bool(np.sqrt((np.diff(np.log(prices[i: i + h + 1])) ** 2).sum()) > f["med_rv"])
+            out.append({"date": p["date"], "horizon": h, "prob": f["prob"], "above_usual": above, "days_left": max(0, i + h - len(prices) + 1)})
+        return out[::-1][:20]
+
+    def backup(self):
+        """Zip of the forward ledgers (they cannot be recreated) with each hash chain's status."""
+        buffer, status = io.BytesIO(), {}
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as z:
+            for path in sorted(self.processed.glob("*ledger*.jsonl")):
+                z.writestr(path.name, path.read_bytes())
+                status[path.name] = AuditLog(path).verify()[0]
+            z.writestr("chain_status.json", json.dumps(status))
+        name = f"nifty-forward-records-{self.ctx.now_fn():%Y-%m-%d}.zip"
+        return Response(buffer.getvalue(), media_type="application/zip", headers={"Content-Disposition": f'attachment; filename="{name}"'})
+
     def stock(self, iid):
         if not cache_path(iid).exists():
             raise HTTPException(404, "unknown instrument")
@@ -132,7 +168,7 @@ class WebData:
         out = {"id": iid, "symbol": inst.symbol, "sector": getattr(inst, "sector", None), "status": status,
                "prices": [[str(t.date()), round(float(c), 2)] for t, c in zip(bars.event_time, bars.close)],
                "forecasts": {h: {**b["forecasts"][iid], "data_date": b["data_date"]} for h, b in blocks.items() if iid in b["forecasts"]},
-               "meetings": [], "record": self.track_record(iid), "filings": self.filings(instrument=iid, limit=8), "disclaimer": DISCLAIMER}
+               "meetings": [], "record": self.track_record(iid), "forward": self.forward(iid, load_cached(iid)), "filings": self.filings(instrument=iid, limit=8), "disclaimer": DISCLAIMER}
         meetings = self._parquet("board_meetings.parquet")
         if meetings is not None:
             m = meetings[meetings.instrument_id == iid].sort_values("meeting_date").drop_duplicates("meeting_date").tail(5)
@@ -257,6 +293,7 @@ def attach_web(app: FastAPI, ctx, data: WebData | None = None, refresher: Refres
     app.get("/api/filings")(data.filings)
     app.get("/api/filings/categories")(data.categories)
     app.get("/api/portfolio")(data.portfolio)
+    app.get("/api/backup")(data.backup)
     app.get("/api/model")(data.model)
     app.get("/api/system")(data.system)
     app.get("/", include_in_schema=False)(lambda: FileResponse(WEB_DIR / "index.html"))
