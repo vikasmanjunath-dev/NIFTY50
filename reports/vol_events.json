@@ -1,0 +1,40 @@
+{
+ "5": {
+  "dev_auc_2010_2020": {
+   "live/blend": 0.654,
+   "live/big_trees": 0.6518,
+   "events/blend": 0.6669,
+   "events/big_trees": 0.6656
+  },
+  "winner": "events/blend",
+  "auc_live_2021": 0.6843,
+  "auc_winner_2021": 0.691,
+  "accuracy_live": 0.6362,
+  "accuracy_winner": 0.639,
+  "rows_with_results_due": 0.091,
+  "gain_ci95": [
+   0.0037,
+   0.0107
+  ],
+  "adopt": true
+ },
+ "20": {
+  "dev_auc_2010_2020": {
+   "live/blend": 0.6789,
+   "live/big_trees": 0.6802,
+   "events/blend": 0.6885,
+   "events/big_trees": 0.6893
+  },
+  "winner": "events/big_trees",
+  "auc_live_2021": 0.7502,
+  "auc_winner_2021": 0.7485,
+  "accuracy_live": 0.688,
+  "accuracy_winner": 0.683,
+  "rows_with_results_due": 0.194,
+  "gain_ci95": [
+   -0.0112,
+   0.0071
+  ],
+  "adopt": false
+ }
+}
