@@ -8,3 +8,4 @@ catboost_info/
 data/raw/*
 data/processed/*
 !data/**/.gitkeep
+dist/
