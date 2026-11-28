@@ -408,3 +408,17 @@ def test_text_colours_meet_wcag_aa_and_errors_have_a_heading():
     assert _contrast("#ffffff", token("button")) >= 4.5 and _contrast(token("dim"), "#f2f2f7") >= 4.5
     script = (WEB_DIR / "app.js").read_text()
     assert '"Page not available"' in script and "safeDecode(arg)" in script
+
+
+@pytest.mark.skipif(not shutil.which("node"), reason="node not installed")
+def test_hosted_shim_rejects_prototype_names_as_holdings():
+    from pathlib import Path
+
+    shim = (Path(__file__).resolve().parents[1] / "scripts" / "static_shim.js").read_text()
+    script = """globalThis.window = {fetch: async () => ({ok: true, json: async () => ({blocks: {"5": {data_date: new Date().toISOString().slice(0, 10), forecasts: {}}}, corr: {}, symbols: {}, test: {}})})};
+globalThis.location = {href: "https://x.test/"};
+""" + shim + """
+(async () => { const out = []; for (const h of ["constructor:1", "__proto__:5", "toString:2"]) out.push((await window.fetch("/api/portfolio?holdings=" + h)).status);
+console.log(JSON.stringify(out)); })();"""
+    done = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=True)
+    assert json.loads(done.stdout) == [422, 422, 422]

@@ -14,7 +14,7 @@
     const amounts = new Map();
     for (const part of (q.get("holdings") || "").split(",").slice(0, 60)) {
       const at = part.lastIndexOf(":"), id = part.slice(0, at), v = Number(part.slice(at + 1));
-      if (at < 0 || !(v > 0 && v < 1e12) || !block.forecasts[id]) return json({ detail: "bad holdings" }, 422);
+      if (at < 0 || !(v > 0 && v < 1e12) || !Object.hasOwn(block.forecasts, id)) return json({ detail: "bad holdings" }, 422);
       amounts.set(id, (amounts.get(id) || 0) + v);
     }
     const ids = [...amounts.keys()], total = ids.reduce((s, i) => s + amounts.get(i), 0), w = ids.map((i) => amounts.get(i) / total);
