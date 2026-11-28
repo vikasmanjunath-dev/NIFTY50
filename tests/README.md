@@ -7,7 +7,7 @@
 |---|---|
 | [test_calibrate_impact.py](test_calibrate_impact.py) | 5 |
 | [test_chunking.py](test_chunking.py) | 6 |
-| [test_core_layer.py](test_core_layer.py) | 21 |
+| [test_core_layer.py](test_core_layer.py) | 22 |
 | [test_delivery.py](test_delivery.py) | 6 |
 | [test_docs.py](test_docs.py) | 2 |
 | [test_documents_eval.py](test_documents_eval.py) | 11 |
@@ -32,7 +32,7 @@
 | [test_judge.py](test_judge.py) | 5 |
 | [test_llm.py](test_llm.py) | 6 |
 | [test_longshort.py](test_longshort.py) | 6 |
-| [test_ops.py](test_ops.py) | 18 |
+| [test_ops.py](test_ops.py) | 19 |
 | [test_overnight.py](test_overnight.py) | 2 |
 | [test_paper.py](test_paper.py) | 5 |
 | [test_phase2_layers.py](test_phase2_layers.py) | 20 |

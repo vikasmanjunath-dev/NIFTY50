@@ -8,6 +8,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from nifty_analyser.config import DATA_RAW_DIR
+from nifty_analyser.data.timestamps import write_parquet_atomic
 from nifty_analyser.data.instrument_master import get_instrument, ingestible_instrument_ids
 from nifty_analyser.documents.ingest import _http_get_json
 from nifty_analyser.features.volatility_events import normalise
@@ -32,7 +33,7 @@ def main():
     out = pd.concat(parts, ignore_index=True).drop_duplicates()
     if out.instrument_id.nunique() < 50:
         sys.exit(f"only {out.instrument_id.nunique()} instruments returned data; keeping the old file. failures: {failed[:5]}")
-    out.to_parquet(OUT, index=False)
+    write_parquet_atomic(out, OUT)
     print(f"rows {len(out)} instruments {out.instrument_id.nunique()} {out.available_time.min().date()}..{out.available_time.max().date()} "
           f"results meetings {int(out.is_results.sum())} failed {failed[:5]}")
 

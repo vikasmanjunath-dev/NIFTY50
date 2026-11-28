@@ -199,3 +199,23 @@ def test_still_forming_bars_are_dropped_until_the_close():
     frame = pd.DataFrame({"available_time": [eod_bar_available_time("2026-11-26"), eod_bar_available_time("2026-11-27")]})
     assert len(drop_unfinished(frame, pd.Timestamp("2026-11-27 12:22"))) == 1
     assert len(drop_unfinished(frame, pd.Timestamp("2026-11-27 15:30"))) == 2
+
+
+def test_atomic_write_keeps_the_old_file_if_writing_fails(tmp_path, monkeypatch):
+    import pandas as pd
+    import pytest
+
+    from nifty_analyser.data.timestamps import write_parquet_atomic
+
+    path = tmp_path / "x.parquet"
+    write_parquet_atomic(pd.DataFrame({"a": [1]}), path)
+
+    def boom(self, target, **kw):
+        open(target, "wb").write(b"half")
+        raise OSError("disk full")
+
+    monkeypatch.setattr(pd.DataFrame, "to_parquet", boom)
+    with pytest.raises(OSError):
+        write_parquet_atomic(pd.DataFrame({"a": [2]}), path)
+    monkeypatch.undo()
+    assert pd.read_parquet(path).a.tolist() == [1] and list(tmp_path.iterdir()) == [path]
