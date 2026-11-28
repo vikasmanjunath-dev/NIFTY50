@@ -15,3 +15,6 @@ Assumptions: keep the single main branch the owner asked for earlier (the loop p
 - 2026-11-28 H-11 routes timed: /api/record 161 ms every call -> 1 ms cached; first /api/system 1.2 s after start (cold price load, left); 402 tests; 09e3c9a
 - 2026-11-28 H-13 dark theme: every text colour >= 4.5:1; no change needed
 - 2026-11-28 H-14 done: first /api/system 1.2 s -> 0.23 s (measured on a running server); console 404s were from the earlier bad-address test; 403 tests; d047af3
+- 2026-11-28 pushed 4 commits (owner asked)
+- 2026-11-28 H-15 B-11 fixed; 8abc68b
+- 2026-11-28 H-16 lint (own ast check; no linter installed) and security grep: no security findings; unused imports removed; 405 tests, 61 routes ok; 8e318f1

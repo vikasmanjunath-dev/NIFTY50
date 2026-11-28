@@ -11,3 +11,4 @@
 | B-08 | two writers sharing a log would break its hash chain | tail cached per process | file lock, tail read under lock | same test | d2ef846 |
 | B-09 | refresh button and daily task could run together | no cross-process lock | lock file | test_only_one_refresh_at_a_time | d2ef846 |
 | B-10 | hosted portfolio with "constructor:1" returned nonsense | object prototype lookup | own-property check | test_hosted_shim_rejects_prototype_names_as_holdings | c4d04fa |
+| B-11 | vendor returns truncated history: full price file silently replaced | no size or date check before overwrite | refuse shorter or older downloads, keep file | test_a_shortened_download_never_replaces_fuller_data | 8abc68b |

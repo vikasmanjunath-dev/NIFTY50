@@ -567,3 +567,5 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 | H-12 | Fresh-environment install check | BLOCKED | low | owner: allow downloading all packages into a new environment? | 2026-11-28 |
 | H-13 | Dark-theme contrast audit | VERIFIED | low | all >= 4.5:1 | 2026-11-28 |
 | H-14 | Warm the scorecard at start-up | VERIFIED | low | | 2026-11-28 |
+| H-15 | Guard price history against truncated downloads | VERIFIED | high | B-11; a real vendor truncation has not been observed | 2026-11-28 |
+| H-16 | Lint and security pattern pass | VERIFIED | medium | no linter installed; own checks in tests/test_lint.py | 2026-11-28 |
