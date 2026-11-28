@@ -25,5 +25,7 @@ for horizon in (5, 20):
         **({"move_low_90": round(float(r.move_low_90), 4), "move_high_90": round(float(r.move_high_90), 4)} if quantiles else {})} for r in f.itertuples()}}
     print(f"h={horizon} data={date} names={len(f)} recorded={new}")
     print(f.head(5).drop(columns=["event_time", "med_rv", "horizon_days"]).to_string(index=False))
-(DATA_PROCESSED_DIR / "volatility_latest.json").write_text(json.dumps(latest))
+tmp = DATA_PROCESSED_DIR / "volatility_latest.tmp"
+tmp.write_text(json.dumps(latest))
+tmp.replace(DATA_PROCESSED_DIR / "volatility_latest.json")      # readers never see half a file
 print("forward scorecard:", json.dumps(score(ledger, bars)) or "{}", "| chain ok:", ledger.verify()[0])

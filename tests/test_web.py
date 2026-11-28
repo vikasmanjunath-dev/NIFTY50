@@ -377,3 +377,14 @@ def test_stock_rejects_malformed_ids_with_404(site, monkeypatch, bad):
     # reproduce a real cache hit for look-alike names (the path sanitiser maps them onto existing files)
     monkeypatch.setattr(web, "cache_path", lambda i: WEB_DIR / "index.html")
     assert client.get(f"/api/stock/{bad}").status_code == 404
+
+
+def test_half_written_files_do_not_crash_pages(site, tmp_path):
+    _, client = site
+    assert client.get("/api/filings").status_code == 200  # cached once
+    (tmp_path / "announcements_nifty50.parquet").write_bytes(b"PAR1 truncated")
+    assert [h["symbol"] for h in client.get("/api/filings").json()] == ["TCS", "INFY"]  # last good copy
+    (tmp_path / "volatility_latest.json").write_text('{"5": {"data_')
+    assert client.get("/api/overview").json()["status"] == "NO_DATA"
+    (tmp_path / "board_meetings.parquet").write_bytes(b"junk")
+    assert client.get("/api/system").status_code == 200

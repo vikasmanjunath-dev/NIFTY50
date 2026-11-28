@@ -26,7 +26,11 @@ DISCLAIMER = "Forecasts the size of price moves, not their direction. Research o
 
 
 def _json(path: Path):
-    return json.loads(path.read_text()) if path.exists() else None
+    """None if absent or unreadable (e.g. caught mid-write): pages then say there is no data instead of failing."""
+    try:
+        return json.loads(path.read_text()) if path.exists() else None
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return None
 
 
 class WebData:
@@ -40,7 +44,10 @@ class WebData:
             return None
         stamp = path.stat().st_mtime
         if self._cache.get(name, (None,))[0] != stamp:
-            self._cache[name] = (stamp, pd.read_parquet(path))
+            try:
+                self._cache[name] = (stamp, pd.read_parquet(path))
+            except Exception:  # noqa: BLE001  (a refresh may be rewriting it: keep serving the last good copy)
+                return self._cache[name][1] if name in self._cache else None
         return self._cache[name][1]
 
     def _bars(self, iid: str) -> pd.DataFrame:
