@@ -247,6 +247,15 @@ class WebData:
         entries = [e["payload"] for e in self._ledger() if e["kind"] == "vol_forecast"]
         if not entries:
             return {"rows": [], "chain_ok": True}
+        # recompute only when the ledger or one of its price files changes (stat calls are cheap; grading is not)
+        mark = lambda p: (p.stat().st_mtime_ns, p.stat().st_size) if p.exists() else None
+        ids = sorted({f["instrument_id"] for p in entries for f in p["forecasts"]})
+        key = (mark(self.processed / "vol_ledger.jsonl"), tuple(mark(cache_path(i)) for i in ids))
+        if self._cache.get("record", (None,))[0] != key:
+            self._cache["record"] = (key, self._grade_record(entries))
+        return self._cache["record"][1]
+
+    def _grade_record(self, entries: list[dict]) -> dict:
         rows, bars = [], {}
         for p in entries:
             h, graded, right = p["horizon_days"], 0, 0

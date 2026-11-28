@@ -422,3 +422,25 @@ globalThis.location = {href: "https://x.test/"};
 console.log(JSON.stringify(out)); })();"""
     done = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=True)
     assert json.loads(done.stdout) == [422, 422, 422]
+
+
+def test_record_is_cached_until_ledger_or_prices_change(site, tmp_path, monkeypatch):
+    from nifty_analyser.ops import web
+
+    ctx, _ = site
+    ledger = AuditLog(tmp_path / "vol_ledger.jsonl")
+    add = lambda d: ledger.append("vol_forecast", {"date": d, "horizon_days": 5, "forecasts": [{"instrument_id": "NSE:INFY", "prob": 0.5, "med_rv": 1.0}]})
+    price = tmp_path / "p.parquet"
+    price.write_bytes(b"1")
+    monkeypatch.setattr(web, "cache_path", lambda i: price)
+    reads = []
+    days = pd.date_range("2026-01-01", periods=3, freq="B", tz="Asia/Kolkata")
+    data = WebData(ctx, tmp_path, tmp_path, tmp_path)
+    monkeypatch.setattr(data, "_bars", lambda i: (reads.append(i), pd.DataFrame({"event_time": days, "close": [1.0, 2.0, 3.0], "quality_flag": "PASS"}))[1])
+    add("2026-01-01")
+    assert data.record() == data.record() and len(reads) == 1
+    add("2026-01-02")
+    assert len(data.record()["rows"]) == 2 and len(reads) == 2
+    price.write_bytes(b"22")
+    data.record()
+    assert len(reads) == 3
