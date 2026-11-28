@@ -9,24 +9,34 @@ from nifty_analyser.data.macro import MACRO_SERIES, ingest_macro
 from nifty_analyser.data.store import load_universe_bars
 from nifty_analyser.ops import paper
 from nifty_analyser.ops.audit import AuditLog
+from nifty_analyser.ops.refresh import single_instance
 run = lambda s: subprocess.run([sys.executable, str(root / "scripts" / s)], cwd=root, check=True)
-run("backfill_bars.py")
-for name in MACRO_SERIES:                                  # keeps India VIX etc. in step with the bars
+
+
+def main():
+    run("backfill_bars.py")
+    for name in MACRO_SERIES:                                  # keeps India VIX etc. in step with the bars
+        try:
+            ingest_macro(name)
+        except RuntimeError as exc:
+            print(f"macro refresh failed, keeping cache: {exc}")
+    dates = sorted(str(d.date()) for d in load_universe_bars().event_time.unique())
+    bk = paper.books(AuditLog(DATA_PROCESSED_DIR / "paper_ledger.jsonl"))
+    if not bk or paper.is_due(AuditLog(DATA_PROCESSED_DIR / "paper_ledger.jsonl"), dates[-1], dates):
+        print("rebalance due -> rebuilding serving artifacts"); run("build_serving_artifacts.py")
+    run("paper_trade.py")
     try:
-        ingest_macro(name)
-    except RuntimeError as exc:
-        print(f"macro refresh failed, keeping cache: {exc}")
-dates = sorted(str(d.date()) for d in load_universe_bars().event_time.unique())
-bk = paper.books(AuditLog(DATA_PROCESSED_DIR / "paper_ledger.jsonl"))
-if not bk or paper.is_due(AuditLog(DATA_PROCESSED_DIR / "paper_ledger.jsonl"), dates[-1], dates):
-    print("rebalance due -> rebuilding serving artifacts"); run("build_serving_artifacts.py")
-run("paper_trade.py")
-try:
-    run("backfill_board_meetings.py")                      # newly announced meeting dates
-except subprocess.CalledProcessError as exc:
-    print(f"board-meeting refresh failed, keeping cache: {exc}")
-try:
-    run("refresh_announcements.py")                        # new company filings
-except subprocess.CalledProcessError as exc:
-    print(f"filings refresh failed, keeping cache: {exc}")
-run("forecast_volatility.py")
+        run("backfill_board_meetings.py")                      # newly announced meeting dates
+    except subprocess.CalledProcessError as exc:
+        print(f"board-meeting refresh failed, keeping cache: {exc}")
+    try:
+        run("refresh_announcements.py")                        # new company filings
+    except subprocess.CalledProcessError as exc:
+        print(f"filings refresh failed, keeping cache: {exc}")
+    run("forecast_volatility.py")
+
+
+with single_instance(DATA_PROCESSED_DIR / "refresh.lock") as mine:
+    if not mine:
+        sys.exit("another refresh is already running")
+    main()

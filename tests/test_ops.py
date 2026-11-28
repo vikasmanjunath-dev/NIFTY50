@@ -263,3 +263,30 @@ def test_out_of_range_as_of_is_a_validation_error_not_a_crash(when):
         with pytest.raises(ValidationError):
             model(**fields, as_of=when)
         assert model(**fields, as_of="2026-01-02T10:00:00").as_of.year == 2026
+
+
+def test_audit_log_survives_a_torn_line_and_a_second_writer(tmp_path):
+    from nifty_analyser.ops.audit import AuditLog
+
+    path = tmp_path / "a.jsonl"
+    first, second = AuditLog(path), AuditLog(path)  # two processes hold the same file
+    first.append("a", {})
+    second.append("b", {})
+    first.append("c", {})
+    assert [e["seq"] for e in first.read()] == [1, 2, 3] and first.verify() == (True, None)
+    path.open("a").write('{"seq": 4, "tor')  # crash mid-write
+    assert [e["kind"] for e in AuditLog(path).read()] == ["a", "b", "c"]
+    assert AuditLog(path).verify() == (False, 4)  # damage is reported, not hidden
+    AuditLog(path).append("d", {})
+    assert [e["kind"] for e in AuditLog(path).read()] == ["a", "b", "c", "d"]
+    assert AuditLog(path).verify()[0] is False
+
+
+def test_only_one_refresh_at_a_time(tmp_path):
+    from nifty_analyser.ops.refresh import single_instance
+
+    with single_instance(tmp_path / "r.lock") as first:
+        with single_instance(tmp_path / "r.lock") as second:
+            assert first and not second
+    with single_instance(tmp_path / "r.lock") as third:
+        assert third
