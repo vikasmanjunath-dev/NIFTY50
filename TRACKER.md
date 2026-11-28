@@ -558,14 +558,45 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 | H-06 | Tolerate a half-written last log line | VERIFIED | high | | 2026-11-28 |
 | H-07 | One refresh at a time across processes | VERIFIED | high | | 2026-11-28 |
 | H-08 | Fuzz hosted browser shim inputs | VERIFIED | medium | | 2026-11-28 |
-| H-09 | Deduplicate tests and tidy long lines | TODO | low | | 2026-11-28 |
-| H-10 | Split web/app.js into modules | TODO | low | | 2026-11-28 |
+| H-09 | Deduplicate tests and tidy long lines | SUPERSEDED | low | | 2026-11-28 |
+| H-10 | Split web/app.js into modules | SUPERSEDED | low | | 2026-11-28 |
 | X-01 | Off-machine ledger backup | BLOCKED | high | owner: where should it go? | 2026-11-28 |
 | X-02 | Unattended refresh via launchd | BLOCKED | medium | owner: install the job? (a desktop task already publishes daily) | 2026-11-28 |
 | X-03 | Human relevance labels | BLOCKED | low | owner: run scripts/label_cli.py | 2026-11-28 |
 | H-11 | Route timing pass | VERIFIED | medium | record grading cached | 2026-11-28 |
-| H-12 | Fresh-environment install check | BLOCKED | low | owner: allow downloading all packages into a new environment? | 2026-11-28 |
+| H-12 | Fresh-environment install check | SUPERSEDED | low | owner: allow downloading all packages into a new environment? | 2026-11-28 |
 | H-13 | Dark-theme contrast audit | VERIFIED | low | all >= 4.5:1 | 2026-11-28 |
 | H-14 | Warm the scorecard at start-up | VERIFIED | low | | 2026-11-28 |
 | H-15 | Guard price history against truncated downloads | VERIFIED | high | B-11; a real vendor truncation has not been observed | 2026-11-28 |
 | H-16 | Lint and security pattern pass | VERIFIED | medium | no linter installed; own checks in tests/test_lint.py | 2026-11-28 |
+
+## Execution tracker
+Goals [goals.md](goals.md) · order [PLAN.md](PLAN.md). Status: ⬜ todo · 🟦 doing · ✅ done · 🟥 blocked · ⏸ parked. Open items from the hardening backlog now live here.
+
+| ID | M | Task (files · command) | Type | Pri | Est h | Status | Deps | Acceptance | Traces |
+|---|---|---|---|---|---|---|---|---|---|
+| T-001 | M3 | Back up `data/processed/*.jsonl` off this machine | ops | P0 | 1 | 🟥 owner: destination | T-002 | copy exists elsewhere, chain verifies after restore | KR2.2 R-02 |
+| T-002 | M3 | Decide data republication (D-005); act on it | decision | P0 | 2 | ✅ | — | decision recorded; site matches it | KR3.1 R-03 |
+| T-003 | M3 | `scripts/backup_ledgers.py <dir>`: copy, verify, prune; add to daily job | build | P0 | 4 | ⬜ | T-001 | test restores a copy and `verify()` is true | KR2.2 R-02 |
+| T-004 | M3 | `scripts/daily_publish.sh`: refuse uncommitted changes, run tests first | build | P0 | 3 | ✅ | — | dirty tree → non-zero exit, no deploy | KR3.2 R-04 |
+| T-005 | M4 | Run log per refresh (start, end, result) shown on System | build | P1 | 6 | ⬜ | T-004 | failed step appears as failed; duration recorded | KR2.1 R-05 |
+| T-006 | M4 | CI workflow: pytest on push (`.github/workflows/test.yml`) | build | P1 | 3 | 🟥 owner: allow a GitHub workflow | — | green run on main | KR3.2 |
+| T-007 | M4 | Choose unattended trigger (launchd job or keep desktop task) | ops | P1 | 1 | 🟥 owner | — | runs with the app closed, or risk accepted in writing | KR2.1 R-06 |
+| T-008 | M4 | Missed-day notice on System from ledger dates vs trading days | build | P1 | 4 | ⬜ | T-005 | gap listed after a simulated missed day | KR1.1 R-06 |
+| T-009 | M5 | Accumulate 60 data dates | calendar | P0 | 0 | 🟦 3/60 | T-008 | `forward_report.py` shows 60 | KR1.1 |
+| T-010 | M5 | Forward AUC and coverage with date-block interval in `forward_report.py` | build | P1 | 6 | ⬜ | — | test on synthetic ledger reproduces known values | KR1.2 KR1.3 R-01 |
+| T-011 | M5 | Interim then final review against S-1 and K-1 | decision | P1 | 3 | ⬜ | T-009 T-010 | written verdict with numbers | KR1.2 R-01 |
+| T-012 | M5 | Anchor ledger head hash outside the machine (in the commit log) | build | P2 | 2 | ⬜ | T-005 | published hash matches ledger tail | R-01 |
+| T-013 | M6 | Choose a repository licence | decision | P2 | 1 | 🟥 owner | — | LICENSE present or choice recorded | R-08 |
+| T-014 | M6 | Split `nifty_analyser/web/app.js` into page modules | refactor | P2 | 8 | ⬜ | — | tests and `smoke_web.py` pass; export works | R-07 |
+| T-015 | M6 | Fresh-environment install check | test | P2 | 2 | 🟥 owner: allow package download | — | clean venv runs tests | R-07 |
+| T-016 | M6 | Test grading after a price restatement (split/bonus) | test | P2 | 3 | ⬜ | — | ratios unchanged when history is rescaled | KR1.3 R-05 |
+
+**Progress:** M0–M2 100% · M3 2/4 · M4 0/4 · M5 0/4 (T-009 5%) · M6 0/4. **Blockers:** T-001 T-006 T-007 T-013 T-015 (owner).
+**Decision log:** D-001…D-005 taken. **Risk log:** R-01…R-08 opened 2026-11-28; R-02 highest.
+**Next 5 actions:** T-001, T-003, T-005.
+
+### Changelog
+- 2026-11-28: planning system created (goals, blueprint, plan, this tracker section) because success and kill criteria were undefined.
+- 2026-11-28: D-005 decided: public snapshot stays; R-03 accepted by owner (terms not read).
+- 2026-11-28: T-004 done: publish refuses uncommitted work and failing tests (tested with stand-in tools; not yet run by the real daily task).
