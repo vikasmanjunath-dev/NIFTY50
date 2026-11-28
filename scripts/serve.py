@@ -14,7 +14,7 @@ import pandas as pd
 from nifty_analyser.config import DATA_PROCESSED_DIR, REPORTS_DIR
 from nifty_analyser.data.timestamps import to_ist
 from nifty_analyser.ops.api import create_app
-from nifty_analyser.ops.web import LOCAL_HOSTS, attach_web
+from nifty_analyser.ops.web import LOCAL_HOSTS, WebData, attach_web, warm_up
 from nifty_analyser.ops.audit import AuditLog
 from nifty_analyser.ops.kill_switch import KillSwitch, Thresholds, compute_live_health
 from nifty_analyser.ops.registry import load_model
@@ -83,5 +83,6 @@ if __name__ == "__main__":
         mp = DATA_PROCESSED_DIR / 'models'; clf = EventClassifier.load(mp / ('event_classifier_final.joblib' if (mp / 'event_classifier_final.joblib').exists() else 'event_classifier.joblib'))
     vp = DATA_PROCESSED_DIR / "volatility_latest.json"      # written by scripts/forecast_volatility.py
     vol = __import__("json").loads(vp.read_text()) if vp.exists() else None
-    app = attach_web(create_app(ctx, psi, metrics, docs, clf, vol), ctx, hosts=[*LOCAL_HOSTS, args.host])    # web app at http://host:port/
+    app = attach_web(create_app(ctx, psi, metrics, docs, clf, vol), ctx, data=(web_data := WebData(ctx)), hosts=[*LOCAL_HOSTS, args.host])    # web app at http://host:port/
+    warm_up(web_data)
     uvicorn.run(app, host=args.host, port=args.port)

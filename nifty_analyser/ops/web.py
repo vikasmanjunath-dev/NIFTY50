@@ -2,6 +2,7 @@
 Forecasts are withheld while the kill switch is tripped or when they are stale."""
 import io
 import json
+import threading
 import zipfile
 from datetime import date
 from pathlib import Path
@@ -431,6 +432,18 @@ class WebData:
         return {"health": health, "model_version": self.ctx.version, "audit_ok": ok, "audit_entries": len(self.ctx.audit.read()),
                 "ledger_entries": ledgers, "forecast_status": self.forecasts()[0], "scorecard": self.scorecard(), "recent": [{"time": e["ts"][:19], "kind": e["kind"]} for e in self.ctx.audit.read()[-10:]][::-1],
                 "sources": self.freshness()}
+
+
+def warm_up(data: WebData) -> threading.Thread:
+    """Load prices for the scorecard in the background so the first System page is not slow."""
+    def run():
+        try:
+            data.scorecard()
+        except Exception:  # noqa: BLE001  (the page itself will report the problem)
+            pass
+    thread = threading.Thread(target=run, daemon=True)
+    thread.start()
+    return thread
 
 
 LOCAL_HOSTS = ["127.0.0.1", "localhost", "[::1]"]

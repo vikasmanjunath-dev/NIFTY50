@@ -444,3 +444,16 @@ def test_record_is_cached_until_ledger_or_prices_change(site, tmp_path, monkeypa
     price.write_bytes(b"22")
     data.record()
     assert len(reads) == 3
+
+
+def test_warm_up_runs_in_the_background_and_never_raises(site, tmp_path, monkeypatch):
+    from nifty_analyser.ops.web import warm_up
+
+    ctx, _ = site
+    data = WebData(ctx, tmp_path, tmp_path, tmp_path)
+    calls = []
+    monkeypatch.setattr(data, "scorecard", lambda: calls.append(1))
+    warm_up(data).join(5)
+    monkeypatch.setattr(data, "scorecard", lambda: 1 / 0)
+    warm_up(data).join(5)  # a broken data file must not stop the server starting
+    assert calls == [1]
