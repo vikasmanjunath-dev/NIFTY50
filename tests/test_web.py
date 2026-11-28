@@ -367,3 +367,13 @@ def test_live_record_counts_only_matured_forecasts(site, tmp_path, monkeypatch):
     monkeypatch.setattr(web, "load_cached", lambda i: pd.DataFrame({"event_time": days, "close": 100 * np.array([1, 1.1] * 3 + [1]), "quality_flag": "PASS"}))
     rows = client.get("/api/record").json()["rows"]
     assert [(r["date"], r["graded"], r["right"], r["ranged"], r["inside"]) for r in rows] == [("2026-01-08", 0, 0, 0, 0), ("2026-01-01", 1, 1, 1, 1)]
+
+
+@pytest.mark.parametrize("bad", ["NSE_INFY", "nse:infy", "NSE_NIFTY50_INDEX", "a" * 500])
+def test_stock_rejects_malformed_ids_with_404(site, monkeypatch, bad):
+    from nifty_analyser.ops import web
+
+    _, client = site
+    # reproduce a real cache hit for look-alike names (the path sanitiser maps them onto existing files)
+    monkeypatch.setattr(web, "cache_path", lambda i: WEB_DIR / "index.html")
+    assert client.get(f"/api/stock/{bad}").status_code == 404

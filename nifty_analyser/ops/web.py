@@ -15,7 +15,7 @@ from fastapi.staticfiles import StaticFiles
 
 from nifty_analyser.config import DATA_PROCESSED_DIR, DATA_RAW_DIR, REPORTS_DIR
 from nifty_analyser.data.ingest import cache_path, load_cached
-from nifty_analyser.data.instrument_master import get_instrument
+from nifty_analyser.data.instrument_master import get_instrument, ingestible_instrument_ids
 from nifty_analyser.data.store import load_universe_bars
 from nifty_analyser.ops.audit import AuditLog
 from nifty_analyser.ops.refresh import Refresher
@@ -276,7 +276,8 @@ class WebData:
         return Response(buffer.getvalue(), media_type="application/zip", headers={"Content-Disposition": f'attachment; filename="{name}"'})
 
     def stock(self, iid):
-        if not cache_path(iid).exists():
+        # exact ids only: the cache path sanitiser maps look-alikes ("nse:infy", "NSE_INFY") onto real files
+        if iid not in ingestible_instrument_ids() or not cache_path(iid).exists():
             raise HTTPException(404, "unknown instrument")
         bars = load_cached(iid)
         bars = bars[bars.quality_flag != "FAIL"].tail(260)
