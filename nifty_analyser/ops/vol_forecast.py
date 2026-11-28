@@ -131,10 +131,11 @@ def record(ledger, forecasts: pd.DataFrame, model: str = "v2") -> bool:
     return True
 
 
-def score(ledger, bars: pd.DataFrame) -> dict:
-    """AUC and accuracy of recorded forecasts whose horizon has fully elapsed."""
+def graded_rows(ledger, bars: pd.DataFrame) -> pd.DataFrame:
+    """One row per recorded forecast whose horizon has fully passed: date, horizon, y, prob, inside (range hit or NaN)."""
     closes = {i: g.sort_values("event_time").set_index("event_time").close for i, g in bars.groupby("instrument_id")}
-    graded: dict[int, list] = {}
+    days = {i: c.index.strftime("%Y-%m-%d") for i, c in closes.items()}
+    rows = []
     for e in ledger.read():
         if e["kind"] != LEDGER_KIND:
             continue
@@ -144,17 +145,44 @@ def score(ledger, bars: pd.DataFrame) -> dict:
             c = closes.get(f["instrument_id"])
             if c is None:
                 continue
-            i = int(np.searchsorted(c.index.strftime("%Y-%m-%d"), p["date"]))
+            i = int(np.searchsorted(days[f["instrument_id"]], p["date"]))
             if i + h < len(c):
                 rv = np.sqrt((np.log(c.iloc[i: i + h + 1]).diff() ** 2).sum())
                 move = c.iloc[i + h] / c.iloc[i] - 1
                 inside = float(f["low_90"] <= move <= f["high_90"]) if "low_90" in f else np.nan
-                graded.setdefault(h, []).append((int(rv > f["med_rv"]), f["prob"], inside))
+                rows.append((p["date"], h, int(rv > f["med_rv"]), f["prob"], inside))
+    return pd.DataFrame(rows, columns=["date", "horizon", "y", "prob", "inside"])
+
+
+def auc_interval(rows: pd.DataFrame, horizon: int, samples: int = 400, seed: int = 0):
+    """95% interval for AUC, resampling blocks of `horizon` consecutive dates because nearby outcomes overlap.
+    None with fewer than four blocks: too little to say anything."""
+    dates = sorted(rows.date.unique())
+    blocks = [rows[rows.date.isin(dates[i: i + horizon])] for i in range(0, len(dates), horizon)]
+    if len(blocks) < 4:
+        return None
+    rng = np.random.default_rng(seed)
+    values = []
+    for _ in range(samples):
+        draw = pd.concat([blocks[i] for i in rng.integers(0, len(blocks), len(blocks))])
+        if draw.y.nunique() == 2:
+            values.append(roc_auc_score(draw.y, draw.prob))
+    return [round(float(v), 3) for v in np.percentile(values, [2.5, 97.5])] if values else None
+
+
+def score(ledger, bars: pd.DataFrame) -> dict:
+    """AUC, accuracy and range coverage of recorded forecasts whose horizon has fully elapsed."""
+    graded = graded_rows(ledger, bars)
     out = {}
-    for h, rows in graded.items():
-        y, p, inside = np.array(rows, float).T
+    for h, rows in graded.groupby("horizon") if len(graded) else []:
+        y, p = rows.y.to_numpy(), rows.prob.to_numpy()
         out[str(h)] = {"n": len(y), "accuracy": round(float(((p > 0.5) == y).mean()), 4),
                        "auc": round(float(roc_auc_score(y, p)), 4) if len(set(y)) > 1 else None}
-        if np.isfinite(inside).any():
-            out[str(h)]["coverage_90"] = round(float(np.nanmean(inside)), 4)
+        if rows.inside.notna().any():
+            out[str(h)]["coverage_90"] = round(float(rows.inside.mean()), 4)
+        dates, interval = rows.date.nunique(), auc_interval(rows, int(h))
+        if interval:
+            out[str(h)]["auc_ci95"] = interval
+        if dates > 1:
+            out[str(h)]["dates"] = int(dates)
     return out

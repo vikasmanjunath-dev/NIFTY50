@@ -21,7 +21,8 @@ def render(ledger, scores: dict) -> str:
     for horizon, s in sorted(scores.items(), key=lambda kv: int(kv[0])):
         auc = "-" if s["auc"] is None else f"{s['auc']:.3f}"
         cover = f", price range held {s['coverage_90']:.0%}" if "coverage_90" in s else ""
-        lines.append(f"- {horizon}-day: {s['n']} graded, accuracy {s['accuracy']:.1%}, AUC {auc}{cover}")
+        ci = f" (95% interval {s['auc_ci95'][0]:.2f}-{s['auc_ci95'][1]:.2f})" if "auc_ci95" in s else " (too few dates for an interval)"
+        lines.append(f"- {horizon}-day: {s['n']} graded, accuracy {s['accuracy']:.1%}, AUC {auc}{ci}{cover}")
     dates = len({p["date"] for p in entries})
     lines += ["", f"Only {dates} data date(s) recorded. Forecasts made on nearby dates overlap, so judge the model after months, not days."]
     return "\n".join(lines) + "\n"
