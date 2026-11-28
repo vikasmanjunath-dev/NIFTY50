@@ -619,6 +619,8 @@ async function shared(arg) {
 }
 
 const routes = { record, shared, meetings, today, portfolio, filings, ask, guide, compare, summary, sector, model, system, stock };
+// A hand-edited or truncated address must give "not found", not a JavaScript error message.
+const safeDecode = (s) => { try { return decodeURIComponent(s); } catch { return s; } };
 let visit = 0;
 async function route() {
   const [, name = "today", arg] = location.hash.split("/");
@@ -630,8 +632,8 @@ async function route() {
   }
   let content;
   const slow = setTimeout(() => { if (mine === visit) view.replaceChildren(h("p", { class: "empty", role: "status" }, "Loading…")); }, 300);
-  try { content = await page(arg && decodeURIComponent(arg)); }
-  catch (err) { content = [card(h("strong", {}, "Could not load this page. "), navigator.onLine === false || err instanceof TypeError ? "The server cannot be reached. Start it with python3 scripts/serve.py." : err.message, h("p", {}, h("button", { type: "button", class: "primary", onclick: () => route() }, "Try again")))]; }
+  try { content = await page(arg && safeDecode(arg)); }
+  catch (err) { content = [h("h1", {}, "Page not available"), card(h("strong", {}, "Could not load this page. "), navigator.onLine === false || err instanceof TypeError ? "The server cannot be reached. Start it with python3 scripts/serve.py." : err.message, h("p", {}, h("button", { type: "button", class: "primary", onclick: () => route() }, "Try again")))]; }
   clearTimeout(slow);
   if (mine !== visit) return;
   view.replaceChildren(...content.flat(Infinity).filter(Boolean));

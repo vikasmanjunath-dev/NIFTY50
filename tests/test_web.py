@@ -388,3 +388,23 @@ def test_half_written_files_do_not_crash_pages(site, tmp_path):
     assert client.get("/api/overview").json()["status"] == "NO_DATA"
     (tmp_path / "board_meetings.parquet").write_bytes(b"junk")
     assert client.get("/api/system").status_code == 200
+
+
+def _contrast(a, b):
+    def lum(h):
+        c = [int(h[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+        r, g, bl = [x / 12.92 if x <= 0.04045 else ((x + 0.055) / 1.055) ** 2.4 for x in c]
+        return 0.2126 * r + 0.7152 * g + 0.0722 * bl
+    hi, lo = sorted((lum(a), lum(b)), reverse=True)
+    return (hi + 0.05) / (lo + 0.05)
+
+
+def test_text_colours_meet_wcag_aa_and_errors_have_a_heading():
+    import re
+
+    css = (WEB_DIR / "app.css").read_text()
+    token = lambda name: re.findall(rf"--{name}:(#[0-9a-f]{{6}})", css)[0]  # first = light theme
+    assert _contrast(token("accent"), "#ffffff") >= 4.5 and _contrast(token("accent"), "#f2f2f7") >= 4.5
+    assert _contrast("#ffffff", token("button")) >= 4.5 and _contrast(token("dim"), "#f2f2f7") >= 4.5
+    script = (WEB_DIR / "app.js").read_text()
+    assert '"Page not available"' in script and "safeDecode(arg)" in script
