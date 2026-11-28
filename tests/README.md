@@ -7,7 +7,7 @@
 |---|---|
 | [test_calibrate_impact.py](test_calibrate_impact.py) | 5 |
 | [test_chunking.py](test_chunking.py) | 6 |
-| [test_core_layer.py](test_core_layer.py) | 22 |
+| [test_core_layer.py](test_core_layer.py) | 23 |
 | [test_delivery.py](test_delivery.py) | 6 |
 | [test_docs.py](test_docs.py) | 2 |
 | [test_documents_eval.py](test_documents_eval.py) | 11 |
@@ -30,6 +30,7 @@
 | [test_index_membership.py](test_index_membership.py) | 8 |
 | [test_insurance_fundamentals.py](test_insurance_fundamentals.py) | 9 |
 | [test_judge.py](test_judge.py) | 5 |
+| [test_lint.py](test_lint.py) | 1 |
 | [test_llm.py](test_llm.py) | 6 |
 | [test_longshort.py](test_longshort.py) | 6 |
 | [test_ops.py](test_ops.py) | 21 |

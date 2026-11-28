@@ -1,7 +1,7 @@
 """Market-neutral cross-sectional long/short on walk-forward OOS scores, net of impact costs, vs a within-date permutation null."""
 import json, sys
 from pathlib import Path
-import numpy as np, pandas as pd
+import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from nifty_analyser.data.store import load_universe_bars
 from nifty_analyser.eval.costs import ImpactCostModel

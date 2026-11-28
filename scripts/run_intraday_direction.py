@@ -2,7 +2,7 @@
 return from that decision price to the day's last bar close. Features known at the decision: overnight gap, return so far today, previous-day return, previous US (S&P) return,
 number of bars so far. Walk-forward by calendar quarter, logistic regression pooled over instruments (+ per-instrument for the index). Reports accuracy, AUC, majority baseline,
 and accuracy in the most confident decile."""
-import json, sys, warnings
+import json, warnings
 from pathlib import Path
 import numpy as np, pandas as pd
 warnings.filterwarnings("ignore")

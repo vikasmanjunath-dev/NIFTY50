@@ -1,4 +1,4 @@
-import numpy as np, pytest
+import numpy as np
 from nifty_analyser.eval.stat_rigor import bootstrap_sharpe_ci, deflated_sharpe, effective_n, expected_max_sharpe
 
 

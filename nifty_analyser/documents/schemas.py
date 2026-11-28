@@ -9,7 +9,7 @@ point-in-time retrieval firewall in ``retrieval.py`` possible at all.
 """
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import ConfigDict, field_validator, model_validator
 
 from nifty_analyser.data.schemas import PointInTimeRecord, QualityFlag
 

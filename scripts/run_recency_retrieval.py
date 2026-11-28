@@ -1,6 +1,6 @@
 """Retrieval hit-rate (gold filing in top-5) with and without a recency boost, no LLM. Questions as in run_filing_qa.py (dividend record date / results period),
 400-day window, instrument-filtered. Weight chosen on TUNE seed, confirmed on HOLDOUT seed."""
-import json, re, sys
+import json, sys
 from pathlib import Path
 import numpy as np, pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))

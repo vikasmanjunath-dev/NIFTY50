@@ -1,4 +1,4 @@
-import pandas as pd, pytest
+import pytest
 from nifty_analyser.eval.calibrate_impact import FILL_COLUMNS, fit_impact, prepare, simulate_fills
 
 

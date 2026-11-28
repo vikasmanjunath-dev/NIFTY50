@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import pytest
+
 from nifty_analyser.eval.costs import ImpactCostModel
 from nifty_analyser.eval.longshort import longshort_returns, permutation_null, pivots, sharpe, weights
 

@@ -1,4 +1,4 @@
-import numpy as np, pytest
+
 from fastapi.testclient import TestClient
 from nifty_analyser.documents.event_classifier import EventClassifier, label_for, mask_text
 from nifty_analyser.ops.api import create_app

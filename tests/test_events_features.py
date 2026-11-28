@@ -1,7 +1,7 @@
 """Tests for RAG->ML event feature fusion (nifty_analyser/features/events.py)."""
 from __future__ import annotations
 
-import numpy as np
+
 import pandas as pd
 import pytest
 

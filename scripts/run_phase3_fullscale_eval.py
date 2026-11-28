@@ -1,5 +1,5 @@
 """Full-corpus (58k docs) retrieval evaluation via the persistent index: RRF vs RRF+LLM rerank; relevant = same instrument AND category."""
-import json, sys, time
+import json, sys
 from pathlib import Path
 import numpy as np, pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))

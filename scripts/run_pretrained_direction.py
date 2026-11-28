@@ -5,8 +5,8 @@ Metrics: accuracy of sign, AUC of the score, rank IC; vs the majority baseline."
 """Can a local LLM call next-day direction from a company announcement? Strictly point-in-time: the model sees only the announcement text, company and
 date; entry = first close at/after publication (after 15:30 -> next day's close), exit = the following close (1 trading day). N announcements in
 market-relevant categories, 2023-06..2026-10. Reports accuracy, AUC, accuracy by stated confidence, vs the 'always-majority' baseline."""
-import json, re, sys, urllib.request
-from concurrent.futures import ThreadPoolExecutor
+import json, sys
+
 from pathlib import Path
 import numpy as np, pandas as pd
 from sklearn.metrics import roc_auc_score
@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from nifty_analyser.config import DATA_RAW_DIR
 from nifty_analyser.data.instrument_master import NIFTY50
 from nifty_analyser.data.store import load_universe_bars
-from nifty_analyser.documents.llm import OLLAMA_GENERATE_URL
+
 MODEL = sys.argv[1] if len(sys.argv) > 1 else "qwen3:14b"; N = int(sys.argv[2]) if len(sys.argv) > 2 else 400
 CATS = ["Financial Result Updates", "Dividend", "Acquisition", "Credit Rating", "Outcome of Board Meeting", "Press Release", "Allotment of Securities", "Appointment", "Change in Director(s)"]
 d = pd.read_parquet(DATA_RAW_DIR / "announcements_nifty50.parquet"); d = d[(d.quality_flag == "PASS") & d.category.isin(CATS) & (d.text.str.len() > 60)].copy()

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import pandas as pd
-import pytest
+
 
 from nifty_analyser.data.schemas import QualityFlag
 from nifty_analyser.documents.ingest import _date_windows, _to_document_row

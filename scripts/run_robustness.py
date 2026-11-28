@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from nifty_analyser.config import DATA_PROCESSED_DIR
+
 from nifty_analyser.data.store import load_universe_bars
 from nifty_analyser.eval.costs import (CostAssumption, ImpactCostModel, _sharpe, portfolio_returns,
                                        portfolio_returns_impact, signal_from_proba)

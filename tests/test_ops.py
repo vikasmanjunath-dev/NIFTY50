@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 
 from nifty_analyser.ops.api import create_app
 from nifty_analyser.ops.audit import AuditLog
-from nifty_analyser.ops.kill_switch import AMBER, GREEN, RED, Health, KillSwitch, Thresholds, compute_live_health, evaluate_health
+from nifty_analyser.ops.kill_switch import AMBER, GREEN, RED, Health, KillSwitch, compute_live_health, evaluate_health
 from nifty_analyser.ops.registry import RegistryError, load_model, save_model
 from nifty_analyser.ops.service import AnalyseRequest, FutureAsOfError, ServingContext, TTLCached, analyse, replay
 

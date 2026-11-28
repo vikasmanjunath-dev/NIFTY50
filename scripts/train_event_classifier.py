@@ -5,7 +5,7 @@
 import json, sys
 from pathlib import Path
 import numpy as np, pandas as pd
-from sklearn.metrics import accuracy_score, f1_score
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from nifty_analyser.config import DATA_PROCESSED_DIR, DATA_RAW_DIR
 from nifty_analyser.documents.event_classifier import MIN_CONTENT_CHARS, VAGUE, EventClassifier, label_for, mask_text

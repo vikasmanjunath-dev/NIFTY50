@@ -1,8 +1,8 @@
 """v2 (train<=2024-12, val 2025-01..05 for ALL tuning, test>=2025-06 touched once). Announcement EVENT-TYPE classification with the category label masked out of the text (so it cannot be solved by lookup), temporal holdout
 (train <= 2025-05-31, test after), three models: TF-IDF+LR, mxbai-embedding+LR, and a zero-shot Ollama LLM on a test subsample.
 Labels = NSE `category` merged into coarse classes (documented in CLASSES). Rows whose text is empty after masking are excluded (reported)."""
-import json, re, sys, urllib.request
-from concurrent.futures import ThreadPoolExecutor
+import json, re, sys
+
 from pathlib import Path
 import numpy as np, pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -11,7 +11,7 @@ from sklearn.metrics import accuracy_score, classification_report, f1_score
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from nifty_analyser.config import DATA_RAW_DIR
 from nifty_analyser.documents.index import make_ollama_embedder
-from nifty_analyser.documents.llm import OLLAMA_GENERATE_URL
+
 CLASSES = {"investor_meet": r"investor meet|con\. call|analyst|investor presentation|link of recording|earnings call|transcript", "share_admin": r"share certificate|letter of confirmation|duplicate|depositories and participants|74\(5\)",
            "results": r"financial result|result updates|quarterly|audited|unaudited", "board_meeting": r"outcome of board|board meeting", "press_release": r"press release", "newspaper": r"newspaper",
            "esop_allotment": r"esop|esos|esps|allotment|stock option|restricted stock|rsu", "trading_window": r"trading window", "takeover_disclosure": r"takeover|regulation 31|substantial acquisition|disclosure under sebi",

@@ -5,15 +5,15 @@ real llama3.2:3b answers through retrieve -> generate -> guardrails (the answer 
 (qwen3:14b) grades every generated answer against its own evidence (2 fully supported / 1 minor unsupported claim / 0 unsupported or contradicted) and every
 evidence pack for answerability (some item graded >= 2 for the question). Reports guardrail outcomes, faithfulness of released vs withheld answers,
 leakage (unfaithful answers that were released) and abstention behaviour when the evidence cannot answer. Resumable cache: reports/explain_eval_cache.json."""
-import json, re, sys, urllib.request
+import json, sys
 from pathlib import Path
 import numpy as np, pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from nifty_analyser.config import DATA_PROCESSED_DIR, DATA_RAW_DIR
 from nifty_analyser.data.instrument_master import NIFTY50
 from nifty_analyser.documents.index import VectorIndex, make_ollama_embedder
-from nifty_analyser.documents.judge import ollama_judge
-from nifty_analyser.documents.llm import OLLAMA_GENERATE_URL, generate_explanation
+
+
 from nifty_analyser.ops.audit import AuditLog
 from nifty_analyser.ops.evidence_service import DocsContext, EvidenceRequest, explain
 MODEL = sys.argv[1] if len(sys.argv) > 1 else "llama3.2:3b"; SUF = ("" if MODEL == "llama3.2:3b" else "_" + MODEL.replace(":", "-")) + ("_routed" if "--route" in sys.argv else "") + ("_rerank" if "--rerank" in sys.argv else "")

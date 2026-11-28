@@ -1,7 +1,7 @@
 """CPCV with date-neutral metrics for LightGBM and the full calibrated ensemble -> reports/cpcv_full.json."""
 import json, sys, time
 from pathlib import Path
-import numpy as np, pandas as pd
+import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from nifty_analyser.eval.dataset import load_pit_dataset
 from nifty_analyser.models.baseline import fit_lightgbm, fit_logistic

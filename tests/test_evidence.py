@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import pandas as pd
-import pytest
+
 
 from nifty_analyser.documents.evidence import build_evidence_pack
 

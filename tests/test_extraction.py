@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import pandas as pd
-import pytest
+
 
 from nifty_analyser.documents.extraction import (
     add_materiality,

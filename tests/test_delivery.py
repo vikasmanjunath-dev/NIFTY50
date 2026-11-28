@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-import pytest
+
 
 from nifty_analyser.data.bhavcopy import parse_bhavcopy
 from nifty_analyser.features.delivery import add_delivery_indicators, merge_delivery_into_features

@@ -5,7 +5,7 @@ budget is checked from the file metadata before any data is fetched. Needs no ac
 import sys
 from pathlib import Path
 
-import numpy as np
+
 import pandas as pd
 import pyarrow.parquet as pq
 from huggingface_hub import HfFileSystem

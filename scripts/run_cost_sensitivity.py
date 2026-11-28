@@ -1,7 +1,7 @@
 """How wrong can the (uncalibrated) impact coefficient be before the conclusion flips? LightGBM walk-forward long/short, net Sharpe grid."""
 import json, sys
 from pathlib import Path
-import numpy as np, pandas as pd
+import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from nifty_analyser.data.store import load_universe_bars
 from nifty_analyser.eval.costs import ImpactCostModel

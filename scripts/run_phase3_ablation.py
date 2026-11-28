@@ -24,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pandas as pd
 
-from nifty_analyser.data.instrument_master import get_instrument
+
 from nifty_analyser.data.store import load_universe_bars
 from nifty_analyser.documents.extraction import add_materiality, compute_daily_event_features
 from nifty_analyser.features.build import build_feature_matrix, feature_columns
