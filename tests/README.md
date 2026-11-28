@@ -23,7 +23,7 @@
 | [test_export_static.py](test_export_static.py) | 1 |
 | [test_extraction.py](test_extraction.py) | 10 |
 | [test_fii_dii.py](test_fii_dii.py) | 8 |
-| [test_forward_report.py](test_forward_report.py) | 1 |
+| [test_forward_report.py](test_forward_report.py) | 2 |
 | [test_fundamentals.py](test_fundamentals.py) | 12 |
 | [test_fundamentals_features.py](test_fundamentals_features.py) | 11 |
 | [test_guardrails.py](test_guardrails.py) | 25 |
@@ -43,6 +43,7 @@
 | [test_rerank.py](test_rerank.py) | 7 |
 | [test_retrieval.py](test_retrieval.py) | 13 |
 | [test_robustness.py](test_robustness.py) | 14 |
+| [test_runlog_backup.py](test_runlog_backup.py) | 4 |
 | [test_spread_estimators.py](test_spread_estimators.py) | 2 |
 | [test_stat_rigor.py](test_stat_rigor.py) | 4 |
 | [test_static_shim.py](test_static_shim.py) | 3 |

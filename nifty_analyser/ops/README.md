@@ -14,6 +14,7 @@ Serving, audit, kill switch, ledgers and web data.
 | [paper.py](paper.py) | Forward paper-trading ledger: the only evidence that cannot have been tuned on is data that did not exist yet. |
 | [refresh.py](refresh.py) | Runs scripts/daily_refresh.py for the web app's refresh button: one run at a time, in a separate process. |
 | [registry.py](registry.py) | Model registry (Blueprint §5.4): versioned artifacts with SHA-256 integrity checks. |
+| [runlog.py](runlog.py) | What each daily refresh did (data/processed/refresh_runs.jsonl) and which trading days the forward record is missing. |
 | [service.py](service.py) | ``/v3/analyse`` contract and serving core (Blueprint §5.4). |
 | [temporal.py](temporal.py) | Temporal intent of a question. |
 | [vol_forecast.py](vol_forecast.py) | Live volatility forecasts and their forward (untainted) scorecard. |

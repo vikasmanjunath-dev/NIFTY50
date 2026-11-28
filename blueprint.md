@@ -114,7 +114,7 @@ Secrets: only `STM_ADMIN_TOKEN` (env) and Vercel CLI login; none in repo. PII: n
 Fallback: evidence-only digest, or BM25 only.
 
 ## 10. Delivery and observability
-Env: one (owner's Mac) plus static prod. CI: none `[F]` (T-006). Deploy: daily task ~19:00 runs `scripts/daily_publish.sh` on the working folder, only if it is clean and tests pass (R-04). Rollback: redeploy a previous commit's export, or Vercel's previous deployment. Observability: audit log, System page, publish live-check; no alert on failure (T-005).
+Env: one (owner's Mac) plus static prod. CI: none `[F]` (T-006). Deploy: daily task ~19:00 runs `scripts/daily_publish.sh` on the working folder, only if it is clean and tests pass (R-04). Rollback: redeploy a previous commit's export, or Vercel's previous deployment. Observability: audit log, System page, publish live-check; a run log and missed-day notice on System (no push alert).
 
 ## 11. Tests and layout
 pytest: unit, route, point-in-time, doc-freshness, static checks; `scripts/smoke_web.py` on real data. Not covered: coverage %, load, browser automation. Layout and generated docs: [docs/README.md](docs/README.md); regenerate with `scripts/build_docs.py`.

@@ -19,3 +19,4 @@ Assumptions: keep the single main branch the owner asked for earlier (the loop p
 - 2026-11-28 H-15 B-11 fixed; 8abc68b
 - 2026-11-28 H-16 lint (own ast check; no linter installed) and security grep: no security findings; unused imports removed; 405 tests, 61 routes ok; 8e318f1
 - 2026-11-28 T-004 publish guard; red then green (tests/test_publish_guard.py); not committed
+- 2026-11-28 T-003 T-005 T-008 T-010 T-016 done; 415 tests, 61 routes; not committed

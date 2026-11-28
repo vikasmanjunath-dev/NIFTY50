@@ -45,7 +45,7 @@ Change control: a milestone slipping > 20% of its duration → decision record i
 | dates exceed stated capacity | dependency on assistant sessions made explicit above |
 
 ## Production checklist
-security ◐ (no login by design; R-03 accepted, D-005) · tests ✔ · observability ✗ until T-005 · rollback ✔ (redeploy previous) · cost ✔ A-03 · docs ✔
+security ◐ (no login by design; R-03 accepted, D-005) · tests ✔ · observability ✔ run log and missed days · rollback ✔ (redeploy previous) · cost ✔ A-03 · docs ✔
 
 ## Next 5
-T-001 → T-003 → T-005 → T-010 → T-008
+T-001 → T-007 → T-012 → T-014 → T-009 (calendar)

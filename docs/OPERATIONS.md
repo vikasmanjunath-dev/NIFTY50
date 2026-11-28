@@ -31,6 +31,8 @@ The System page lists each data source with its newest date. The daily job also 
 
 The daily publish (`scripts/daily_publish.sh`) refuses to run while there are uncommitted changes or failing tests; commit first.
 
+The System page lists the last refreshes and any trading day with no saved forecast. To back up the forward records automatically, put one folder path (outside this project) in `data/processed/backup_dir.txt`; or run `python3 scripts/backup_ledgers.py <folder>`.
+
 ## Kill switch
 `POST /v3/admin/kill` (server started with `STM_ADMIN_TOKEN`). Forecasts are withheld until reset.
 
