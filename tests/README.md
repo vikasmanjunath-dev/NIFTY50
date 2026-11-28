@@ -37,6 +37,8 @@
 | [test_overnight.py](test_overnight.py) | 2 |
 | [test_paper.py](test_paper.py) | 5 |
 | [test_phase2_layers.py](test_phase2_layers.py) | 20 |
+| [test_planning.py](test_planning.py) | 2 |
+| [test_publish_guard.py](test_publish_guard.py) | 3 |
 | [test_requirements.py](test_requirements.py) | 1 |
 | [test_rerank.py](test_rerank.py) | 7 |
 | [test_retrieval.py](test_retrieval.py) | 13 |

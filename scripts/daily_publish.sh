@@ -3,6 +3,10 @@
 set -eo pipefail
 cd "${0:A:h}/.."
 echo "== $(date)"
+# The site is built from this folder: never publish work that is not committed, or code whose tests fail.
+dirty=$(git status --porcelain)
+[[ -z $dirty ]] || { echo "not publishing: uncommitted changes:"; echo "$dirty" | head -10; exit 1; }
+python3 -m pytest -q -p no:warnings || { echo "not publishing: tests fail"; exit 1; }
 python3 scripts/daily_refresh.py
 python3 scripts/export_static.py
 vercel deploy dist/nifty-tremor --prod --yes >/dev/null

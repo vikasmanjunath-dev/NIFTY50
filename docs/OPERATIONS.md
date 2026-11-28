@@ -29,6 +29,8 @@ The System page lists each data source with its newest date. The daily job also 
 
 `python3 scripts/forward_report.py` summarises the forward record and its scores.
 
+The daily publish (`scripts/daily_publish.sh`) refuses to run while there are uncommitted changes or failing tests; commit first.
+
 ## Kill switch
 `POST /v3/admin/kill` (server started with `STM_ADMIN_TOKEN`). Forecasts are withheld until reset.
 
