@@ -563,3 +563,7 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 | X-01 | Off-machine ledger backup | BLOCKED | high | owner: where should it go? | 2026-11-28 |
 | X-02 | Unattended refresh via launchd | BLOCKED | medium | owner: install the job? (a desktop task already publishes daily) | 2026-11-28 |
 | X-03 | Human relevance labels | BLOCKED | low | owner: run scripts/label_cli.py | 2026-11-28 |
+| H-11 | Route timing pass | VERIFIED | medium | record grading cached | 2026-11-28 |
+| H-12 | Fresh-environment install check | BLOCKED | low | owner: allow downloading all packages into a new environment? | 2026-11-28 |
+| H-13 | Dark-theme contrast audit | VERIFIED | low | all >= 4.5:1 | 2026-11-28 |
+| H-14 | Warm the scorecard at start-up | TODO | low | | 2026-11-28 |

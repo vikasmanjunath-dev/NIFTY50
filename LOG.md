@@ -11,3 +11,6 @@ Assumptions: keep the single main branch the owner asked for earlier (the loop p
 - 2026-11-28 H-06 H-07 done (B-07..B-09); 400 tests; d2ef846
 - 2026-11-28 H-08 done (B-10); 401 tests, 61 routes ok; c4d04fa
 - STATUS done: 10 bugs; in progress: none; blocked: X-01..X-03 (owner); open bugs: 0 known; next: H-09, H-10
+- 2026-11-28 reprioritised H-11 and H-13 above H-09 (more user value)
+- 2026-11-28 H-11 routes timed: /api/record 161 ms every call -> 1 ms cached; first /api/system 1.2 s after start (cold price load, left); 402 tests; 09e3c9a
+- 2026-11-28 H-13 dark theme: every text colour >= 4.5:1; no change needed
