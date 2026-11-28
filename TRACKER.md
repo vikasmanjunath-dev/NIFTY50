@@ -555,9 +555,9 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 | ID | Task | Status | Priority | Notes | Updated |
 |---|---|---|---|---|---|
 | H-01..H-05 | Crash, partial-file, error-page, contrast and date-range bugs (BUGS.md B-01..B-06) | VERIFIED | high | tests plus route fuzzing | 2026-11-28 |
-| H-06 | Tolerate a half-written last log line | TODO | high | | 2026-11-28 |
-| H-07 | One refresh at a time across processes | TODO | high | | 2026-11-28 |
-| H-08 | Fuzz hosted browser shim inputs | TODO | medium | | 2026-11-28 |
+| H-06 | Tolerate a half-written last log line | VERIFIED | high | | 2026-11-28 |
+| H-07 | One refresh at a time across processes | VERIFIED | high | | 2026-11-28 |
+| H-08 | Fuzz hosted browser shim inputs | VERIFIED | medium | | 2026-11-28 |
 | H-09 | Deduplicate tests and tidy long lines | TODO | low | | 2026-11-28 |
 | H-10 | Split web/app.js into modules | TODO | low | | 2026-11-28 |
 | X-01 | Off-machine ledger backup | BLOCKED | high | owner: where should it go? | 2026-11-28 |

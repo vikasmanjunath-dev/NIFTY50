@@ -32,7 +32,7 @@
 | [test_judge.py](test_judge.py) | 5 |
 | [test_llm.py](test_llm.py) | 6 |
 | [test_longshort.py](test_longshort.py) | 6 |
-| [test_ops.py](test_ops.py) | 19 |
+| [test_ops.py](test_ops.py) | 21 |
 | [test_overnight.py](test_overnight.py) | 2 |
 | [test_paper.py](test_paper.py) | 5 |
 | [test_phase2_layers.py](test_phase2_layers.py) | 20 |
@@ -47,4 +47,4 @@
 | [test_triple_barrier.py](test_triple_barrier.py) | 5 |
 | [test_vector_index.py](test_vector_index.py) | 8 |
 | [test_volatility.py](test_volatility.py) | 19 |
-| [test_web.py](test_web.py) | 31 |
+| [test_web.py](test_web.py) | 32 |

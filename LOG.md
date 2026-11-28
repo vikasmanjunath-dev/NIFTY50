@@ -8,3 +8,6 @@ Assumptions: keep the single main branch the owner asked for earlier (the loop p
 - 2026-11-28 B-05 fixed; fuzzed /v3 posts; bf3df97
 - 2026-11-28 B-06 fixed; 398 tests; cf71b75; forecast status OK, 50 stocks, 61 routes checked, 0 failed
 - STATUS done: 6 bugs; in progress: none; blocked: backup destination, launchd install, human labels (owner); open bugs: 0 known; next: H-06
+- 2026-11-28 H-06 H-07 done (B-07..B-09); 400 tests; d2ef846
+- 2026-11-28 H-08 done (B-10); 401 tests, 61 routes ok; c4d04fa
+- STATUS done: 10 bugs; in progress: none; blocked: X-01..X-03 (owner); open bugs: 0 known; next: H-09, H-10
