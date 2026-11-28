@@ -15,7 +15,7 @@ from typing import Callable, Literal
 
 import numpy as np
 import pandas as pd
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from nifty_analyser.data.index_membership import instrument_ids_as_of
 from nifty_analyser.data.instrument_master import NIFTY50
@@ -30,7 +30,15 @@ class FutureAsOfError(ValueError):
     pass
 
 
+def check_as_of(value: datetime | None) -> datetime | None:
+    """Dates far outside the data overflow timestamp arithmetic; reject them as bad input."""
+    if value is not None and not 1990 <= value.year <= 2100:
+        raise ValueError("as_of must be between 1990 and 2100")
+    return value
+
+
 class AnalyseRequest(BaseModel):
+    _as_of_range = field_validator("as_of")(check_as_of)
     instrument_id: str = Field(pattern=r"^NSE:[A-Z0-9&\-]+$", examples=["NSE:RELIANCE"])
     as_of: datetime | None = Field(None, description="Decision time (default now). Naive = IST. Future values are rejected.")
     request_id: str | None = Field(None, max_length=64)

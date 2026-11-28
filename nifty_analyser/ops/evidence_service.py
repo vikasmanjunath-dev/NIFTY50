@@ -13,7 +13,9 @@ from datetime import datetime
 from typing import Callable, Literal
 
 import pandas as pd
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+from nifty_analyser.ops.service import check_as_of
 
 from nifty_analyser.data.instrument_master import FORMER_NAMES, NIFTY50
 from nifty_analyser.data.timestamps import to_ist
@@ -36,6 +38,7 @@ DISCLAIMER = "Retrieved company announcements for research; relevance is model-e
 
 
 class EvidenceRequest(BaseModel):
+    _as_of_range = field_validator("as_of")(check_as_of)
     query: str = Field(min_length=2, max_length=300)
     instrument_id: str | None = Field(None, pattern=r"^NSE:[A-Z0-9&\-]+$", examples=["NSE:RELIANCE"])
     as_of: datetime | None = Field(None, description="Decision time (default now). Naive = IST. Future values are rejected.")

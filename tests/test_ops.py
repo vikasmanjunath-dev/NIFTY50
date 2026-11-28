@@ -250,3 +250,16 @@ def test_api_replay_dashboard_and_xss_escaping(tmp_path):
     assert c.post("/v3/audit/replay/999").status_code == 404
     html = c.get("/v3/dashboard").text
     assert "AMBER" in html and "Chain integrity: <b>OK</b>" in html and "<script>alert(1)" not in html and "&lt;script&gt;" in html
+
+
+@pytest.mark.parametrize("when", ["0001-01-01", "9999-12-31"])
+def test_out_of_range_as_of_is_a_validation_error_not_a_crash(when):
+    from pydantic import ValidationError
+
+    from nifty_analyser.ops.evidence_service import EvidenceRequest
+    from nifty_analyser.ops.service import AnalyseRequest
+
+    for model, fields in ((AnalyseRequest, {"instrument_id": "NSE:INFY"}), (EvidenceRequest, {"query": "dividend"})):
+        with pytest.raises(ValidationError):
+            model(**fields, as_of=when)
+        assert model(**fields, as_of="2026-01-02T10:00:00").as_of.year == 2026
