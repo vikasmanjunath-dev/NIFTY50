@@ -79,6 +79,10 @@ The working plan. Item-level history is in [TRACKER.md](../TRACKER.md); model ex
 
 | 43 | Hosted snapshot checked page by page; owner activity left out | all pages work in a local copy of the export | done (needs redeploy) |
 
+| 44 | Live record page: saved forecasts by date, graded as they mature | linked from Model; in the hosted export | done |
+
+| 45 | Live record shows price-range hits and exports CSV | counted only once matured | done |
+
 ## Next (in order)
 | # | Item | Why | Needs |
 |---|---|---|---|

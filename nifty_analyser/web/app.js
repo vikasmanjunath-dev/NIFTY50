@@ -447,6 +447,19 @@ async function sector(name) {
 
 const filingRows = (items) => [["symbol", "date", "category", "text", "url"], ...items.map((x) => [x.symbol, x.date, x.category, x.text, x.url || ""])];
 
+async function record() {
+  const d = await get("/api/record");
+  const graded = d.rows.reduce((s, r) => s + r.graded, 0), right = d.rows.reduce((s, r) => s + r.right, 0);
+  return [h("a", { href: "#/model" }, "‹ Model"), ...header("Live record", "Forecasts saved before the outcome was known"),
+    h("div", { class: "grid" }, stat("Graded so far", graded, "overlapping periods are not independent"),
+      stat("Right call", graded ? pct(right / graded, 0) : "–", "above or not above usual"), stat("Record integrity", d.chain_ok ? "Intact" : "BROKEN", "hash chain")),
+    d.rows.length ? h("p", {}, h("button", { type: "button", class: "primary", onclick: () => download("live-record.csv",
+      [["data_date", "horizon_days", "stocks", "graded", "right", "ranged", "inside_range"], ...d.rows.map((r) => [r.date, r.horizon, r.stocks, r.graded, r.right, r.ranged, r.inside])]) }, "Export CSV")) : "",
+    h("h2", {}, "By date"), h("div", { class: "list" }, d.rows.length ? d.rows.map((r) => h("div", { class: "filing" }, h("strong", {}, r.date),
+      ` · ${r.horizon}-day · ${r.stocks} stocks · `, r.graded ? `${r.right} of ${r.graded} right${r.ranged ? `, ${r.inside} of ${r.ranged} inside their price range` : ""}` : h("span", { class: "badge" }, "pending")))
+      : h("div", { class: "empty" }, "Nothing saved yet."))];
+}
+
 async function filings() {
   const results = h("div");
   let timer, latest = 0, query = "", category = "", limit = 30;
@@ -513,7 +526,7 @@ async function ask() {
 async function model() {
   const d = await get("/api/model");
   const last = d.rounds.at(-1);
-  return [...header("Model", "How well it works, and what was tried"),
+  return [...header("Model", "How well it works, and what was tried"), h("p", {}, h("a", { href: "#/record" }, "See the live record")),
     h("div", { class: "grid" }, stat("5-day accuracy score (AUC)", last.h5.toFixed(3), "0.5 is a coin flip, 1.0 is perfect"),
       stat("20-day accuracy score (AUC)", last.h20.toFixed(3), "Past data, examined many times"), stat("Up or down", d.direction_auc.toFixed(2), "No better than chance")),
     h("h2", {}, "Progress"), card(legend("5-day", "20-day"),
@@ -605,14 +618,14 @@ async function shared(arg) {
     h("footer", {}, data.disclaimer)];
 }
 
-const routes = { shared, meetings, today, portfolio, filings, ask, guide, compare, summary, sector, model, system, stock };
+const routes = { record, shared, meetings, today, portfolio, filings, ask, guide, compare, summary, sector, model, system, stock };
 let visit = 0;
 async function route() {
   const [, name = "today", arg] = location.hash.split("/");
   const page = routes[name] || today;
   const mine = ++visit;
   for (const a of document.querySelectorAll("nav a")) {
-    const on = a.hash === `#/${["stock", "shared", "meetings", "guide", "compare", "summary", "sector"].includes(name) ? "today" : name}`;
+    const on = a.hash === `#/${name === "record" ? "model" : ["stock", "shared", "meetings", "guide", "compare", "summary", "sector"].includes(name) ? "today" : name}`;
     on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current");
   }
   let content;

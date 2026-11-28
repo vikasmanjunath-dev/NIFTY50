@@ -50,6 +50,7 @@ def main():
         sys.exit(f"forecast status is {overview['status']}; run scripts/daily_refresh.py first")
     save("overview", overview)
     save("model", get("/api/model"))
+    save("record", get("/api/record"))
     save("system", public_system(get("/api/system")))
     save("refresh", {"running": False, "ok": None, "message": ""})
     save("filings_categories", get("/api/filings/categories"))

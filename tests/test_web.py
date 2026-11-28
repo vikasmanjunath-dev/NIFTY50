@@ -351,3 +351,19 @@ def test_filing_rows_and_watchlist_fill():
               "fromWatchlist(new Set(['a','b','z']), new Map([['a',5]]), new Map([['a'],['b']]), 100)]))")
     out = subprocess.run(["node", "-e", script], capture_output=True, text=True, check=True).stdout
     assert json.loads(out) == [["A", "d", "c", "t", ""], [["b", 100]]]
+
+
+def test_live_record_counts_only_matured_forecasts(site, tmp_path, monkeypatch):
+    import numpy as np
+
+    from nifty_analyser.ops import web
+
+    _, client = site
+    assert client.get("/api/record").json() == {"rows": [], "chain_ok": True}
+    ledger = AuditLog(tmp_path / "vol_ledger.jsonl")
+    for day in ("2026-01-01", "2026-01-08"):
+        ledger.append("vol_forecast", {"date": day, "horizon_days": 2, "forecasts": [{"instrument_id": "NSE:INFY", "prob": 0.9, "med_rv": 0.01, "low_90": -0.5, "high_90": 0.5}]})
+    days = pd.date_range("2026-01-01", periods=7, freq="B", tz="Asia/Kolkata")
+    monkeypatch.setattr(web, "load_cached", lambda i: pd.DataFrame({"event_time": days, "close": 100 * np.array([1, 1.1] * 3 + [1]), "quality_flag": "PASS"}))
+    rows = client.get("/api/record").json()["rows"]
+    assert [(r["date"], r["graded"], r["right"], r["ranged"], r["inside"]) for r in rows] == [("2026-01-08", 0, 0, 0, 0), ("2026-01-01", 1, 1, 1, 1)]

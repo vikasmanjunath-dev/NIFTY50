@@ -548,3 +548,5 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 34. Web: download a stock's prices and past test forecasts as CSV (checked in a browser).
 35. Web: sort Today by lowest chance or furthest above the stock's own usual volatility.
 36. Web: download shown filings as CSV; add watched stocks to the portfolio at one amount each (both checked in a browser).
+32. Web: live record page and `GET /api/record` (also exported to the hosted snapshot).
+33. Web: live record shows range hits and exports CSV.

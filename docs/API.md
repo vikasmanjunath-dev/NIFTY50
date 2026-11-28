@@ -13,6 +13,7 @@ Local server only; there is no login.
 | `GET /api/filings/categories` | most common filing categories |
 | `GET /api/portfolio` | risk of a mix (`holdings=NSE:INFY:50000,...`, `horizon`) |
 | `GET /api/sector/{name}` | one sector's stocks and how they move together |
+| `GET /api/record` | saved forecasts by date, graded as they mature |
 | `GET /api/backup` | zip of the forward ledgers |
 | `GET /api/model` | progress, reliability, rejected ideas |
 | `GET /api/system` | health, audit, ledgers, forward scorecard |

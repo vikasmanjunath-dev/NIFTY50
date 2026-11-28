@@ -235,6 +235,35 @@ class WebData:
             togetherness = round(float(np.nanmean(corr[~np.eye(len(corr), dtype=bool)])), 2)
         return {"status": status, "sector": name, "rows": rows, "correlation": togetherness, "disclaimer": view["disclaimer"]}
 
+    def record(self) -> dict:
+        """Every saved forecast date with how much of it has matured and, where it has, how often the call was right."""
+        entries = [e["payload"] for e in self._ledger() if e["kind"] == "vol_forecast"]
+        if not entries:
+            return {"rows": [], "chain_ok": True}
+        rows, bars = [], {}
+        for p in entries:
+            h, graded, right = p["horizon_days"], 0, 0
+            ranged, inside = 0, 0
+            for f in p["forecasts"]:
+                iid = f["instrument_id"]
+                if iid not in bars:
+                    if not cache_path(iid).exists():
+                        continue
+                    close = self._bars(iid)
+                    close = close[close.quality_flag != "FAIL"].sort_values("event_time")
+                    bars[iid] = (close.event_time.dt.strftime("%Y-%m-%d").to_numpy(), close.close.to_numpy(float))
+                days, prices = bars[iid]
+                i = int(np.searchsorted(days, p["date"]))
+                if i + h < len(prices):
+                    above = np.sqrt((np.diff(np.log(prices[i: i + h + 1])) ** 2).sum()) > f["med_rv"]
+                    graded += 1
+                    right += int(above == (f["prob"] > 0.5))
+                    if "low_90" in f:
+                        ranged += 1
+                        inside += int(f["low_90"] <= prices[i + h] / prices[i] - 1 <= f["high_90"])
+            rows.append({"date": p["date"], "horizon": h, "stocks": len(p["forecasts"]), "graded": graded, "right": right, "ranged": ranged, "inside": inside})
+        return {"rows": rows[::-1], "chain_ok": AuditLog(self.processed / "vol_ledger.jsonl").verify()[0]}
+
     def backup(self):
         """Zip of the forward ledgers (they cannot be recreated) with each hash chain's status."""
         buffer, status = io.BytesIO(), {}
@@ -411,6 +440,7 @@ def attach_web(app: FastAPI, ctx, data: WebData | None = None, refresher: Refres
     app.get("/api/filings")(data.filings)
     app.get("/api/filings/categories")(data.categories)
     app.get("/api/portfolio")(data.portfolio)
+    app.get("/api/record")(data.record)
     app.get("/api/sector/{name}")(data.sector)
     app.get("/api/backup")(data.backup)
     app.get("/api/model")(data.model)
