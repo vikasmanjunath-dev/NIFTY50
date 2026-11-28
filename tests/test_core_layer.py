@@ -219,3 +219,21 @@ def test_atomic_write_keeps_the_old_file_if_writing_fails(tmp_path, monkeypatch)
         write_parquet_atomic(pd.DataFrame({"a": [2]}), path)
     monkeypatch.undo()
     assert pd.read_parquet(path).a.tolist() == [1] and list(tmp_path.iterdir()) == [path]
+
+
+def test_a_shortened_download_never_replaces_fuller_data(tmp_path):
+    import pandas as pd
+    import pytest
+
+    from nifty_analyser.data.timestamps import write_series_if_not_shrunk
+
+    frame = lambda start, n: pd.DataFrame({"event_time": pd.date_range(start, periods=n, tz="Asia/Kolkata")})
+    path = tmp_path / "p.parquet"
+    write_series_if_not_shrunk(frame("2026-01-01", 100), path)
+    for bad in (frame("2026-03-01", 5), frame("2026-01-01", 80), frame("2025-12-01", 120)):  # truncated, short, or ending earlier
+        with pytest.raises(RuntimeError, match="keeping the existing file"):
+            write_series_if_not_shrunk(bad, path)
+    assert len(pd.read_parquet(path)) == 100
+    write_series_if_not_shrunk(frame("2026-01-01", 101), path)
+    write_series_if_not_shrunk(frame("2026-01-02", 100), path)  # a start date moving a little is normal
+    assert len(pd.read_parquet(path)) == 100

@@ -10,7 +10,7 @@ import pandas as pd
 from nifty_analyser.config import DATA_RAW_DIR
 from nifty_analyser.data.instrument_master import Instrument, get_instrument
 from nifty_analyser.data.schemas import QualityFlag
-from nifty_analyser.data.timestamps import eod_bar_available_time, to_ist, drop_unfinished, write_parquet_atomic
+from nifty_analyser.data.timestamps import eod_bar_available_time, to_ist, drop_unfinished, write_series_if_not_shrunk
 
 logger = logging.getLogger(__name__)
 SOURCE_ID = "yfinance"
@@ -86,7 +86,7 @@ def validate_and_tag(raw: pd.DataFrame, instrument_id: str) -> pd.DataFrame:
 def ingest_instrument(instrument: Instrument | str, start: str = "2021-01-01") -> pd.DataFrame:
     inst = get_instrument(instrument) if isinstance(instrument, str) else instrument
     tagged = drop_unfinished(validate_and_tag(fetch_ohlcv(inst.yahoo_ticker, start), inst.instrument_id))
-    write_parquet_atomic(tagged, cache_path(inst.instrument_id))
+    write_series_if_not_shrunk(tagged, cache_path(inst.instrument_id))
     return tagged
 
 

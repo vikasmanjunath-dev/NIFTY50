@@ -24,6 +24,18 @@ def write_parquet_atomic(frame: pd.DataFrame, path) -> None:
         tmp.unlink(missing_ok=True)
 
 
+def write_series_if_not_shrunk(frame: pd.DataFrame, path, keep: float = 0.98) -> None:
+    """Price vendors sometimes return a truncated history. Never let that overwrite a fuller file."""
+    if path.exists():
+        old = pd.read_parquet(path, columns=["event_time"])["event_time"]
+        new = frame["event_time"]
+        last = lambda s: pd.to_datetime(s, utc=True).max()
+        if len(new) < keep * len(old) or last(new) < last(old):
+            raise RuntimeError(f"{path.name}: download has {len(new)} rows to {last(new).date()}, file has {len(old)} to "
+                               f"{last(old).date()}; keeping the existing file")
+    write_parquet_atomic(frame, path)
+
+
 def drop_unfinished(frame: pd.DataFrame, now: pd.Timestamp | None = None) -> pd.DataFrame:
     """Remove rows not yet knowable, e.g. Yahoo's still-forming bar for a session that has not closed."""
     now = to_ist(now if now is not None else pd.Timestamp.now(tz=IST))
