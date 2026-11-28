@@ -566,4 +566,4 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 | H-11 | Route timing pass | VERIFIED | medium | record grading cached | 2026-11-28 |
 | H-12 | Fresh-environment install check | BLOCKED | low | owner: allow downloading all packages into a new environment? | 2026-11-28 |
 | H-13 | Dark-theme contrast audit | VERIFIED | low | all >= 4.5:1 | 2026-11-28 |
-| H-14 | Warm the scorecard at start-up | TODO | low | | 2026-11-28 |
+| H-14 | Warm the scorecard at start-up | VERIFIED | low | | 2026-11-28 |

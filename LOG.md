@@ -14,3 +14,4 @@ Assumptions: keep the single main branch the owner asked for earlier (the loop p
 - 2026-11-28 reprioritised H-11 and H-13 above H-09 (more user value)
 - 2026-11-28 H-11 routes timed: /api/record 161 ms every call -> 1 ms cached; first /api/system 1.2 s after start (cold price load, left); 402 tests; 09e3c9a
 - 2026-11-28 H-13 dark theme: every text colour >= 4.5:1; no change needed
+- 2026-11-28 H-14 done: first /api/system 1.2 s -> 0.23 s (measured on a running server); console 404s were from the earlier bad-address test; 403 tests; d047af3
