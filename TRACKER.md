@@ -550,3 +550,16 @@ User asked to remove the stray line (done first) and start Phase 3. Built the en
 36. Web: download shown filings as CSV; add watched stocks to the portfolio at one amount each (both checked in a browser).
 32. Web: live record page and `GET /api/record` (also exported to the hosted snapshot).
 33. Web: live record shows range hits and exports CSV.
+
+### Hardening backlog
+| ID | Task | Status | Priority | Notes | Updated |
+|---|---|---|---|---|---|
+| H-01..H-05 | Crash, partial-file, error-page, contrast and date-range bugs (BUGS.md B-01..B-06) | VERIFIED | high | tests plus route fuzzing | 2026-11-28 |
+| H-06 | Tolerate a half-written last log line | TODO | high | | 2026-11-28 |
+| H-07 | One refresh at a time across processes | TODO | high | | 2026-11-28 |
+| H-08 | Fuzz hosted browser shim inputs | TODO | medium | | 2026-11-28 |
+| H-09 | Deduplicate tests and tidy long lines | TODO | low | | 2026-11-28 |
+| H-10 | Split web/app.js into modules | TODO | low | | 2026-11-28 |
+| X-01 | Off-machine ledger backup | BLOCKED | high | owner: where should it go? | 2026-11-28 |
+| X-02 | Unattended refresh via launchd | BLOCKED | medium | owner: install the job? (a desktop task already publishes daily) | 2026-11-28 |
+| X-03 | Human relevance labels | BLOCKED | low | owner: run scripts/label_cli.py | 2026-11-28 |
