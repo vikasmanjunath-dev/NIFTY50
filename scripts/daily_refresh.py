@@ -2,6 +2,7 @@
 Yahoo bars refresh -> if a rebalance is due (>= hold_days trading days since the last book) rebuild serving features -> paper_trade.
 Run: python3 scripts/daily_refresh.py      Cron (weekdays 19:00 IST):  0 19 * * 1-5 cd /Users/vkm/Desktop/STM && python3 scripts/daily_refresh.py >> data/processed/refresh.log 2>&1"""
 import subprocess, sys
+from datetime import datetime
 from pathlib import Path
 root = Path(__file__).resolve().parents[1]; sys.path.insert(0, str(root))
 from nifty_analyser.config import DATA_PROCESSED_DIR
@@ -10,7 +11,16 @@ from nifty_analyser.data.store import load_universe_bars
 from nifty_analyser.ops import paper
 from nifty_analyser.ops.audit import AuditLog
 from nifty_analyser.ops.refresh import single_instance
-run = lambda s: subprocess.run([sys.executable, str(root / "scripts" / s)], cwd=root, check=True)
+from nifty_analyser.ops.runlog import append_run
+failed: list[str] = []
+
+
+def run(script, *args):
+    try:
+        subprocess.run([sys.executable, str(root / "scripts" / script), *args], cwd=root, check=True)
+    except subprocess.CalledProcessError:
+        failed.append(script)
+        raise
 
 
 def main():
@@ -34,9 +44,20 @@ def main():
     except subprocess.CalledProcessError as exc:
         print(f"filings refresh failed, keeping cache: {exc}")
     run("forecast_volatility.py")
+    destination = DATA_PROCESSED_DIR / "backup_dir.txt"   # one line: a folder outside the project
+    if destination.exists():
+        try:
+            run("backup_ledgers.py", destination.read_text().strip())
+        except subprocess.CalledProcessError as exc:
+            print(f"ledger backup failed: {exc}")
 
 
 with single_instance(DATA_PROCESSED_DIR / "refresh.lock") as mine:
     if not mine:
         sys.exit("another refresh is already running")
-    main()
+    started, ok = datetime.now().isoformat(timespec="seconds"), False
+    try:
+        main()
+        ok = not failed
+    finally:
+        append_run(DATA_PROCESSED_DIR / "refresh_runs.jsonl", started, datetime.now().isoformat(timespec="seconds"), ok, failed)

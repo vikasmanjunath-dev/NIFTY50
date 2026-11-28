@@ -570,7 +570,10 @@ async function system() {
     h("h2", {}, "Data sources"), h("div", { class: "list" }, d.sources.map((s) => h("div", { class: "filing" },
       h("strong", {}, s.source), " ", h("span", { class: `badge ${s.late ? "STALE" : "OK"}` }, s.newest == null ? "missing" : s.late ? "behind" : "current"),
       h("div", { class: "dim" }, s.newest == null ? `Get it with: ${s.refresh_with}` : `newest ${s.newest}, ${s.age_days} day${s.age_days === 1 ? "" : "s"} ago${s.late ? ` · update with: ${s.refresh_with}` : ""}`)))),
+    d.missed.length ? h("div", { class: "card notice" }, `No forecast was saved for ${d.missed.length} trading day${d.missed.length === 1 ? "" : "s"}: ${d.missed.join(", ")}. Gaps cannot be filled afterwards.`) : "",
     h("h2", {}, "Update"), refreshCard(),
+    d.runs.length ? h("div", { class: "list" }, d.runs.map((r) => h("div", { class: "filing" }, h("span", { class: `badge ${r.ok ? "OK" : "RED"}` }, r.ok ? "ok" : "failed"),
+      ` ${r.started.replace("T", " ")}`, r.failed.length ? h("span", { class: "dim" }, ` · ${r.failed.join(", ")}`) : ""))) : h("p", { class: "dim" }, "No refresh has been logged yet."),
     h("h2", {}, "Recent activity"), h("div", { class: "list" }, d.recent.length ? d.recent.map((e) => h("div", { class: "filing" },
       h("strong", {}, e.kind.replaceAll("_", " ")), h("span", { class: "dim" }, ` · ${new Date(`${e.time}Z`).toLocaleString("en-IN")}`))) : h("div", { class: "empty" }, "Nothing logged yet.")),
     h("h2", {}, "Forward records"), h("div", { class: "list" }, Object.entries(d.ledger_entries).map(([k, v]) =>

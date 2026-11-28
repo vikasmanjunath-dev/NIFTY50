@@ -20,6 +20,7 @@ from nifty_analyser.data.instrument_master import get_instrument, ingestible_ins
 from nifty_analyser.data.store import load_universe_bars
 from nifty_analyser.ops.audit import AuditLog
 from nifty_analyser.ops.refresh import Refresher
+from nifty_analyser.ops.runlog import missed_days, recent_runs
 from nifty_analyser.ops.vol_forecast import score
 
 WEB_DIR = Path(__file__).resolve().parents[1] / "web"
@@ -422,6 +423,14 @@ class WebData:
                         "late": (today - newest).days > limit, "refresh_with": how})
         return out
 
+    def missed(self) -> list[str]:
+        index = self._parquet("NSE_NIFTY50_INDEX.parquet")
+        if index is None:
+            return []
+        days = pd.to_datetime(index.event_time, utc=True).dt.tz_convert("Asia/Kolkata").dt.strftime("%Y-%m-%d").tolist()
+        recorded = {e["payload"]["date"] for e in self._ledger() if e["kind"] == "vol_forecast"}
+        return missed_days(days, recorded)[-10:]
+
     def system(self):
         health = self.ctx.killswitch.effective(self.ctx.health_fn()).to_dict()
         ok, _ = self.ctx.audit.verify()
@@ -430,7 +439,8 @@ class WebData:
             path = self.processed / f"{name}.jsonl"
             ledgers[name] = sum(1 for line in path.read_text().splitlines() if line.strip()) if path.exists() else 0
         return {"health": health, "model_version": self.ctx.version, "audit_ok": ok, "audit_entries": len(self.ctx.audit.read()),
-                "ledger_entries": ledgers, "forecast_status": self.forecasts()[0], "scorecard": self.scorecard(), "recent": [{"time": e["ts"][:19], "kind": e["kind"]} for e in self.ctx.audit.read()[-10:]][::-1],
+                "ledger_entries": ledgers, "forecast_status": self.forecasts()[0], "scorecard": self.scorecard(), "runs": recent_runs(self.processed / "refresh_runs.jsonl"), "missed": self.missed(),
+                "recent": [{"time": e["ts"][:19], "kind": e["kind"]} for e in self.ctx.audit.read()[-10:]][::-1],
                 "sources": self.freshness()}
 
 

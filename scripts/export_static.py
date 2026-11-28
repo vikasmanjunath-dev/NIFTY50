@@ -26,7 +26,7 @@ NAME = "Nifty Tremor"
 
 def public_system(system: dict) -> dict:
     """The hosted copy is public: leave out what the owner did and when."""
-    return {**system, "recent": [], "audit_entries": 0}
+    return {**system, "recent": [], "audit_entries": 0, "runs": []}  # run times show when the owner uses the Mac
 
 
 def main():
